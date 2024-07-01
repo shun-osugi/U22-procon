@@ -10,6 +10,7 @@
 
 # MacOS specific
 **/u_22_procon/.DS_Store
+**/.DS_Store
 
 # Windows specific
 **/u_22_procon/Thumbs.db
