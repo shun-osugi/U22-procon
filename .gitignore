@@ -11,6 +11,7 @@
 # MacOS specific
 **/u_22_procon/.DS_Store
 **/.DS_Store
+**/u_22_procon/android/local.properties
 
 # Windows specific
 **/u_22_procon/Thumbs.db
