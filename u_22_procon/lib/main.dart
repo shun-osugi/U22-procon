@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:u_22_procon/samplePage.dart';
+import 'package:u_22_procon/samplePage2.dart';
+import 'package:u_22_procon/samplePage3.dart';
+
 //遷移先ファイルのインポート文を記述
 //下が例
 // import 'package:XXX/page_a.dart';
@@ -18,7 +21,7 @@ main() {
 //プロバイダー
 final indexProvider = StateProvider((ref) {
   //変化するデータ　0, 1, 2...(遷移先)
-  return 1; //時間割から
+  return 1; //時間割
 });
 
 //画面
@@ -81,6 +84,8 @@ class HeaderFooter extends ConsumerWidget {
     const pages = [
       //ここに遷移先の画面を記述
       Samplepage(),
+      Samplepage2(),
+      Samplepage3(),
       //例：
       //PageA(),
       //PageB(),
