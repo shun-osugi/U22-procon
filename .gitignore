@@ -1,0 +1,15 @@
+# Flutter/Dart specific
+**/u_22_procon/.dart_tool/
+**/u_22_procon/.packages
+**/u_22_procon/.flutter-plugins
+**/u_22_procon/.flutter-plugins-dependencies
+**/u_22_procon/.flutter-versions
+**/u_22_procon/build/
+**/u_22_procon/ios/Pods/
+**/u_22_procon/pubspec.lock
+
+# MacOS specific
+**/u_22_procon/.DS_Store
+
+# Windows specific
+**/u_22_procon/Thumbs.db
