@@ -7,6 +7,7 @@
 **/u_22_procon/build/
 **/u_22_procon/ios/Pods/
 **/u_22_procon/pubspec.lock
+**/u_22_procon/android/.gradle
 
 # MacOS specific
 **/u_22_procon/.DS_Store
