@@ -6,7 +6,7 @@ class Samplepage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.pink,
+      backgroundColor: Colors.blue,
       body: const Center(
         child: Text('サンプルページ'),
       ),
