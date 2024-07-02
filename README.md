@@ -19,9 +19,6 @@
     - `{issue_num}` : issue 番号
     - `{done}` : やったことを日本語で要約して記載
   - pull request 作成の際にも template を用いますが，github 上から選択できないので，`./.github/PULL_REQUEST_TEMPLATE/feature.md` の中身をコピーし作成してください．
-- main ブランチには直接 push できないようにしています．
-  - remote push 前には，手元で実行できることを確認してください．
-  - 上記手順にて作成した branch にて commit -> remote push し，~~pull request 発行して main にマージしてください~~ pull request 発行いただければ，僕の方でレビューしてマージします．
 - 基本的にはアジャイル開発チックに進めていきましょう．
   - 機能考えつくして一気に開発していくという流れではなく，色々作って試行錯誤的に完成させていくという流れです．
   - 資料よりもコードを書いたり実装しましょう．
