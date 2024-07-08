@@ -4,14 +4,25 @@ import 'package:u_22_procon/samplePage.dart';
 import 'package:u_22_procon/samplePage2.dart';
 import 'package:u_22_procon/samplePage3.dart';
 
+//データベース
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 //遷移先ファイルのインポート文を記述
 //下が例
 // import 'package:XXX/page_a.dart';
 
 //main関数
-main() {
+main() async {
   //アプリ
   const app = MaterialApp(home: HeaderFooter());
+
+  //データベース初期化
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   //プロバイダースコープでアプリを囲む
   const scop = ProviderScope(child: app);
