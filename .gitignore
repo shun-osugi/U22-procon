@@ -17,3 +17,9 @@
 # Windows specific
 **/u_22_procon/Thumbs.db
 **/u_22_procon/Windows/flutter
+
+# firebase
+**/u_22_procon/.env
+**/u_22_procon/lib/env/env.g.dart
+**/u_22_procon/android/app/google-services.json
+**/u_22_procon/ios/Runner/GoogleService-Info.plist
