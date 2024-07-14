@@ -12,6 +12,7 @@ class TechTermPage extends StatelessWidget {
     TextEditingController _termName = TextEditingController();
     TextEditingController _description = TextEditingController();
     String? _dropdownValue = "オペレーティングシステム"; // null許容型として宣言
+    bool _isChecked = true;
 
     return Scaffold(
       appBar: AppBar(
@@ -64,6 +65,12 @@ class TechTermPage extends StatelessWidget {
                       controller: _description,
                     ),
                     SizedBox(height: 20),
+                    Checkbox(
+                      value: _isChecked,
+                      onChanged: (bool? value) {
+                        _isChecked = value!;
+                      },
+                    ),
                     ElevatedButton(
                       onPressed: () async {
                         String selectedCategory =
@@ -78,11 +85,13 @@ class TechTermPage extends StatelessWidget {
                           '科目': selectedCategory,
                           '用語': term,
                           '説明': description,
+                          'MY用語': _isChecked,
                         });
                         // ここでデータを保存する処理を実装
                         print(selectedCategory);
                         print(term);
                         print(description);
+                        print(_isChecked);
 
                         Navigator.pop(context); // モーダルシートを閉じる
                       },
