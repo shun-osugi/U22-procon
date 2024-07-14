@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'tech_term.dart'; // tech_term.dartのインポート
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Samplepage3 extends StatelessWidget {
   const Samplepage3({super.key});
@@ -8,14 +11,48 @@ class Samplepage3 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey,
-      body: const Center(
-        child: Text('サンプルページ3'),
+      body: Center(
+        child: FutureBuilder<QuerySnapshot>(
+          // Firestore コレクションの参照を取得
+          future: FirebaseFirestore.instance.collection('tech_term').get(),
+          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              // 1. データが読み込まれるまでの間、ローディングインジケーターを表示
+              return CircularProgressIndicator();
+            }
+            if (snapshot.hasError) {
+              // 2. エラーが発生した場合、エラーメッセージを表示
+              return Text('Error: ${snapshot.error}');
+            }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              // 3. データが存在しない場合、メッセージを表示
+              return Text('No data found');
+            }
+
+            // データが存在する場合、UI に表示する
+            List<DocumentSnapshot> docs = snapshot.data!.docs;
+            return ListView.builder(
+              itemCount: docs.length,
+              itemBuilder: (context, index) {
+                var data = docs[index].data() as Map<String, dynamic>;
+                var subject = data['科目'] ?? 'No subject';
+                var term = data['用語'] ?? 'No term';
+                var description = data['説明'] ?? 'No description';
+                var checkbox = data['MY用語'] ?? 'No checkbox';
+                return ListTile(
+                  title: Text('$term ($subject)'),
+                  subtitle: Text(description),
+                );
+              },
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => TechTermPage()),
+            MaterialPageRoute(builder: (context) => const TechTermPage()),
           );
         },
         child: const Icon(Icons.add),
