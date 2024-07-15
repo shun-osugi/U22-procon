@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:u_22_procon/samplePage.dart';
 import 'package:u_22_procon/samplePage2.dart';
-import 'package:u_22_procon/samplePage3.dart';
+import 'package:u_22_procon/subject_term.dart';
 
 //データベース
 import 'package:firebase_core/firebase_core.dart';
@@ -96,7 +96,7 @@ class HeaderFooter extends ConsumerWidget {
       //ここに遷移先の画面を記述
       Samplepage(),
       Samplepage2(),
-      Samplepage3(),
+      subject_term(),
       //例：
       //PageA(),
       //PageB(),

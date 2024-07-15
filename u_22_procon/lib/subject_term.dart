@@ -4,8 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Samplepage3 extends StatelessWidget {
-  const Samplepage3({super.key});
+class subject_term extends StatelessWidget {
+  const subject_term({super.key});
 
   @override
   Widget build(BuildContext context) {
