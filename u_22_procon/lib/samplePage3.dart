@@ -29,8 +29,19 @@ class Samplepage3 extends StatelessWidget {
               return Text('No data found');
             }
 
+            //MY用語にtrueが格納されてるデータを探す
+            List<DocumentSnapshot> docs = snapshot.data!.docs.where((doc) {
+              var data = doc.data() as Map<String, dynamic>;
+              return data['MY用語'] == true;
+            }).toList();
+
+            if (docs.isEmpty) {
+              // フィルタリングされた結果が空の場合、メッセージを表示
+              return Text('No MY用語 found');
+            }
+
             // データが存在する場合、UI に表示する
-            List<DocumentSnapshot> docs = snapshot.data!.docs;
+            //List<DocumentSnapshot> docs = snapshot.data!.docs;
             return ListView.builder(
               itemCount: docs.length,
               itemBuilder: (context, index) {
@@ -39,10 +50,10 @@ class Samplepage3 extends StatelessWidget {
                 var term = data['用語'] ?? 'No term';
                 var description = data['説明'] ?? 'No description';
                 var checkbox = data['MY用語'] ?? 'No checkbox';
-                return ListTile(
-                  title: Text('$term ($subject)'),
-                  subtitle: Text(description),
-                );
+                  return ListTile(
+                    title: Text('$term ($subject)'),
+                    subtitle: Text(description),
+                  );
               },
             );
           },
