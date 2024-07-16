@@ -1,22 +1,93 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:u_22_procon/samplePage.dart';
-import 'package:u_22_procon/samplePage2.dart';
+import 'package:u_22_procon/class_timetable.dart';
+import 'package:u_22_procon/subject_details.dart';
 import 'package:u_22_procon/subject_term.dart';
 
 //データベース
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:go_router/go_router.dart';
 
 //遷移先ファイルのインポート文を記述
 //下が例
 // import 'package:XXX/page_a.dart';
 
+final rootNavigatorKeyProvider = Provider<GlobalKey<NavigatorState>>((ref) {
+  return GlobalKey<NavigatorState>(debugLabel: 'root');
+});
+final shellNavigatorKeyProvider = Provider<GlobalKey<NavigatorState>>((ref) {
+  return GlobalKey<NavigatorState>(debugLabel: 'shell');
+});
+
+final goRouterProvider = Provider<GoRouter>((ref) {
+  final rootNavigatorKey = ref.watch(rootNavigatorKeyProvider);
+  final shellNavigatorKey = ref.watch(shellNavigatorKeyProvider);
+
+  return GoRouter(
+    navigatorKey: rootNavigatorKey,
+    initialLocation: '/classTimetable',
+    debugLogDiagnostics: true,
+    routes: <RouteBase>[
+      ShellRoute(
+        navigatorKey: shellNavigatorKey,
+        builder: (BuildContext context, GoRouterState state, Widget child) {
+          return HeaderFooter(child: child);
+        },
+        routes: <RouteBase>[
+          GoRoute(
+            path: '/samplePage',
+            builder: (BuildContext context, GoRouterState state) {
+              return const Samplepage();
+            },
+            // routes: <RouteBase>[
+            //   GoRoute(
+            //     path: 'subjectDetails',
+            //     parentNavigatorKey: rootNavigatorKey,
+            //     builder: (BuildContext context, GoRouterState state) {
+            //       return const SubjectDetails();
+            //     }),
+            //   ],
+          ),
+          GoRoute(
+              path: '/classTimetable',
+              builder: (BuildContext context, GoRouterState state) {
+                return const ClassTimetable();
+              },
+              routes: <RouteBase>[
+                GoRoute(
+                    path: 'subjectDetails',
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (BuildContext context, GoRouterState state) {
+                      return const SubjectDetails();
+                    }),
+              ]),
+          GoRoute(
+            path: '/subject_term',
+            builder: (BuildContext context, GoRouterState state) {
+              return const subject_term();
+            },
+            // routes: <RouteBase>[
+            //   GoRoute(
+            //     path: 'subjectDetails',
+            //     parentNavigatorKey: rootNavigatorKey,
+            //     builder: (BuildContext context, GoRouterState state) {
+            //       return const SubjectDetails();
+            //     }),
+            //   ],
+          ),
+        ],
+      ),
+    ],
+  );
+});
+
 //main関数
 main() async {
   //アプリ
-  const app = MaterialApp(home: HeaderFooter());
+  const app = MyApp();
 
   //データベース初期化
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,9 +106,26 @@ final indexProvider = StateProvider((ref) {
   return 1; //時間割
 });
 
+class MyApp extends ConsumerWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(goRouterProvider);
+    return MaterialApp.router(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      routerConfig: router,
+    );
+  }
+}
+
 //画面
 class HeaderFooter extends ConsumerWidget {
-  const HeaderFooter({super.key});
+  final Widget child;
+  const HeaderFooter({required this.child, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -86,25 +174,25 @@ class HeaderFooter extends ConsumerWidget {
       unselectedItemColor: Colors.black, //選択せれていない時のアイテムの色
       currentIndex: index, //インデックス
       //タップされた時インデックス(画面)を変更する
-      onTap: (index) {
-        ref.read(indexProvider.notifier).state = index;
+      onTap: (int idx) {
+        ref.read(indexProvider.notifier).state = idx;
+        switch (idx) {
+          case 0:
+            context.go('/samplePage');
+            break;
+          case 1:
+            context.go('/classTimetable');
+            break;
+          case 2:
+            context.go('/subject_term');
+            break;
+        }
       },
     );
 
-    //遷移先の画面たち
-    const pages = [
-      //ここに遷移先の画面を記述
-      Samplepage(),
-      Samplepage2(),
-      subject_term(),
-      //例：
-      //PageA(),
-      //PageB(),
-    ];
-
     return Scaffold(
       appBar: header,
-      body: pages[index],
+      body: child,
       bottomNavigationBar: footerBar,
     );
   }
