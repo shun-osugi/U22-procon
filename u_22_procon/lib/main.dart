@@ -7,6 +7,7 @@ import 'package:u_22_procon/subject_term.dart';
 
 //データベース
 import 'package:firebase_core/firebase_core.dart';
+import 'package:u_22_procon/tech_term.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
@@ -69,14 +70,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             builder: (BuildContext context, GoRouterState state) {
               return const subject_term();
             },
-            // routes: <RouteBase>[
-            //   GoRoute(
-            //     path: 'subjectDetails',
-            //     parentNavigatorKey: rootNavigatorKey,
-            //     builder: (BuildContext context, GoRouterState state) {
-            //       return const SubjectDetails();
-            //     }),
-            //   ],
+            routes: <RouteBase>[
+              GoRoute(
+                  path: 'tech_term',
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (BuildContext context, GoRouterState state) {
+                    return const TechTermPage();
+                  }),
+            ],
           ),
         ],
       ),
