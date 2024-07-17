@@ -26,7 +26,7 @@ class TechTermPage extends StatelessWidget {
             context: context,
             builder: (BuildContext context) {
               return StatefulBuilder(
-                //状態管理
+                //状態確認
                 builder: (BuildContext context, StateSetter setState) {
                   return Container(
                     height: MediaQuery.of(context).size.height / 2,
@@ -81,25 +81,61 @@ class TechTermPage extends StatelessWidget {
                             String term = _termName.text;
                             String description = _description.text;
 
-                            await FirebaseFirestore.instance
-                                .collection('tech_term')
-                                .doc()
-                                .set({
-                              '科目': selectedCategory,
-                              '用語': term,
-                              '説明': description,
-                              'MY用語': _isChecked,
-                            });
+                            // 確認メッセージのポップアップ表示
+                            bool shouldSave = await showDialog<bool>(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text('これでいいですか？'),
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: <Widget>[
+                                          Text('科目: $selectedCategory'),
+                                          Text('用語名: $term'),
+                                          Text('説明: $description'),
+                                        ],
+                                      ),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop(false);
+                                          },
+                                          child: Text('キャンセル'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop(true);
+                                          },
+                                          child: Text('OK'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ) ??
+                                false;
 
-                            // 入力フィールドとチェックボックスの状態をクリア
-                            setState(() {
-                              _dropdownValue = "オペレーティングシステム";
-                              _termName.clear();
-                              _description.clear();
-                              _isChecked = true;
-                            });
+                            if (shouldSave) {
+                              //ポップアップで「OK」を押したら保存
+                              await FirebaseFirestore.instance
+                                  .collection('tech_term')
+                                  .doc()
+                                  .set({
+                                '科目': selectedCategory,
+                                '用語': term,
+                                '説明': description,
+                                'MY用語': _isChecked,
+                              });
 
-                            Navigator.pop(context); // モーダルシートを閉じる
+                              // 入力フィールドとチェックボックスの状態をクリア
+                              setState(() {
+                                _dropdownValue = "オペレーティングシステム";
+                                _termName.clear();
+                                _description.clear();
+                                _isChecked = true;
+                              });
+
+                              Navigator.pop(context); // モーダルシートを閉じる
+                            }
                           },
                           child: Text('保存'),
                         ),
