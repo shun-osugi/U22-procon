@@ -10,25 +10,41 @@ class subject_term extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey,
-      body: Center(
-        child: FutureBuilder<QuerySnapshot>(
+    return DefaultTabController(
+      length: 2, 
+      child:Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar( 
+        backgroundColor: Colors.grey,
+        bottom: TabBar(
+          tabs:[
+            Tab(text:'My用語集'),
+            Tab(text: '専門用語集',)
+          ],
+        ),
+      ),
+
+      body: TabBarView(
+        children: [
+          Center(
+            child: FutureBuilder<QuerySnapshot>(
           // Firestore コレクションの参照を取得
-          future: FirebaseFirestore.instance.collection('tech_term').get(),
-          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              // 1. データが読み込まれるまでの間、ローディングインジケーターを表示
-              return CircularProgressIndicator();
-            }
-            if (snapshot.hasError) {
-              // 2. エラーが発生した場合、エラーメッセージを表示
-              return Text('Error: ${snapshot.error}');
-            }
-            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              // 3. データが存在しない場合、メッセージを表示
-              return Text('No data found');
-            }
+            future: FirebaseFirestore.instance.collection('tech_term').get(),
+            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                // 1. データが読み込まれるまでの間、ローディングインジケーターを表示
+                return CircularProgressIndicator();
+              }
+              if (snapshot.hasError) {
+                // 2. エラーが発生した場合、エラーメッセージを表示
+                return Text('Error: ${snapshot.error}');
+              }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                // 3. データが存在しない場合、メッセージを表示
+                return Text('No data found');
+              }
+          
+        
 
             //MY用語にtrueが格納されてるデータを探す
             List<DocumentSnapshot> docs = snapshot.data!.docs.where((doc) {
@@ -38,12 +54,13 @@ class subject_term extends StatelessWidget {
 
             if (docs.isEmpty) {
               // フィルタリングされた結果が空の場合、メッセージを表示
-              return Text('No MY用語 found');
+              return Text('登録しているMY用語はありません');
             }
 
             // データが存在する場合、UI に表示する
             //List<DocumentSnapshot> docs = snapshot.data!.docs;
             return ListView.builder(
+              padding: const EdgeInsets.all(8.0),
               itemCount: docs.length,
               itemBuilder: (context, index) {
                 var data = docs[index].data() as Map<String, dynamic>;
@@ -51,15 +68,45 @@ class subject_term extends StatelessWidget {
                 var term = data['用語'] ?? 'No term';
                 var description = data['説明'] ?? 'No description';
                 var checkbox = data['MY用語'] ?? 'No checkbox';
-                return ListTile(
-                  title: Text('$term ($subject)'),
-                  subtitle: Text(description),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Card(
+                    margin: const EdgeInsets.symmetric(vertical:8.0),
+                    child:ListTile(
+                    title: Text(term,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                      ),
+                    ),
+                    onTap: (){
+                      showDialog(context: context,
+                      builder: (context){
+                        return AlertDialog(
+                          title: Text('$term\n$subject'),
+                          content: Text(description),
+                          actions: <Widget>[
+                          TextButton(
+                            child: Text('閉じる'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
                 );
               },
             );
           },
         ),
       ),
+    ],
+  ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           GoRouter.of(context).go('/subject_term/tech_term');
@@ -68,6 +115,7 @@ class subject_term extends StatelessWidget {
       ),
       floatingActionButtonLocation:
           FloatingActionButtonLocation.endFloat, // ボタンの位置を右下に設定
+      ),
     );
   }
 }
