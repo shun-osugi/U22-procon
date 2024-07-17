@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'tech_term.dart'; // tech_term.dartのインポート
+import 'package:go_router/go_router.dart';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -50,10 +51,10 @@ class subject_term extends StatelessWidget {
                 var term = data['用語'] ?? 'No term';
                 var description = data['説明'] ?? 'No description';
                 var checkbox = data['MY用語'] ?? 'No checkbox';
-                  return ListTile(
-                    title: Text('$term ($subject)'),
-                    subtitle: Text(description),
-                  );
+                return ListTile(
+                  title: Text('$term ($subject)'),
+                  subtitle: Text(description),
+                );
               },
             );
           },
@@ -61,10 +62,7 @@ class subject_term extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const TechTermPage()),
-          );
+          GoRouter.of(context).go('/subject_term/tech_term');
         },
         child: const Icon(Icons.add),
       ),
