@@ -73,19 +73,17 @@ class subject_term extends StatelessWidget {
                   child: Card(
                     margin: const EdgeInsets.symmetric(vertical:8.0),
                     child:ListTile(
-                    title: Text(
-                      '$term ($subject)',
+                    title: Text(term,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey,
+                      color: Colors.black,
                       ),
                     ),
-                    subtitle: Text(description),
                     onTap: (){
                       showDialog(context: context,
                       builder: (context){
                         return AlertDialog(
-                          title: Text(term),
+                          title: Text('$term\n$subject'),
                           content: Text(description),
                           actions: <Widget>[
                           TextButton(
