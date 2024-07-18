@@ -86,7 +86,7 @@ class TechTermPage extends StatelessWidget {
                                   context: context,
                                   builder: (BuildContext context) {
                                     return AlertDialog(
-                                      title: Text('これでいいですか？'),
+                                      title: Text('この内容で保存しますか？'),
                                       content: Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: <Widget>[
