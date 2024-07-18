@@ -13,7 +13,10 @@ class ClassTimetable extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: Text('Firestore Example')),
+        appBar: AppBar(
+          title: const Text('時間割'),
+          backgroundColor: Colors.grey[350],
+        ),
         body: Center(
             child: Column(
           children: [
