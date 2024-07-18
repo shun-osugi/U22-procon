@@ -4,6 +4,7 @@ import 'package:u_22_procon/samplePage.dart';
 import 'package:u_22_procon/class_timetable.dart';
 import 'package:u_22_procon/subject_details.dart';
 import 'package:u_22_procon/subject_term.dart';
+import 'package:u_22_procon/subject_eval.dart';
 
 //データベース
 import 'package:firebase_core/firebase_core.dart';
@@ -51,6 +52,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             //       return const SubjectDetails();
             //     }),
             //   ],
+            routes: <RouteBase>[
+              GoRoute(
+                path: 'subject_eval',
+                parentNavigatorKey: rootNavigatorKey,
+                builder: (BuildContext context, GoRouterState state) {
+                  return const SubjectEval();
+                }
+              ),
+            ],
           ),
           GoRoute(
               path: '/classTimetable',
