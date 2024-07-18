@@ -44,6 +44,14 @@ class ClassTimetable extends StatelessWidget {
             )
           ],
         )),
+        floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          GoRouter.of(context).go('/classTimetable/subject_eval');
+        },
+        child: const Icon(Icons.add),
+        ),
+        floatingActionButtonLocation:
+            FloatingActionButtonLocation.endFloat, // ボタンの位置を右下に設定
       ),
     );
   }
