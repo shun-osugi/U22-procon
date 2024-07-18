@@ -52,15 +52,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             //       return const SubjectDetails();
             //     }),
             //   ],
-            routes: <RouteBase>[
-              GoRoute(
-                path: 'subject_eval',
-                parentNavigatorKey: rootNavigatorKey,
-                builder: (BuildContext context, GoRouterState state) {
-                  return const SubjectEval();
-                }
-              ),
-            ],
           ),
           GoRoute(
               path: '/classTimetable',
@@ -74,6 +65,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                     builder: (BuildContext context, GoRouterState state) {
                       return const SubjectDetails();
                     }),
+                GoRoute(
+                    path: 'subject_eval',
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (BuildContext context, GoRouterState state) {
+                      return const SubjectEval();
+                    }
+                    ),
               ]),
           GoRoute(
             path: '/subject_term',
