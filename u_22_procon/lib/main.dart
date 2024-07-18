@@ -59,7 +59,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               routes: <RouteBase>[
                 GoRoute(
                     path: 'subjectDetails',
-                    parentNavigatorKey: rootNavigatorKey,
+                    // parentNavigatorKey: rootNavigatorKey,
                     builder: (BuildContext context, GoRouterState state) {
                       return const SubjectDetails();
                     }),
@@ -132,12 +132,6 @@ class HeaderFooter extends ConsumerWidget {
     //インデックス
     final index = ref.watch(indexProvider);
 
-    //ヘッダー
-    final header = AppBar(
-      title: const Text('時間割'), //ヘッダーのテキストは後日再考する
-      backgroundColor: Colors.grey[350], //背景色
-    );
-
     //フッターアイテムたち
     const footerItems = [
       //画面1(仮)
@@ -191,7 +185,6 @@ class HeaderFooter extends ConsumerWidget {
     );
 
     return Scaffold(
-      appBar: header,
       body: child,
       bottomNavigationBar: footerBar,
     );
