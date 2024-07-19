@@ -75,7 +75,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/subject_term',
             builder: (BuildContext context, GoRouterState state) {
-              return const subject_term();
+              return const SubjectTerm();
             },
             routes: <RouteBase>[
               GoRoute(
