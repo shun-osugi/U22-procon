@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:u_22_procon/samplePage.dart';
+import 'package:u_22_procon/todo.dart';
 import 'package:u_22_procon/class_timetable.dart';
 import 'package:u_22_procon/subject_details.dart';
 import 'package:u_22_procon/subject_term.dart';
@@ -40,9 +40,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         },
         routes: <RouteBase>[
           GoRoute(
-            path: '/samplePage',
+            path: '/todo',
             builder: (BuildContext context, GoRouterState state) {
-              return const Samplepage();
+              return const Todo();
             },
             // routes: <RouteBase>[
             //   GoRoute(
@@ -70,8 +70,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (BuildContext context, GoRouterState state) {
                       return const SubjectEval();
-                    }
-                    ),
+                    }),
               ]),
           GoRoute(
             path: '/subject_term',
@@ -181,7 +180,7 @@ class HeaderFooter extends ConsumerWidget {
         ref.read(indexProvider.notifier).state = idx;
         switch (idx) {
           case 0:
-            context.go('/samplePage');
+            context.go('/todo');
             break;
           case 1:
             context.go('/classTimetable');
