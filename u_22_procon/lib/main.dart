@@ -5,6 +5,7 @@ import 'package:u_22_procon/class_timetable.dart';
 import 'package:u_22_procon/subject_details.dart';
 import 'package:u_22_procon/subject_term.dart';
 import 'package:u_22_procon/subject_eval.dart';
+import 'package:u_22_procon/subject_settings.dart';
 
 //データベース
 import 'package:firebase_core/firebase_core.dart';
@@ -70,6 +71,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (BuildContext context, GoRouterState state) {
                       return const SubjectEval();
+                    }),
+                GoRoute(
+                    path: 'subject_settings',
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (BuildContext context, GoRouterState state) {
+                      return const Subject_settings();
                     }),
               ]),
           GoRoute(
