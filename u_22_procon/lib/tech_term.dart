@@ -12,6 +12,8 @@ class TechTermPage extends StatelessWidget {
     TextEditingController _description = TextEditingController();
     String? _dropdownValue = "オペレーティングシステム";
     bool _isChecked = true;
+    int registrationNumber = 1;
+    
 
     return Scaffold(
       appBar: AppBar(
@@ -72,6 +74,11 @@ class TechTermPage extends StatelessWidget {
                             setState(() {
                               //UI再描画
                               _isChecked = value ?? false;
+                              if(_isChecked == true){
+                                registrationNumber += 1;
+                              }else{
+                                registrationNumber -= 1;
+                              }
                             });
                           },
                         ),
@@ -80,6 +87,7 @@ class TechTermPage extends StatelessWidget {
                             String selectedCategory = _dropdownValue ?? "";
                             String term = _termName.text;
                             String description = _description.text;
+                            DateTime registrationTime = DateTime.now();
 
                             // 確認メッセージのポップアップ表示
                             bool shouldSave = await showDialog<bool>(
@@ -105,6 +113,7 @@ class TechTermPage extends StatelessWidget {
                                         TextButton(
                                           onPressed: () {
                                             Navigator.of(context).pop(true);
+
                                           },
                                           child: Text('OK'),
                                         ),
@@ -124,6 +133,8 @@ class TechTermPage extends StatelessWidget {
                                 '用語': term,
                                 '説明': description,
                                 'MY用語': _isChecked,
+                                '登録数': registrationNumber,
+                                '登録時間': registrationTime,
                               });
 
                               // 入力フィールドとチェックボックスの状態をクリア
@@ -132,6 +143,7 @@ class TechTermPage extends StatelessWidget {
                                 _termName.clear();
                                 _description.clear();
                                 _isChecked = true;
+                                registrationNumber = 1;
                               });
 
                               Navigator.pop(context); // モーダルシートを閉じる
