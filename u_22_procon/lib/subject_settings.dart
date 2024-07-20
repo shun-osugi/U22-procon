@@ -80,29 +80,6 @@ class Subject_settings extends StatelessWidget {
                                 fontSize: 20,
                               ),
                             ),
-                            DropdownButton<String>(
-                              value: _dropdownValue,
-                              items: [
-                                DropdownMenuItem(
-                                  value: "オペレーティングシステム",
-                                  child: Text("オペレーティングシステム"),
-                                ),
-                                DropdownMenuItem(
-                                  value: "アルゴリズム・データ構造",
-                                  child: Text("アルゴリズム・データ構造"),
-                                ),
-                                DropdownMenuItem(
-                                  value: "研究開発リテラシー",
-                                  child: Text("研究開発リテラシー"),
-                                ),
-                              ],
-                              onChanged: (String? value) {
-                                setState(() {
-                                  //UI再描画
-                                  _dropdownValue = value;
-                                });
-                              },
-                            ),
                           ],
                         ),
                         const Divider(
