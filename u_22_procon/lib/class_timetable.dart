@@ -11,47 +11,89 @@ class ClassTimetable extends StatelessWidget {
   @override
   //データベース
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double padding = 8.0;
+    double availableWidth = screenWidth - (2 * padding);
+    double columnWidth = availableWidth / 7;
+    final selectedIndex = <int>{};
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
           title: const Text('時間割'),
           backgroundColor: Colors.grey[350],
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                GoRouter.of(context).go('/classTimetable/subject_settings');
+              },
+            ),
+          ],
         ),
         body: Center(
-            child: Column(
-          children: [
-            ElevatedButton(
-              onPressed: () async {
-                // Firestore のコレクション 'test' 内のドキュメント 'test2' にデータを保存
-                await FirebaseFirestore.instance
-                    .collection('test')
-                    .doc('test2')
-                    .set({
-                  'test': 2,
-                });
-
-                // 書き込みが完了したら、メッセージを表示
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Data saved to Firestore'),
-                  ),
-                );
-              },
-              child: Text('Save data to Firestore'),
+            child: Padding(
+          padding: EdgeInsets.all(padding),
+          child: DataTable(
+            columnSpacing: 32.0,
+            border: TableBorder.all(),
+            columns: [
+              DataColumn(
+                label: Container(
+                  width: 20,
+                  child: Center(child: Text('')),
+                ),
+              ),
+              DataColumn(
+                label: Container(
+                  width: columnWidth,
+                  child: Center(child: Text('月')),
+                ),
+              ),
+              DataColumn(
+                label: Container(
+                  width: columnWidth,
+                  child: Center(child: Text('火')),
+                ),
+              ),
+              DataColumn(
+                label: Container(
+                  width: columnWidth,
+                  child: Center(child: Text('水')),
+                ),
+              ),
+              DataColumn(
+                label: Container(
+                  width: columnWidth,
+                  child: Center(child: Text('木')),
+                ),
+              ),
+              DataColumn(
+                label: Container(
+                  width: columnWidth,
+                  child: Center(child: Text('金')),
+                ),
+              ),
+            ],
+            rows: List<DataRow>.generate(
+              5,
+              (index) => DataRow(
+                cells: <DataCell>[
+                  DataCell(Text('${index + 1}')),
+                  DataCell(Text('Subject Mon${index + 1}')),
+                  DataCell(Text('Subject Tue${index + 1}')),
+                  DataCell(Text('Subject Wed${index + 1}')),
+                  DataCell(Text('Subject Thu${index + 1}')),
+                  DataCell(Text('Subject Fri${index + 1}')),
+                ],
+              ),
             ),
-            TextButton(
-              onPressed: () {
-                GoRouter.of(context).go('/classTimetable/subjectDetails');
-              },
-              child: const Text('GO!!'),
-            )
-          ],
+          ),
         )),
         floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          GoRouter.of(context).go('/classTimetable/subject_eval');
-        },
-        child: const Icon(Icons.add),
+          onPressed: () {
+            GoRouter.of(context).go('/classTimetable/subjectDetails');
+          },
+          child: const Icon(Icons.add),
         ),
         floatingActionButtonLocation:
             FloatingActionButtonLocation.endFloat, // ボタンの位置を右下に設定
