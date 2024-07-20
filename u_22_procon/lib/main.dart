@@ -68,7 +68,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                     }),
                 GoRoute(
                     path: 'subject_eval',
-                    parentNavigatorKey: rootNavigatorKey,
                     builder: (BuildContext context, GoRouterState state) {
                       return const SubjectEval();
                     }),

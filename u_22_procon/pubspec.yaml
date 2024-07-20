@@ -39,8 +39,9 @@ dependencies:
   firebase_core: ^3.1.1
   cloud_firestore: ^5.0.2  # Cloud Firestore プラグイン
   envied: ^0.5.4+1
-  go_router:
+  go_router: ^14.2.1
   intl: ^0.19.0
+  numberpicker: ^3.0.0
 
 dev_dependencies:
   flutter_test:

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 //データベース
 import 'package:firebase_core/firebase_core.dart';
+import 'package:go_router/go_router.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:numberpicker/numberpicker.dart';
 
 class SubjectDetails extends StatelessWidget {
   const SubjectDetails({super.key});
@@ -10,6 +13,11 @@ class SubjectDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          GoRouter.of(context).go('/classTimetable/subject_eval');
+        },
+      ),
       appBar: AppBar(
         title: const Text('時間割'),
         backgroundColor: Colors.grey[350],
@@ -33,20 +41,59 @@ class SubjectDetails extends StatelessWidget {
   }
 }
 
-class WritePostDB extends StatelessWidget {
+final numberPickerProvider1 = StateProvider<int>((ref) => 100);
+final numberPickerProvider2 = StateProvider<int>((ref) => 0);
+final numberPickerProvider3 = StateProvider<int>((ref) => 0);
+
+class WritePostDB extends ConsumerStatefulWidget {
   const WritePostDB({super.key});
 
   @override
+  _WritePostDBState createState() => _WritePostDBState();
+}
+
+class _WritePostDBState extends ConsumerState<WritePostDB> {
+  late final TextEditingController _className;
+  late final TextEditingController _teacherName;
+  late final TextEditingController _classPlaceName;
+  late final TextEditingController _evaluationMethod1;
+  late final TextEditingController _evaluationMethod2;
+  late final TextEditingController _evaluationMethod3;
+
+  @override
+  void initState() {
+    super.initState();
+    _className = TextEditingController();
+    _teacherName = TextEditingController();
+    _classPlaceName = TextEditingController();
+    _evaluationMethod1 = TextEditingController();
+    _evaluationMethod2 = TextEditingController();
+    _evaluationMethod3 = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _className.dispose();
+    _teacherName.dispose();
+    _classPlaceName.dispose();
+    _evaluationMethod1.dispose();
+    _evaluationMethod2.dispose();
+    _evaluationMethod3.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    TextEditingController _className = TextEditingController();
-    TextEditingController _teacherName = TextEditingController();
-    TextEditingController _classPlaceName = TextEditingController();
-    TextEditingController _evaluationMethod1 = TextEditingController();
-    TextEditingController _evaluationMethod2 = TextEditingController();
-    TextEditingController _evaluationMethod3 = TextEditingController();
-    TextEditingController _evaluationMethodPer1 = TextEditingController();
-    TextEditingController _evaluationMethodPer2 = TextEditingController();
-    TextEditingController _evaluationMethodPer3 = TextEditingController();
+    //評価方法の割合のプロバイダー
+    final numberPickerValue1 = ref.watch(numberPickerProvider1);
+    final numberPickerController1 = ref.read(numberPickerProvider1.notifier);
+
+    final numberPickerValue2 = ref.watch(numberPickerProvider2);
+    final numberPickerController2 = ref.read(numberPickerProvider2.notifier);
+
+    final numberPickerValue3 = ref.watch(numberPickerProvider3);
+    final numberPickerController3 = ref.read(numberPickerProvider3.notifier);
+
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
       margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
@@ -72,12 +119,9 @@ class WritePostDB extends StatelessWidget {
                     String evaluationMethod1 = _evaluationMethod1.text;
                     String evaluationMethod2 = _evaluationMethod2.text;
                     String evaluationMethod3 = _evaluationMethod3.text;
-                    int evaluationMethodPer1 =
-                        int.parse(_evaluationMethodPer1.text);
-                    int evaluationMethodPer2 =
-                        int.parse(_evaluationMethodPer2.text);
-                    int evaluationMethodPer3 =
-                        int.parse(_evaluationMethodPer3.text);
+                    int evaluationMethodPer1 = numberPickerValue1;
+                    int evaluationMethodPer2 = numberPickerValue2;
+                    int evaluationMethodPer3 = numberPickerValue3;
 
                     // 確認メッセージのポップアップ表示
                     bool shouldSave = await showDialog<bool>(
@@ -142,9 +186,9 @@ class WritePostDB extends StatelessWidget {
                       _evaluationMethod1.clear();
                       _evaluationMethod2.clear();
                       _evaluationMethod3.clear();
-                      _evaluationMethodPer1.clear();
-                      _evaluationMethodPer2.clear();
-                      _evaluationMethodPer3.clear();
+                      numberPickerController1.state = 100;
+                      numberPickerController2.state = 0;
+                      numberPickerController3.state = 0;
                     }
                   } catch (e) {
                     // エラーをキャッチしてログに出力
@@ -165,7 +209,7 @@ class WritePostDB extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     SizedBox(
-                      width: MediaQuery.of(context).size.height / 8,
+                      width: MediaQuery.of(context).size.width / 1.5,
                       height: MediaQuery.of(context).size.height / 30,
                       child: TextField(
                         decoration: const InputDecoration(
@@ -186,7 +230,7 @@ class WritePostDB extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     SizedBox(
-                      width: MediaQuery.of(context).size.height / 8,
+                      width: MediaQuery.of(context).size.width / 2.8,
                       height: MediaQuery.of(context).size.height / 30,
                       child: TextField(
                         decoration: const InputDecoration(
@@ -200,7 +244,7 @@ class WritePostDB extends StatelessWidget {
                       ),
                     ),
                     SizedBox(
-                      width: MediaQuery.of(context).size.height / 8,
+                      width: MediaQuery.of(context).size.width / 2.8,
                       height: MediaQuery.of(context).size.height / 30,
                       child: TextField(
                         decoration: const InputDecoration(
@@ -219,7 +263,7 @@ class WritePostDB extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     SizedBox(
-                      width: MediaQuery.of(context).size.height / 6,
+                      width: MediaQuery.of(context).size.width / 2.8,
                       height: MediaQuery.of(context).size.height / 30,
                       child: TextField(
                         decoration: const InputDecoration(
@@ -232,14 +276,18 @@ class WritePostDB extends StatelessWidget {
                         controller: _evaluationMethod1,
                       ),
                     ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.height / 8,
-                      height: MediaQuery.of(context).size.height / 30,
-                      child: TextField(
-                        decoration: const InputDecoration(labelText: '％'),
-                        keyboardType: TextInputType.number,
-                        controller: _evaluationMethodPer1,
-                      ),
+                    Row(
+                      children: [
+                        NumberPicker(
+                            itemCount: 1,
+                            itemHeight: 25,
+                            value: numberPickerValue1,
+                            minValue: 0,
+                            maxValue: 100,
+                            onChanged: (value) =>
+                                numberPickerController1.state = value),
+                        const Text('%'),
+                      ],
                     ),
                   ],
                 ),
@@ -247,27 +295,31 @@ class WritePostDB extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     SizedBox(
-                      width: MediaQuery.of(context).size.height / 6,
+                      width: MediaQuery.of(context).size.width / 2.8,
                       height: MediaQuery.of(context).size.height / 30,
                       child: TextField(
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                             border: InputBorder.none,
                             icon: Icon(
                               Icons.edit_square,
-                              color: Colors.black,
+                              color: Colors.grey[300],
                             ),
                             labelText: '評価方法2'),
                         controller: _evaluationMethod2,
                       ),
                     ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.height / 8,
-                      height: MediaQuery.of(context).size.height / 30,
-                      child: TextField(
-                        decoration: const InputDecoration(labelText: '％'),
-                        keyboardType: TextInputType.number,
-                        controller: _evaluationMethodPer2,
-                      ),
+                    Row(
+                      children: [
+                        NumberPicker(
+                            itemCount: 1,
+                            itemHeight: 25,
+                            value: numberPickerValue2,
+                            minValue: 0,
+                            maxValue: 100,
+                            onChanged: (value) =>
+                                numberPickerController2.state = value),
+                        const Text('%'),
+                      ],
                     ),
                   ],
                 ),
@@ -275,27 +327,31 @@ class WritePostDB extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     SizedBox(
-                      width: MediaQuery.of(context).size.height / 6,
+                      width: MediaQuery.of(context).size.width / 2.8,
                       height: MediaQuery.of(context).size.height / 30,
                       child: TextField(
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                             border: InputBorder.none,
                             icon: Icon(
                               Icons.edit_square,
-                              color: Colors.black,
+                              color: Colors.grey[300],
                             ),
                             labelText: '評価方法3'),
                         controller: _evaluationMethod3,
                       ),
                     ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.height / 8,
-                      height: MediaQuery.of(context).size.height / 30,
-                      child: TextField(
-                        decoration: const InputDecoration(labelText: '％'),
-                        keyboardType: TextInputType.number,
-                        controller: _evaluationMethodPer3,
-                      ),
+                    Row(
+                      children: [
+                        NumberPicker(
+                            itemCount: 1,
+                            itemHeight: 25,
+                            value: numberPickerValue3,
+                            minValue: 0,
+                            maxValue: 100,
+                            onChanged: (value) =>
+                                numberPickerController3.state = value),
+                        const Text('%'),
+                      ],
                     ),
                   ],
                 ),
