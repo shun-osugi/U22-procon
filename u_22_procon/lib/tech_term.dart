@@ -53,9 +53,11 @@ class _TechTermPageState extends State<TechTermPage> {
             Expanded(
               child: Container(
                 width: MediaQuery.of(context).size.width / 1.4,
-                height: MediaQuery.of(context).size.height / 5,
                 child: _buildTabBarView(context),
               ),
+            ),
+            SizedBox(
+              height: 20,
             ),
           ],
         ),
@@ -85,7 +87,24 @@ class _TechTermPageState extends State<TechTermPage> {
           return Text('登録されている専門用語はありません');
         }
 
-        return Center(
+        return Container(
+          width: MediaQuery.of(context).size.width / 1.1,
+          height: MediaQuery.of(context).size.height / 2.5,
+          decoration: const BoxDecoration(
+            //角を丸くする
+            color: Color.fromARGB(255, 255, 255, 255),
+            border: Border(
+              top: BorderSide(color: Colors.grey, width: 1),
+              right: BorderSide(color: Colors.grey, width: 2),
+              bottom: BorderSide(color: Colors.grey, width: 2),
+              left: BorderSide(color: Colors.grey, width: 2),
+            ),
+            borderRadius: BorderRadius.only(
+              //下だけ
+              bottomLeft: Radius.circular(10),
+              bottomRight: Radius.circular(10),
+            ),
+          ),
           child: ListView.builder(
             itemCount: docs.length,
             itemBuilder: (context, index) {
@@ -108,10 +127,7 @@ class _TechTermPageState extends State<TechTermPage> {
                   decoration: const BoxDecoration(
                     color: Color.fromARGB(255, 255, 255, 255),
                     border: Border(
-                      top: BorderSide(color: Colors.grey, width: 1),
-                      right: BorderSide(color: Colors.grey, width: 2),
                       bottom: BorderSide(color: Colors.grey, width: 1),
-                      left: BorderSide(color: Colors.grey, width: 2),
                     ),
                   ),
                   child: ListTile(
