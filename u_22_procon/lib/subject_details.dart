@@ -7,6 +7,9 @@ import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:numberpicker/numberpicker.dart';
 
+const String tentativeDate = '月';
+const int tentativePeriod = 1;
+
 class SubjectDetails extends StatelessWidget {
   const SubjectDetails({super.key});
 
@@ -15,7 +18,6 @@ class SubjectDetails extends StatelessWidget {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // GoRouter.of(context).go('/classTimetable/subject_eval');
           GoRouter.of(context).go('/classTimetable/subject_details_updating');
         },
       ),
@@ -56,9 +58,6 @@ class SubjectDetails extends StatelessWidget {
 
                         //テキスト
                         Container(
-                          // margin: EdgeInsets.fromLTRB(0, 0, 0, ),
-                          // width: MediaQuery.of(context).size.width / 1.1,
-                          // height: MediaQuery.of(context).size.height / 13,
                           alignment: Alignment.center, //左寄せ
                           child: const Text(
                             'みんなが登録した科目一覧',
@@ -156,7 +155,7 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
             //曜日と時限を受け取ってデータベースに格納するコードを記述する必要あり
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('月曜1限'),
+              const Text('$tentativeDate曜$tentativePeriod限'),
               IconButton(
                 onPressed: () async {
                   try {
@@ -179,6 +178,8 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                               content: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: <Widget>[
+                                  const Text('曜日: $tentativeDate'),
+                                  const Text('時限: $tentativePeriod'),
                                   Text('教科名: $className'),
                                   Text('教員名: $teacherName'),
                                   Text('教室: $classPlaceName'),
@@ -215,6 +216,8 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                           .collection('class')
                           .doc()
                           .set({
+                        '曜日': tentativeDate,
+                        '時限': tentativePeriod,
                         '教科名': className,
                         '教員名': teacherName,
                         '教室': classPlaceName,
@@ -265,7 +268,7 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                             Icons.edit_square,
                             color: Colors.black,
                           ),
-                          labelText: '教科名',
+                          hintText: '教科名',
                         ),
                         controller: _className,
                       ),
@@ -286,7 +289,7 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                               Icons.person,
                               color: Colors.black,
                             ),
-                            labelText: '教員名'),
+                            hintText: '教員名'),
                         controller: _teacherName,
                       ),
                     ),
@@ -300,7 +303,7 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                               Icons.location_pin,
                               color: Colors.black,
                             ),
-                            labelText: '教室名'),
+                            hintText: '教室名'),
                         controller: _classPlaceName,
                       ),
                     ),
@@ -319,7 +322,7 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                               Icons.edit,
                               color: Colors.black,
                             ),
-                            labelText: '評価方法1'),
+                            hintText: '評価方法1'),
                         controller: _evaluationMethod1,
                       ),
                     ),
@@ -351,7 +354,7 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                               Icons.edit_square,
                               color: Colors.grey[300],
                             ),
-                            labelText: '評価方法2'),
+                            hintText: '評価方法2'),
                         controller: _evaluationMethod2,
                       ),
                     ),
@@ -383,7 +386,7 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                               Icons.edit_square,
                               color: Colors.grey[300],
                             ),
-                            labelText: '評価方法3'),
+                            hintText: '評価方法3'),
                         controller: _evaluationMethod3,
                       ),
                     ),
@@ -477,7 +480,7 @@ class ListWidget extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Container(
+                    SizedBox(
                       width: MediaQuery.of(context).size.width / 2,
                       child: Text(
                         '$message',
@@ -491,8 +494,8 @@ class ListWidget extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        Padding(padding: EdgeInsets.all(0)),
-                        Container(
+                        const Padding(padding: EdgeInsets.all(0)),
+                        SizedBox(
                           width: MediaQuery.of(context).size.width / 10,
                           child: const Icon(
                             Icons.people,
@@ -500,7 +503,7 @@ class ListWidget extends StatelessWidget {
                             size: 24.0,
                           ),
                         ),
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width / 10,
                           child: Text(
                             '$message',
