@@ -215,6 +215,8 @@ class _TodoState extends State<Todo> {
     String? _dropdownValue = "オペレーティングシステム";
     DateTime? _selectedDate;
     TimeOfDay? _selectedTime;
+    DateTime? _remindDate;
+    TimeOfDay? _remindTime;
 
     return FloatingActionButton(
       onPressed: () {
@@ -256,41 +258,94 @@ class _TodoState extends State<Todo> {
                           controller: _workName,
                         ),
                         SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () async {
-                            DateTime? pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime.now().add(Duration(days: 365)),
-                            );
+                        Row(
+                          children: [
+                            Text('期限　　　　', style: TextStyle(fontSize: 16)),
+                            SizedBox(width: 10),
+                            ElevatedButton(
+                              onPressed: () async {
+                                DateTime? pickedDate = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime.now(),
+                                  lastDate:
+                                      DateTime.now().add(Duration(days: 365)),
+                                );
 
-                            if (pickedDate != null) {
-                              setState(() {
-                                _selectedDate = pickedDate;
-                              });
-                            }
-                          },
-                          child: Text(_selectedDate == null
-                              ? '日付を選択'
-                              : '選択した日付: ${_selectedDate.toString().split(' ')[0]}'),
+                                if (pickedDate != null) {
+                                  setState(() {
+                                    _selectedDate = pickedDate;
+                                  });
+                                }
+                              },
+                              child: Text(_selectedDate == null
+                                  ? '日付を選択'
+                                  : '${_selectedDate.toString().split(' ')[0]}'),
+                            ),
+                            SizedBox(width: 10),
+                            ElevatedButton(
+                              onPressed: () async {
+                                TimeOfDay? pickedTime = await showTimePicker(
+                                  context: context,
+                                  initialTime: TimeOfDay.now(),
+                                );
+
+                                if (pickedTime != null) {
+                                  setState(() {
+                                    _selectedTime = pickedTime;
+                                  });
+                                }
+                              },
+                              child: Text(_selectedTime == null
+                                  ? '時間を選択'
+                                  : '${_selectedTime?.format(context)}'),
+                            ),
+                          ],
                         ),
-                        ElevatedButton(
-                          onPressed: () async {
-                            TimeOfDay? pickedTime = await showTimePicker(
-                              context: context,
-                              initialTime: TimeOfDay.now(),
-                            );
+                        SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Text('リマインダー', style: TextStyle(fontSize: 16)),
+                            SizedBox(width: 10),
+                            ElevatedButton(
+                              onPressed: () async {
+                                DateTime? pickedDate = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime.now(),
+                                  lastDate:
+                                      DateTime.now().add(Duration(days: 365)),
+                                );
 
-                            if (pickedTime != null) {
-                              setState(() {
-                                _selectedTime = pickedTime;
-                              });
-                            }
-                          },
-                          child: Text(_selectedTime == null
-                              ? '時間を選択'
-                              : '選択した時間: ${_selectedTime?.format(context)}'),
+                                if (pickedDate != null) {
+                                  setState(() {
+                                    _remindDate = pickedDate;
+                                  });
+                                }
+                              },
+                              child: Text(_remindDate == null
+                                  ? '日付を選択'
+                                  : '${_remindDate.toString().split(' ')[0]}'),
+                            ),
+                            SizedBox(width: 10),
+                            ElevatedButton(
+                              onPressed: () async {
+                                TimeOfDay? pickedTime = await showTimePicker(
+                                  context: context,
+                                  initialTime: TimeOfDay.now(),
+                                );
+
+                                if (pickedTime != null) {
+                                  setState(() {
+                                    _remindTime = pickedTime;
+                                  });
+                                }
+                              },
+                              child: Text(_remindTime == null
+                                  ? '時間を選択'
+                                  : '${_remindTime?.format(context)}'),
+                            ),
+                          ],
                         ),
                         SizedBox(height: 20),
                         ElevatedButton(
