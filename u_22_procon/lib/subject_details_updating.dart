@@ -238,11 +238,21 @@ class ReadDB extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('$date曜$period限'),
-                          const Icon(
-                            Icons.screen_rotation_alt_rounded,
-                            color: Colors.black,
-                            size: 32,
-                          ),
+                          IconButton(
+                              onPressed: () {
+                                GoRouter.of(context)
+                                    .go('/classTimetable/subjectDetails');
+                              },
+                              icon: const Icon(
+                                Icons.screen_rotation_alt_rounded,
+                                color: Colors.black,
+                                size: 32,
+                              ))
+                          // const Icon(
+                          //   Icons.screen_rotation_alt_rounded,
+                          //   color: Colors.black,
+                          //   size: 32,
+                          // ),
                         ],
                       ),
                       SizedBox(
