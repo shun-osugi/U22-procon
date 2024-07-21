@@ -27,13 +27,53 @@ class SubjectDetails extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             const WritePostDB(),
-            Container(
-                color: Colors.yellow[100],
-                width: MediaQuery.of(context).size.height / 1.6,
-                height: MediaQuery.of(context).size.height / 2.5,
-                child: const Expanded(
-                  child: ListWidget(),
-                )),
+            Column(
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width / 1.1,
+                  height: MediaQuery.of(context).size.height / 13,
+                  decoration: BoxDecoration(
+                    //角を丸くする
+                    color: Colors.yellow[100],
+                    border: const Border(
+                      top: BorderSide(color: Colors.grey, width: 2),
+                      right: BorderSide(color: Colors.grey, width: 2),
+                      bottom: BorderSide(color: Colors.grey, width: 1),
+                      left: BorderSide(color: Colors.grey, width: 2),
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      //上だけ
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10),
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(0),
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: <Widget>[
+                        const SizedBox(width: 80),
+
+                        //テキスト
+                        Container(
+                          // margin: EdgeInsets.fromLTRB(0, 0, 0, ),
+                          // width: MediaQuery.of(context).size.width / 1.1,
+                          // height: MediaQuery.of(context).size.height / 13,
+                          alignment: Alignment.center, //左寄せ
+                          child: const Text(
+                            'みんなが登録した科目一覧',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ]),
+                ),
+                const ListWidget(),
+              ],
+            ),
           ],
         ),
       ),
@@ -698,16 +738,97 @@ class ListWidget extends StatelessWidget {
         if (docs.isEmpty) {}
 
         // 4. Firestore から取得したデータを表示
-        return ListView.builder(
-          itemCount: docs.length,
-          itemBuilder: (context, index) {
-            var data = docs[index].data() as Map<String, dynamic>;
-            var message = data['test'] ?? 'No data found';
-            return Column(
-              children: [ListTile(title: Text('$message')), const Divider()],
-            );
-          },
+        return //口コミのリスト一覧
+            Container(
+          width: MediaQuery.of(context).size.width / 1.1,
+          height: MediaQuery.of(context).size.height / 2.5,
+          decoration: const BoxDecoration(
+            //角を丸くする
+            color: Color.fromARGB(255, 255, 255, 255),
+            border: Border(
+              top: BorderSide(color: Colors.grey, width: 1),
+              right: BorderSide(color: Colors.grey, width: 2),
+              bottom: BorderSide(color: Colors.grey, width: 2),
+              left: BorderSide(color: Colors.grey, width: 2),
+            ),
+            borderRadius: BorderRadius.only(
+              //下だけ
+              bottomLeft: Radius.circular(10),
+              bottomRight: Radius.circular(10),
+            ),
+          ),
+          child: ListView.builder(
+            itemCount: docs.length,
+            //itemCount分表示
+            itemBuilder: (context, index) {
+              var data = docs[index].data() as Map<String, dynamic>;
+              var message = data['test'] ?? 'No data found';
+              return Container(
+                width: 376,
+                height: 40,
+                alignment: Alignment.centerLeft, //左寄せ
+                decoration: const BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey, width: 2),
+                  ),
+                ),
+
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Container(
+                      width: 200,
+                      child: Text(
+                        '$message',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Padding(padding: EdgeInsets.all(0)),
+                        Container(
+                          width: 50,
+                          child: const Icon(
+                            Icons.people,
+                            color: Colors.black,
+                            size: 24.0,
+                          ),
+                        ),
+                        Container(
+                          width: 50,
+                          child: Text(
+                            '$message',
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         );
+        // ListView.builder(
+        //   itemCount: docs.length,
+        //   itemBuilder: (context, index) {
+        // var data = docs[index].data() as Map<String, dynamic>;
+        // var message = data['test'] ?? 'No data found';
+        //     return Column(
+        // children: [ListTile(title: Text('$message')), const Divider()],
+        //     );
+        //   },
+        // );
       },
     );
   }
