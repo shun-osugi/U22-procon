@@ -16,6 +16,7 @@ class SubjectEval extends StatelessWidget {
   static List<int> evalgood = []; //口コミの追加日
   static List<String> evalcontent = []; //口コミの内容
   static StateSetter? setreview; //口コミの一覧の状態を管理（ソートなどで更新されるから）
+  static var cont = OverlayPortalController();
 
   @override
   Widget build(BuildContext context)
@@ -165,8 +166,10 @@ class SubjectEval extends StatelessWidget {
 
           //口コミリスト
           child: reviews(),
-        ),],
-      ),),
+        ),
+
+        
+      ],),),
 
       //口コミ追加ボタン
       floatingActionButton: FloatingActionButton(
@@ -184,8 +187,9 @@ class SubjectEval extends StatelessWidget {
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
+  //main終わり
 
-    //評価欄の各評価項目
+  //評価欄の各評価項目
   Container  evaltext(String? text,int value){
     return Container(
       width:  300,
@@ -216,7 +220,20 @@ class SubjectEval extends StatelessWidget {
             height: 40,
             color: const Color.fromARGB(255, 54, 243, 33),
             alignment: Alignment.center,
-            child: Text('$value'),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                for(var i=0;i<value;i++) const Icon(
+                  Icons.star,
+                  color: Colors.black,
+                ),
+                for(var i=value;i<5;i++) const Icon(
+                  color: Colors.white,
+                  Icons.star,
+                ),
+              ],
+            ),
+            // child: Text('$value'),//Icons.star
           ),
         ]
       ),
@@ -326,54 +343,72 @@ class SubjectEval extends StatelessWidget {
               itemCount: evaltitle.length,
               //itemCount分表示
               itemBuilder: (context, index) {
-                return Container(
-                  width:  376,
-                  height: 40,
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: Colors.blue, width: 2),
+                return GestureDetector(
+                  onTap: () async {
+                    await showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return SimpleDialog(
+                          title: Text(evaltitle[index]),
+                          children: [
+                            Text(evalcontent[index]),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  child: Container(
+                    width:  376,
+                    height: 40,
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey, width: 2),
+                      ),
                     ),
-                  ),
-                  
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 200,
-                        alignment: Alignment.centerLeft,//左寄せ
-                        child: Text(
-                          evaltitle[index],
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1,
+                    
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        //口コミタイトル
+                        Container(
+                          width: 200,
+                          alignment: Alignment.centerLeft,//左寄せ
+                          child: Text(
+                            evaltitle[index],
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                            textAlign: TextAlign.left,
                           ),
-                          textAlign: TextAlign.left,
                         ),
-                      ),
-                      Container(
-                        width: 100,
-                        alignment: Alignment.centerLeft,//左寄せ
-                        child: Text(
-                          evaldate[index],
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1,
+                        //追加日
+                        Container(
+                          width: 100,
+                          alignment: Alignment.centerLeft,//左寄せ
+                          child: Text(
+                            evaldate[index],
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                            textAlign: TextAlign.left,
                           ),
-                          textAlign: TextAlign.left,
                         ),
-                      ),
-                      Container(
-                        width: 40,
-                        alignment: Alignment.centerLeft,//左寄せ
-                        child: const Icon(
-                          Icons.thumb_up,
-                          color: Colors.pink,
-                          size: 24.0,
+                        //いいね数
+                        Container(
+                          width: 40,
+                          alignment: Alignment.centerLeft,//左寄せ
+                          child: const Icon(
+                            Icons.thumb_up,
+                            color: Colors.pink,
+                            size: 24.0,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 );
               }
