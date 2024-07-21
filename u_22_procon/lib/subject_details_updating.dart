@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:go_router/go_router.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:numberpicker/numberpicker.dart';
+
+final String class_name = 'オペレーティングシステム';
 
 class SubjectDetailsUpdating extends StatelessWidget {
   const SubjectDetailsUpdating({super.key});
@@ -58,10 +60,10 @@ class SubjectDetailsUpdating extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          Text('みんなの評価'),
+                          const Text('みんなの評価'),
                           Container(
                             padding: EdgeInsets.all(4),
-                            child: Column(
+                            child: const Column(
                               children: [
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -81,7 +83,7 @@ class SubjectDetailsUpdating extends StatelessWidget {
                               ],
                             ),
                           ),
-                          Text('更新日時'),
+                          const Text('更新日時'),
                         ],
                       ),
                     )),
@@ -106,10 +108,10 @@ class SubjectDetailsUpdating extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          Text('みんなの評価'),
+                          const Text('みんなの評価'),
                           Container(
-                            padding: EdgeInsets.all(4),
-                            child: Column(
+                            padding: const EdgeInsets.all(4),
+                            child: const Column(
                               children: [
                                 Icon(
                                   Icons.edit_document,
@@ -118,7 +120,7 @@ class SubjectDetailsUpdating extends StatelessWidget {
                               ],
                             ),
                           ),
-                          Text('更新日時')
+                          const Text('更新日時')
                         ],
                       ),
                     )),
@@ -131,7 +133,7 @@ class SubjectDetailsUpdating extends StatelessWidget {
                   height: MediaQuery.of(context).size.height / 13,
                   decoration: BoxDecoration(
                     //角を丸くする
-                    color: Colors.yellow[100],
+                    color: Colors.grey[200],
                     border: const Border(
                       top: BorderSide(color: Colors.grey, width: 2),
                       right: BorderSide(color: Colors.grey, width: 2),
@@ -152,9 +154,6 @@ class SubjectDetailsUpdating extends StatelessWidget {
 
                         //テキスト
                         Container(
-                          // margin: EdgeInsets.fromLTRB(0, 0, 0, ),
-                          // width: MediaQuery.of(context).size.width / 1.1,
-                          // height: MediaQuery.of(context).size.height / 13,
                           alignment: Alignment.center, //左寄せ
                           child: const Text(
                             'みんなが登録した科目一覧',
@@ -178,14 +177,18 @@ class SubjectDetailsUpdating extends StatelessWidget {
   }
 }
 
+final checkedIdsProvider = StateProvider<Set<String>>((ref) {
+  return {};
+});
+
 //データベースから読み込んた教科をリストにするWidet
-class ListWidget extends StatelessWidget {
+class ListWidget extends ConsumerWidget {
   const ListWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<QuerySnapshot>(
-      future: FirebaseFirestore.instance.collection('test').get(),
+  Widget build(BuildContext context, WidgetRef ref) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('tech_term').snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // 1. データが読み込まれるまでの間、ローディングインジケーターを表示
@@ -200,10 +203,19 @@ class ListWidget extends StatelessWidget {
           return const Text('No data found');
         }
 
-        List<DocumentSnapshot> docs = snapshot.data!.docs;
+        final checkedIds = ref.watch(checkedIdsProvider);
+
+        //MY用語にtrueが格納されてるデータを探す
+        List<DocumentSnapshot> techTermDocs =
+            snapshot.data!.docs.where((techTermDocs) {
+          var data = techTermDocs.data() as Map<String, dynamic>;
+          return data['科目'] == class_name;
+        }).toList();
 
         // データが存在する場合、UI に表示する
-        if (docs.isEmpty) {}
+        if (techTermDocs.isEmpty) {
+          return const Text('用語なし');
+        }
 
         // 4. Firestore から取得したデータを表示
         return //口コミのリスト一覧
@@ -226,11 +238,31 @@ class ListWidget extends StatelessWidget {
             ),
           ),
           child: ListView.builder(
-            itemCount: docs.length,
+            itemCount: techTermDocs.length,
             //itemCount分表示
             itemBuilder: (context, index) {
-              var data = docs[index].data() as Map<String, dynamic>;
-              var message = data['test'] ?? 'No data found';
+              var data = techTermDocs[index].data() as Map<String, dynamic>;
+              var term = data['用語'] ?? 'No term';
+              var checkbox = data['MY用語'] ?? false;
+              var docId = techTermDocs[index].id;
+
+              //チェックボックスが押された時の関数
+              void onChangedCheckbox(bool? value) {
+                final newSet = Set.of(checkedIds);
+                if (value == true) {
+                  newSet.add(docId);
+                } else {
+                  newSet.remove(docId);
+                }
+                ref.read(checkedIdsProvider.notifier).state = newSet;
+
+                // Firestoreに状態を保存するコードを追加
+                FirebaseFirestore.instance
+                    .collection('tech_term')
+                    .doc(docId)
+                    .update({'MY用語': value});
+              }
+
               return Container(
                 width: 376,
                 height: 40,
@@ -242,12 +274,20 @@ class ListWidget extends StatelessWidget {
                 ),
 
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Container(
+                      margin: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                      child: Checkbox(
+                        value: checkedIds.contains(docId) || checkbox,
+                        onChanged: onChangedCheckbox,
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                       width: 200,
                       child: Text(
-                        '$message',
+                        '$term',
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
@@ -256,47 +296,12 @@ class ListWidget extends StatelessWidget {
                         textAlign: TextAlign.left,
                       ),
                     ),
-                    Row(
-                      children: [
-                        Padding(padding: EdgeInsets.all(0)),
-                        Container(
-                          width: 50,
-                          child: const Icon(
-                            Icons.people,
-                            color: Colors.black,
-                            size: 24.0,
-                          ),
-                        ),
-                        Container(
-                          width: 50,
-                          child: Text(
-                            '$message',
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1,
-                            ),
-                            textAlign: TextAlign.left,
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               );
             },
           ),
         );
-        // ListView.builder(
-        //   itemCount: docs.length,
-        //   itemBuilder: (context, index) {
-        // var data = docs[index].data() as Map<String, dynamic>;
-        // var message = data['test'] ?? 'No data found';
-        //     return Column(
-        // children: [ListTile(title: Text('$message')), const Divider()],
-        //     );
-        //   },
-        // );
       },
     );
   }

@@ -143,6 +143,12 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: Colors.grey[300],
+        border: const Border(
+          top: BorderSide(color: Colors.grey, width: 2),
+          right: BorderSide(color: Colors.grey, width: 2),
+          bottom: BorderSide(color: Colors.grey, width: 1),
+          left: BorderSide(color: Colors.grey, width: 2),
+        ),
       ),
       child: Column(
         children: [
