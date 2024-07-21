@@ -157,7 +157,8 @@ class _TodoState extends State<Todo> {
             var data = doc.data() as Map<String, dynamic>;
             var subject = data['科目'] ?? 'No subject';
             var task = data['課題'] ?? 'No task';
-            var dateStr = data['日時'] ?? 'No date';
+            var dateStr = data['期限'] ?? 'No date';
+            var remindStr = data['リマインド'] ?? 'No date';
             String dateDisplay = 'No date';
             try {
               if (dateStr != 'No date') {
@@ -166,6 +167,16 @@ class _TodoState extends State<Todo> {
               }
             } catch (e) {
               dateDisplay = 'Invalid date format';
+            }
+            String remindDisplay = 'No remind';
+            try {
+              if (remindStr != 'No remind') {
+                DateTime remind =
+                    DateFormat('yyyy-MM-dd HH:mm').parse(remindStr);
+                remindDisplay = DateFormat('yyyy-MM-dd HH:mm').format(remind);
+              }
+            } catch (e) {
+              remindDisplay = 'Invalid remind format';
             }
 
             return Padding(
@@ -187,7 +198,13 @@ class _TodoState extends State<Todo> {
                       builder: (context) {
                         return AlertDialog(
                           title: Text('$task\n$subject'),
-                          content: Text(dateDisplay),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(dateDisplay),
+                              Text(remindDisplay),
+                            ],
+                          ),
                           actions: <Widget>[
                             TextButton(
                               child: Text('閉じる'),
@@ -365,6 +382,18 @@ class _TodoState extends State<Todo> {
                               selectedDateTime = DateFormat('yyyy-MM-dd HH:mm')
                                   .format(combinedDateTime);
                             }
+                            String? remindDateTime;
+                            if (_remindDate != null && _remindTime != null) {
+                              DateTime combinedDateTime = DateTime(
+                                _remindDate!.year,
+                                _remindDate!.month,
+                                _remindDate!.day,
+                                _remindTime!.hour,
+                                _remindTime!.minute,
+                              );
+                              remindDateTime = DateFormat('yyyy-MM-dd HH:mm')
+                                  .format(combinedDateTime);
+                            }
 
                             bool shouldSave = await showDialog<bool>(
                                   context: context,
@@ -376,7 +405,8 @@ class _TodoState extends State<Todo> {
                                         children: <Widget>[
                                           Text('科目: $selectedCategory'),
                                           Text('課題名: $work'),
-                                          Text('日時: $selectedDateTime'),
+                                          Text('期限: $selectedDateTime'),
+                                          Text('リマインド日時: $remindDateTime'),
                                         ],
                                       ),
                                       actions: <Widget>[
@@ -405,7 +435,8 @@ class _TodoState extends State<Todo> {
                                   .set({
                                 '科目': selectedCategory,
                                 '課題': work,
-                                '日時': selectedDateTime,
+                                '期限': selectedDateTime,
+                                'リマインド': remindDateTime,
                               });
 
                               _refreshData();
@@ -415,6 +446,8 @@ class _TodoState extends State<Todo> {
                                 _workName.clear();
                                 _selectedDate = null;
                                 _selectedTime = null;
+                                _remindDate = null;
+                                _remindTime = null;
                               });
 
                               Navigator.pop(context);
