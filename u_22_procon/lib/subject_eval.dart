@@ -4,61 +4,18 @@ import 'package:flutter/widgets.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class SubjectEval extends StatefulWidget {
+class SubjectEval extends StatelessWidget {
   const SubjectEval({super.key});
 
-  @override
-  SubjectEvalmain createState() => SubjectEvalmain();
-}
-
-//main
-class SubjectEvalmain extends State<SubjectEval> {
-  String? dropdownValue = "2"; //口コミプルダウンリスト値
-  String? subject = 'オペレーティングシステム';
-  TextEditingController reviewtitle = TextEditingController();
-  TextEditingController reviewcontent = TextEditingController();
-  List<String> evaltitle = []; //口コミのタイトル
-  List<String> evaldate = []; //口コミの追加日
-  List<int> evalgood = []; //口コミの追加日
-  List<String> evalcontent = []; //口コミの内容
-
-  //評価欄の各評価項目
-  Container  evaltext(String? text,int value){
-    return Container(
-      width:  300,
-      height: 40,
-      color: Colors.grey[100],
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          //評価項目
-          Container(
-            width:  100,
-            height: 40,
-            alignment: Alignment.centerLeft,//左寄せ
-            child: Text(
-              '$text',
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
-              ),
-              textAlign: TextAlign.left,
-            ),
-          ),
-
-          //評価数(星)
-          Container(
-            width:  140,
-            height: 40,
-            color: const Color.fromARGB(255, 54, 243, 33),
-            alignment: Alignment.center,
-            child: Text('$value'),
-          ),
-        ]
-      ),
-    );
-  }
+  static String? dropdownValue = "2"; //口コミプルダウンリスト値
+  static String? subject = 'オペレーティングシステム'; //科目
+  static TextEditingController reviewtitle = TextEditingController(); //口コミタイトル
+  static TextEditingController reviewcontent = TextEditingController(); //口コミ内容
+  static List<String> evaltitle = []; //口コミのタイトル
+  static List<String> evaldate = []; //口コミの追加日
+  static List<int> evalgood = []; //口コミの追加日
+  static List<String> evalcontent = []; //口コミの内容
+  static StateSetter? setreview; //口コミの一覧の状態を管理（ソートなどで更新されるから）
 
   @override
   Widget build(BuildContext context)
@@ -182,50 +139,7 @@ class SubjectEvalmain extends State<SubjectEval> {
               ),
 
               //プルダウンリスト
-              SizedBox(
-                width: 80,//104.8px
-                child: DropdownButton<String>(
-                  value: dropdownValue,
-                  isExpanded: true,
-
-                  items: const[
-                    DropdownMenuItem(
-                    //valueが実際に保存される値
-                      value: "1",
-                      //Textでユーザーに見えるようにする
-                      child: Text(
-                        '新着順',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    DropdownMenuItem(
-                      value: "2",
-                      child: Text(
-                        'いいね数順',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
-
-                  //現在選択されているもの以外が選択された時
-                  onChanged: (String? value) {
-                    setState(() {//setStateによりリアルタイムでUIが変更される
-                      //UI再描画
-                      dropdownValue = value;
-                    });
-                  },
-                ),
-              )
+              dropdownlist(),
             ]
           ),
         ),
@@ -250,104 +164,7 @@ class SubjectEvalmain extends State<SubjectEval> {
           ),
 
           //口コミリスト
-          child: FutureBuilder<QuerySnapshot>(
-            // Firestore コレクションの参照を取得
-            future: FirebaseFirestore.instance.collection('reviews').get(),
-            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                // 1. データが読み込まれるまでの間、ローディングインジケーターを表示
-                return const CircularProgressIndicator();
-              }
-              if (snapshot.hasError) {
-                // 2. エラーが発生した場合、エラーメッセージを表示
-                return Text('Error: ${snapshot.error}');
-              }
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                // 3. データが存在しない場合、メッセージを表示
-                return const Text('No data found');
-              }
-
-              //MY用語にtrueが格納されてるデータを探す
-              List<DocumentSnapshot> docs = snapshot.data!.docs.where((doc) {
-                var data = doc.data() as Map<String, dynamic>;
-                return data['科目'] == subject;
-              }).toList();
-
-              if (docs.isEmpty) {
-                // フィルタリングされた結果が空の場合、メッセージを表示
-                return const Text('MY用語がありません');
-              }
-
-              evaltitle.clear();
-              evaldate.clear();
-              evalgood.clear();
-              evalcontent.clear();
-              for(var i=0; i<docs.length; i++){
-                var data = docs[i].data() as Map<String, dynamic>;
-                evaltitle.add(data['評価タイトル'] ?? 'No title');
-                evaldate.add(data['追加日'] ?? 'No date');
-                evalgood.add(data['いいね数'] ?? 0);
-                evalcontent.add(data['評価内容'] ?? 'No content');
-              }
-
-              return ListView.builder(
-                itemCount: evaltitle.length,
-                //itemCount分表示
-                itemBuilder: (context, index) {
-                  return Container(
-                    width:  376,
-                    height: 40,
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: Colors.blue, width: 2),
-                      ),
-                    ),
-                    
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 200,
-                          alignment: Alignment.centerLeft,//左寄せ
-                          child: Text(
-                            evaltitle[index],
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1,
-                            ),
-                            textAlign: TextAlign.left,
-                          ),
-                        ),
-                        Container(
-                          width: 100,
-                          alignment: Alignment.centerLeft,//左寄せ
-                          child: Text(
-                            evaldate[index],
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1,
-                            ),
-                            textAlign: TextAlign.left,
-                          ),
-                        ),
-                        Container(
-                          width: 40,
-                          alignment: Alignment.centerLeft,//左寄せ
-                          child: const Icon(
-                            Icons.thumb_up,
-                            color: Colors.pink,
-                            size: 24.0,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              );
-            }
-          ),
+          child: reviews(),
         ),],
       ),),
 
@@ -356,97 +173,299 @@ class SubjectEvalmain extends State<SubjectEval> {
         onPressed: () {
           showModalBottomSheet(
             context: context,
-            builder: (BuildContext context) {
-              return StatefulBuilder(
-                //状態確認
-                builder: (BuildContext context, StateSetter setState) {
-                  return Container(
-                    height: MediaQuery.of(context).size.height / 2,
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: <Widget>[
-                        TextField(
-                          decoration: const InputDecoration(labelText: '口コミタイトル'),
-                          controller: reviewtitle,
-                        ),
-                        const SizedBox(height: 20),
-                        TextField(
-                          decoration: const InputDecoration(labelText: '口コミ内容'),
-                          controller: reviewcontent,
-                        ),
-                        const SizedBox(height: 20),
-                        // ElevatedButton(
-                        //   onPressed: () async {
-                        //     String term = _termName.text;
-
-                        //     // 確認メッセージのポップアップ表示
-                        //     bool shouldSave = await showDialog<bool>(
-                        //       context: context,
-                        //       builder: (BuildContext context) {
-                        //         return AlertDialog(
-                        //           title: Text('この内容で保存しますか？'),
-                        //           content: Column(
-                        //             mainAxisSize: MainAxisSize.min,
-                        //             children: <Widget>[
-                        //               Text('科目: $selectedCategory'),
-                        //               Text('用語名: $term'),
-                        //               Text('説明: $description'),
-                        //             ],
-                        //           ),
-                        //           actions: <Widget>[
-                        //             TextButton(
-                        //               onPressed: () {
-                        //                 Navigator.of(context).pop(false);
-                        //               },
-                        //               child: Text('キャンセル'),
-                        //             ),
-                        //             TextButton(
-                        //               onPressed: () {
-                        //                 Navigator.of(context).pop(true);
-                        //               },
-                        //               child: Text('OK'),
-                        //             ),
-                        //           ],
-                        //         );
-                        //       },
-                        //     ) ??
-                        //     false;
-
-                        //     if (shouldSave) {
-                        //       //ポップアップで「OK」を押したら保存
-                        //       await FirebaseFirestore.instance
-                        //           .collection('tech_term')
-                        //           .doc()
-                        //           .set({
-                        //         '科目': selectedCategory,
-                        //         '用語': term,
-                        //         '説明': description,
-                        //         'MY用語': _isChecked,
-                        //       });
-
-                        //       // 入力フィールドとチェックボックスの状態をクリア
-                        //       setState(() {
-                        //         _termName.clear();
-                        //         _description.clear();
-                        //         _isChecked = true;
-                        //       });
-
-                        //       Navigator.pop(context); // モーダルシートを閉じる
-                        //     }
-                        //   },
-                        //   child: Text('保存'),
-                        // ),
-                      ],
-                    ),
-                  );
-                },
-              );
+            builder: (context) {
+              //口コミフォーム
+              return reviewform();
             },
           );
         },
         child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
+  }
+
+    //評価欄の各評価項目
+  Container  evaltext(String? text,int value){
+    return Container(
+      width:  300,
+      height: 40,
+      color: Colors.grey[100],
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          //評価項目
+          Container(
+            width:  100,
+            height: 40,
+            alignment: Alignment.centerLeft,//左寄せ
+            child: Text(
+              '$text',
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
+              textAlign: TextAlign.left,
+            ),
+          ),
+
+          //評価数(星)
+          Container(
+            width:  140,
+            height: 40,
+            color: const Color.fromARGB(255, 54, 243, 33),
+            alignment: Alignment.center,
+            child: Text('$value'),
+          ),
+        ]
+      ),
+    );
+  }
+
+  //プルダウンリスト
+  StatefulBuilder dropdownlist(){
+    return StatefulBuilder(//状態を管理
+      builder: (BuildContext context, StateSetter setState) {
+        return SizedBox(
+          width: 80,//104.8px
+          child: DropdownButton<String>(
+            value: dropdownValue,
+            isExpanded: true,
+
+            items: const[
+              DropdownMenuItem(
+              //valueが実際に保存される値
+                value: "1",
+                //Textでユーザーに見えるようにする
+                child: Text(
+                  '新着順',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              DropdownMenuItem(
+                value: "2",
+                child: Text(
+                  'いいね数順',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+
+            //現在選択されているもの以外が選択された時
+            onChanged: (String? value) {
+              setState(() {//setStateによりリアルタイムでUIが変更される
+                //UI再描画
+                dropdownValue = value;
+                //口コミ一覧を更新
+                setreview!((){});
+              });
+            },
+          ),
+        );
+      }
+    );
+  }
+
+  //口コミ一覧
+  StatefulBuilder reviews(){
+    return StatefulBuilder(//状態を管理
+      builder: (BuildContext context, StateSetter setState) {
+        setreview = setState;//口コミ一覧を別のところからも更新できるようにする
+        return FutureBuilder<QuerySnapshot>(
+          // Firestore コレクションの参照を取得
+          future: FirebaseFirestore.instance.collection('reviews').get(),
+          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              // 1. データが読み込まれるまでの間、ローディングインジケーターを表示
+              return const CircularProgressIndicator();
+            }
+            if (snapshot.hasError) {
+              // 2. エラーが発生した場合、エラーメッセージを表示
+              return Text('Error: ${snapshot.error}');
+            }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              // 3. データが存在しない場合、メッセージを表示
+              return const Text('No data found');
+            }
+
+            //MY用語にtrueが格納されてるデータを探す
+            List<DocumentSnapshot> docs = snapshot.data!.docs.where((doc) {
+              var data = doc.data() as Map<String, dynamic>;
+              return data['科目'] == subject;
+            }).toList();
+
+            if (docs.isEmpty) {
+              // フィルタリングされた結果が空の場合、メッセージを表示
+              return const Text('MY用語がありません');
+            }
+
+            evaltitle.clear();
+            evaldate.clear();
+            evalgood.clear();
+            evalcontent.clear();
+            for(var i=0; i<docs.length; i++){
+              var data = docs[i].data() as Map<String, dynamic>;
+              evaltitle.add(data['口コミタイトル'] ?? 'No title');
+              evaldate.add(data['追加日'] ?? 'No date');
+              evalgood.add(data['いいね数'] ?? 0);
+              evalcontent.add(data['口コミ内容'] ?? 'No content');
+            }
+
+            return ListView.builder(
+              itemCount: evaltitle.length,
+              //itemCount分表示
+              itemBuilder: (context, index) {
+                return Container(
+                  width:  376,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: Colors.blue, width: 2),
+                    ),
+                  ),
+                  
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 200,
+                        alignment: Alignment.centerLeft,//左寄せ
+                        child: Text(
+                          evaltitle[index],
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                      Container(
+                        width: 100,
+                        alignment: Alignment.centerLeft,//左寄せ
+                        child: Text(
+                          evaldate[index],
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                      Container(
+                        width: 40,
+                        alignment: Alignment.centerLeft,//左寄せ
+                        child: const Icon(
+                          Icons.thumb_up,
+                          color: Colors.pink,
+                          size: 24.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            );
+          }
+        );
+      }
+    );
+  }
+
+  //口コミフォーム
+  StatefulBuilder reviewform(){
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return Container(
+          height: MediaQuery.of(context).size.height / 2,
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: <Widget>[
+              TextField(
+                decoration: const InputDecoration(labelText: '口コミタイトル'),
+                controller: reviewtitle,
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                decoration: const InputDecoration(labelText: '口コミ内容'),
+                controller: reviewcontent,
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () async {
+                  String title = reviewtitle.text;
+                  String content = reviewcontent.text;
+
+                  // 確認メッセージのポップアップ表示
+                  bool shouldSave = await showDialog<bool>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('この内容で保存しますか？'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text('タイトル: $title'),
+                            Text('内容: $content'),
+                          ],
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(false);
+                            },
+                            child: const Text('キャンセル'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(true);
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  ) ??
+                  false;
+
+                  if (shouldSave) {
+                    //ポップアップで「OK」を押したら保存
+                    await FirebaseFirestore.instance.collection('reviews').doc().set({
+                      '科目': subject,
+                      '口コミタイトル': title,
+                      '口コミ内容': content,
+                      '追加日': '2024/07/21',
+                      'いいね数': 0,
+                    });
+
+                    // 入力フィールドとチェックボックスの状態をクリア
+                    setState((){
+                      reviewtitle.clear();
+                      reviewcontent.clear();
+                      setreview!((){});
+                    });
+
+                    Navigator.pop(context); // モーダルシートを閉じる
+                  }
+                },
+                child: const Text('保存'),
+              ),
+            ],
+          ),
+        );
+      }
     );
   }
 }
