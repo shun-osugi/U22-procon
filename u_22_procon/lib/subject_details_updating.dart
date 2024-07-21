@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-final String className = 'オペレーティングシステム';
+const String className = 'オペレーティングシステム';
 
 class SubjectDetailsUpdating extends StatelessWidget {
   const SubjectDetailsUpdating({super.key});
@@ -49,7 +49,7 @@ class SubjectDetailsUpdating extends StatelessWidget {
                         children: [
                           const Text('みんなの評価'),
                           Container(
-                            padding: EdgeInsets.all(4),
+                            padding: const EdgeInsets.all(4),
                             child: const Column(
                               children: [
                                 Row(
@@ -143,7 +143,7 @@ class SubjectDetailsUpdating extends StatelessWidget {
                         Container(
                           alignment: Alignment.center, //左寄せ
                           child: const Text(
-                            'みんなが登録した科目一覧',
+                            'この科目の用語一覧',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -193,7 +193,7 @@ class ReadDB extends StatelessWidget {
             builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 // 1. データが読み込まれるまでの間、ローディングインジケーターを表示
-                return CircularProgressIndicator();
+                return const CircularProgressIndicator();
               }
               if (snapshot.hasError) {
                 // 2. エラーが発生した場合、エラーメッセージを表示
@@ -201,7 +201,7 @@ class ReadDB extends StatelessWidget {
               }
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                 // 3. データが存在しない場合、メッセージを表示
-                return Text('No data found');
+                return const Text('No data found');
               }
 
               //MY用語にtrueが格納されてるデータを探す
@@ -212,7 +212,7 @@ class ReadDB extends StatelessWidget {
 
               if (docs.isEmpty) {
                 // フィルタリングされた結果が空の場合、メッセージを表示
-                return Text('MY用語がありません');
+                return const Text('MY用語がありません');
               }
 
               // データが存在する場合、UI に表示する
@@ -248,11 +248,6 @@ class ReadDB extends StatelessWidget {
                                 color: Colors.black,
                                 size: 32,
                               ))
-                          // const Icon(
-                          //   Icons.screen_rotation_alt_rounded,
-                          //   color: Colors.black,
-                          //   size: 32,
-                          // ),
                         ],
                       ),
                       SizedBox(
@@ -263,10 +258,6 @@ class ReadDB extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 SizedBox(
-                                  // width:
-                                  //     MediaQuery.of(context).size.width / 1.5,
-                                  // height:
-                                  //     MediaQuery.of(context).size.height / 30,
                                   child: Container(
                                     child: Row(
                                       children: [
@@ -286,8 +277,6 @@ class ReadDB extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 SizedBox(
-                                    // width:
-                                    //     MediaQuery.of(context).size.width / 2.8,
                                     height:
                                         MediaQuery.of(context).size.height / 20,
                                     child: Row(
@@ -300,10 +289,6 @@ class ReadDB extends StatelessWidget {
                                       ],
                                     )),
                                 SizedBox(
-                                    // width:
-                                    //     MediaQuery.of(context).size.width / 2.8,
-                                    // height:
-                                    //     MediaQuery.of(context).size.height / 20,
                                     child: Row(
                                   children: [
                                     const Icon(
@@ -319,10 +304,6 @@ class ReadDB extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 SizedBox(
-                                    // width:
-                                    //     MediaQuery.of(context).size.width / 2.8,
-                                    // height:
-                                    //     MediaQuery.of(context).size.height / 20,
                                     child: Row(
                                   children: [
                                     const Icon(
@@ -340,10 +321,6 @@ class ReadDB extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 SizedBox(
-                                    // width:
-                                    //     MediaQuery.of(context).size.width / 2.8,
-                                    // height:
-                                    //     MediaQuery.of(context).size.height / 20,
                                     child: Row(
                                   children: [
                                     Icon(
@@ -361,10 +338,6 @@ class ReadDB extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 SizedBox(
-                                    // width:
-                                    //     MediaQuery.of(context).size.width / 2.8,
-                                    // height:
-                                    //     MediaQuery.of(context).size.height / 20,
                                     child: Row(
                                   children: [
                                     Icon(
@@ -385,27 +358,6 @@ class ReadDB extends StatelessWidget {
                   );
                 }).toList(),
               );
-              // return ListView.builder(
-              //   itemCount: docs.length,
-              //   itemBuilder: (context, index) {
-              //     var data = docs[index].data() as Map<String, dynamic>;
-              //     var teacher = data['教員名'] ?? 'No teacher';
-              //     var classPlace = data['教室'] ?? 'No classPlace';
-              //     var className = data['教科名'] ?? 'No className';
-              //     var period = data['時限'] ?? 'No period';
-              //     var date = data['曜日'] ?? 'No date';
-              //     var classEval1 = data['評価方法1'] ?? 'No classEval1';
-              //     var classEvalPer1 =
-              //         data['評価方法1の割合'] ?? 'No classEvalPer1';
-              //     var classEval2 = data['評価方法2'] ?? 'No classEval2';
-              //     var classEvalPer2 =
-              //         data['評価方法2の割合'] ?? 'No classEvalPer2';
-              //     var classEval3 = data['評価方法3'] ?? 'No classEval3';
-              //     var classEvalPer3 =
-              //         data['評価方法3の割合'] ?? 'No classEvalPer3';
-              //     return Container();
-              //   },
-              // );
             },
           ),
         ],
