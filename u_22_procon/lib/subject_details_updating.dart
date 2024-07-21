@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-final String class_name = 'オペレーティングシステム';
+final String className = 'オペレーティングシステム';
 
 class SubjectDetailsUpdating extends StatelessWidget {
   const SubjectDetailsUpdating({super.key});
@@ -22,20 +22,7 @@ class SubjectDetailsUpdating extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.pink[100],
-                border: const Border(
-                  top: BorderSide(color: Colors.grey, width: 2),
-                  right: BorderSide(color: Colors.grey, width: 2),
-                  bottom: BorderSide(color: Colors.grey, width: 2),
-                  left: BorderSide(color: Colors.grey, width: 2),
-                ),
-                borderRadius: const BorderRadius.all(Radius.circular(10)),
-              ),
-              width: MediaQuery.of(context).size.height / 1.6,
-              height: MediaQuery.of(context).size.height / 3.5,
-            ),
+            const ReadDB(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -177,6 +164,246 @@ class SubjectDetailsUpdating extends StatelessWidget {
   }
 }
 
+class ReadDB extends StatelessWidget {
+  const ReadDB({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+      margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+      width: MediaQuery.of(context).size.width / 1.1,
+      height: MediaQuery.of(context).size.height / 3.5,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.cyan[300],
+        border: const Border(
+          top: BorderSide(color: Colors.grey, width: 2),
+          right: BorderSide(color: Colors.grey, width: 2),
+          bottom: BorderSide(color: Colors.grey, width: 1),
+          left: BorderSide(color: Colors.grey, width: 2),
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          FutureBuilder<QuerySnapshot>(
+            // Firestore コレクションの参照を取得
+            future: FirebaseFirestore.instance.collection('class').get(),
+            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                // 1. データが読み込まれるまでの間、ローディングインジケーターを表示
+                return CircularProgressIndicator();
+              }
+              if (snapshot.hasError) {
+                // 2. エラーが発生した場合、エラーメッセージを表示
+                return Text('Error: ${snapshot.error}');
+              }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                // 3. データが存在しない場合、メッセージを表示
+                return Text('No data found');
+              }
+
+              //MY用語にtrueが格納されてるデータを探す
+              List<DocumentSnapshot> docs = snapshot.data!.docs.where((doc) {
+                var data = doc.data() as Map<String, dynamic>;
+                return data['教科名'] == className;
+              }).toList();
+
+              if (docs.isEmpty) {
+                // フィルタリングされた結果が空の場合、メッセージを表示
+                return Text('MY用語がありません');
+              }
+
+              // データが存在する場合、UI に表示する
+              return Column(
+                children: docs.map((doc) {
+                  var data = doc.data() as Map<String, dynamic>;
+                  var teacher = data['教員名'] ?? 'No teacher';
+                  var classPlace = data['教室'] ?? 'No classPlace';
+                  var className = data['教科名'] ?? 'No className';
+                  var period = data['時限'] ?? 'No period';
+                  var date = data['曜日'] ?? 'No date';
+                  var classEval1 = data['評価方法1'] ?? 'No classEval1';
+                  var classEvalPer1 = data['評価方法1の割合'] ?? 'No classEvalPer1';
+                  var classEval2 = data['評価方法2'] ?? 'No classEval2';
+                  var classEvalPer2 = data['評価方法2の割合'] ?? 'No classEvalPer2';
+                  var classEval3 = data['評価方法3'] ?? 'No classEval3';
+                  var classEvalPer3 = data['評価方法3の割合'] ?? 'No classEvalPer3';
+
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('$date曜$period限'),
+                          const Icon(
+                            Icons.screen_rotation_alt_rounded,
+                            color: Colors.black,
+                            size: 32,
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.height / 2.5,
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                  // width:
+                                  //     MediaQuery.of(context).size.width / 1.5,
+                                  // height:
+                                  //     MediaQuery.of(context).size.height / 30,
+                                  child: Container(
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.edit_square,
+                                          color: Colors.black,
+                                        ),
+                                        Text(className),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const Text(''),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                    // width:
+                                    //     MediaQuery.of(context).size.width / 2.8,
+                                    height:
+                                        MediaQuery.of(context).size.height / 20,
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.person,
+                                          color: Colors.black,
+                                        ),
+                                        Text(teacher),
+                                      ],
+                                    )),
+                                SizedBox(
+                                    // width:
+                                    //     MediaQuery.of(context).size.width / 2.8,
+                                    // height:
+                                    //     MediaQuery.of(context).size.height / 20,
+                                    child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.location_pin,
+                                      color: Colors.black,
+                                    ),
+                                    Text(classPlace),
+                                  ],
+                                ))
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                    // width:
+                                    //     MediaQuery.of(context).size.width / 2.8,
+                                    // height:
+                                    //     MediaQuery.of(context).size.height / 20,
+                                    child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.edit,
+                                      color: Colors.black,
+                                    ),
+                                    Text(classEval1),
+                                  ],
+                                )),
+                                SizedBox(
+                                    child: Text('${classEvalPer1.toString()}%'))
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                    // width:
+                                    //     MediaQuery.of(context).size.width / 2.8,
+                                    // height:
+                                    //     MediaQuery.of(context).size.height / 20,
+                                    child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.edit,
+                                      color: Colors.cyan[300],
+                                    ),
+                                    Text(classEval2),
+                                  ],
+                                )),
+                                SizedBox(
+                                    child: Text('${classEvalPer2.toString()}%'))
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                    // width:
+                                    //     MediaQuery.of(context).size.width / 2.8,
+                                    // height:
+                                    //     MediaQuery.of(context).size.height / 20,
+                                    child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.edit,
+                                      color: Colors.cyan[300],
+                                    ),
+                                    Text(classEval3),
+                                  ],
+                                )),
+                                SizedBox(
+                                    child: Text('${classEvalPer3.toString()}%'))
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              );
+              // return ListView.builder(
+              //   itemCount: docs.length,
+              //   itemBuilder: (context, index) {
+              //     var data = docs[index].data() as Map<String, dynamic>;
+              //     var teacher = data['教員名'] ?? 'No teacher';
+              //     var classPlace = data['教室'] ?? 'No classPlace';
+              //     var className = data['教科名'] ?? 'No className';
+              //     var period = data['時限'] ?? 'No period';
+              //     var date = data['曜日'] ?? 'No date';
+              //     var classEval1 = data['評価方法1'] ?? 'No classEval1';
+              //     var classEvalPer1 =
+              //         data['評価方法1の割合'] ?? 'No classEvalPer1';
+              //     var classEval2 = data['評価方法2'] ?? 'No classEval2';
+              //     var classEvalPer2 =
+              //         data['評価方法2の割合'] ?? 'No classEvalPer2';
+              //     var classEval3 = data['評価方法3'] ?? 'No classEval3';
+              //     var classEvalPer3 =
+              //         data['評価方法3の割合'] ?? 'No classEvalPer3';
+              //     return Container();
+              //   },
+              // );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 final checkedIdsProvider = StateProvider<Set<String>>((ref) {
   return {};
 });
@@ -209,7 +436,7 @@ class ListWidget extends ConsumerWidget {
         List<DocumentSnapshot> techTermDocs =
             snapshot.data!.docs.where((techTermDocs) {
           var data = techTermDocs.data() as Map<String, dynamic>;
-          return data['科目'] == class_name;
+          return data['科目'] == className;
         }).toList();
 
         // データが存在する場合、UI に表示する
