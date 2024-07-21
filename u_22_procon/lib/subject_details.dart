@@ -15,7 +15,8 @@ class SubjectDetails extends StatelessWidget {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          GoRouter.of(context).go('/classTimetable/subject_eval');
+          // GoRouter.of(context).go('/classTimetable/subject_eval');
+          GoRouter.of(context).go('/classTimetable/subject_details_updating');
         },
       ),
       appBar: AppBar(

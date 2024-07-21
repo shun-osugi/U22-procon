@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:u_22_procon/subject_details_updating.dart';
 import 'package:u_22_procon/todo.dart';
 import 'package:u_22_procon/class_timetable.dart';
 import 'package:u_22_procon/subject_details.dart';
@@ -76,6 +77,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (BuildContext context, GoRouterState state) {
                       return const Subject_settings();
+                    }),
+                GoRoute(
+                    path: 'subject_details_updating',
+                    // parentNavigatorKey: rootNavigatorKey,
+                    builder: (BuildContext context, GoRouterState state) {
+                      return const SubjectDetailsUpdating();
                     }),
               ]),
           GoRoute(
