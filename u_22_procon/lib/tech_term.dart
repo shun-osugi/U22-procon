@@ -125,9 +125,8 @@ class _TechTermPageState extends State<TechTermPage> {
               return Center(
                 child: Container(
                   decoration: const BoxDecoration(
-                    color: Color.fromARGB(255, 255, 255, 255),
                     border: Border(
-                      bottom: BorderSide(color: Colors.grey, width: 1),
+                      bottom: BorderSide(color: Colors.grey, width: 2),
                     ),
                   ),
                   child: ListTile(
