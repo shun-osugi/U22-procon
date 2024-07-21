@@ -15,6 +15,8 @@ class SubjectEval extends StatefulWidget {
 class SubjectEvalmain extends State<SubjectEval> {
   String? dropdownValue = "2"; //口コミプルダウンリスト値
   String? subject = 'オペレーティングシステム';
+  TextEditingController reviewtitle = TextEditingController();
+  TextEditingController reviewcontent = TextEditingController();
   List<String> evaltitle = []; //口コミのタイトル
   List<String> evaldate = []; //口コミの追加日
   List<int> evalgood = []; //口コミの追加日
@@ -69,7 +71,6 @@ class SubjectEvalmain extends State<SubjectEval> {
         title: const Text('科目評価画面'),
       ),
 
-      //状態管理をする
       body: Center(child: Column(children: [
         const SizedBox(height: 30),
 
@@ -349,6 +350,103 @@ class SubjectEvalmain extends State<SubjectEval> {
           ),
         ),],
       ),),
+
+      //口コミ追加ボタン
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (BuildContext context) {
+              return StatefulBuilder(
+                //状態確認
+                builder: (BuildContext context, StateSetter setState) {
+                  return Container(
+                    height: MediaQuery.of(context).size.height / 2,
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: <Widget>[
+                        TextField(
+                          decoration: const InputDecoration(labelText: '口コミタイトル'),
+                          controller: reviewtitle,
+                        ),
+                        const SizedBox(height: 20),
+                        TextField(
+                          decoration: const InputDecoration(labelText: '口コミ内容'),
+                          controller: reviewcontent,
+                        ),
+                        const SizedBox(height: 20),
+                        // ElevatedButton(
+                        //   onPressed: () async {
+                        //     String term = _termName.text;
+
+                        //     // 確認メッセージのポップアップ表示
+                        //     bool shouldSave = await showDialog<bool>(
+                        //       context: context,
+                        //       builder: (BuildContext context) {
+                        //         return AlertDialog(
+                        //           title: Text('この内容で保存しますか？'),
+                        //           content: Column(
+                        //             mainAxisSize: MainAxisSize.min,
+                        //             children: <Widget>[
+                        //               Text('科目: $selectedCategory'),
+                        //               Text('用語名: $term'),
+                        //               Text('説明: $description'),
+                        //             ],
+                        //           ),
+                        //           actions: <Widget>[
+                        //             TextButton(
+                        //               onPressed: () {
+                        //                 Navigator.of(context).pop(false);
+                        //               },
+                        //               child: Text('キャンセル'),
+                        //             ),
+                        //             TextButton(
+                        //               onPressed: () {
+                        //                 Navigator.of(context).pop(true);
+                        //               },
+                        //               child: Text('OK'),
+                        //             ),
+                        //           ],
+                        //         );
+                        //       },
+                        //     ) ??
+                        //     false;
+
+                        //     if (shouldSave) {
+                        //       //ポップアップで「OK」を押したら保存
+                        //       await FirebaseFirestore.instance
+                        //           .collection('tech_term')
+                        //           .doc()
+                        //           .set({
+                        //         '科目': selectedCategory,
+                        //         '用語': term,
+                        //         '説明': description,
+                        //         'MY用語': _isChecked,
+                        //       });
+
+                        //       // 入力フィールドとチェックボックスの状態をクリア
+                        //       setState(() {
+                        //         _termName.clear();
+                        //         _description.clear();
+                        //         _isChecked = true;
+                        //       });
+
+                        //       Navigator.pop(context); // モーダルシートを閉じる
+                        //     }
+                        //   },
+                        //   child: Text('保存'),
+                        // ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
