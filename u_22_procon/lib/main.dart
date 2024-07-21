@@ -43,8 +43,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         routes: <RouteBase>[
           GoRoute(
             path: '/todo',
-            builder: (BuildContext context, GoRouterState state) {
-              return const Todo();
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              return buildTransitionPage(child: const Todo());
             },
             // routes: <RouteBase>[
             //   GoRoute(
@@ -57,8 +57,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
               path: '/classTimetable',
-              builder: (BuildContext context, GoRouterState state) {
-                return const ClassTimetable();
+              pageBuilder: (BuildContext context, GoRouterState state) {
+                return buildTransitionPage(child: const ClassTimetable());
               },
               routes: <RouteBase>[
                 GoRoute(
@@ -87,8 +87,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               ]),
           GoRoute(
             path: '/subject_term',
-            builder: (BuildContext context, GoRouterState state) {
-              return const SubjectTerm();
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              return buildTransitionPage(child: const SubjectTerm());
             },
             routes: <RouteBase>[
               GoRoute(
@@ -104,6 +104,18 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+CustomTransitionPage<T> buildTransitionPage<T>({
+  required Widget child,
+}) {
+  return CustomTransitionPage<T>(
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return child;
+    },
+    transitionDuration: const Duration(milliseconds: 0),
+  );
+}
 
 //main関数
 main() async {
