@@ -427,29 +427,33 @@ class ListWidget extends ConsumerWidget {
             ),
           ),
           child: ListView.builder(
+            key: const ValueKey('techTermListView'), // Keyを追加
             itemCount: techTermDocs.length,
             //itemCount分表示
             itemBuilder: (context, index) {
               var data = techTermDocs[index].data() as Map<String, dynamic>;
               var term = data['用語'] ?? 'No term';
               var checkbox = data['MY用語'] ?? false;
+              var registrationNumber = data['登録数'] ?? 0;
               var docId = techTermDocs[index].id;
 
               //チェックボックスが押された時の関数
-              void onChangedCheckbox(bool? value) {
+              void onChangedCheckbox(bool? value) async {
                 final newSet = Set.of(checkedIds);
                 if (value == true) {
                   newSet.add(docId);
+                  registrationNumber += 1;
                 } else {
                   newSet.remove(docId);
+                  registrationNumber -= 1;
                 }
                 ref.read(checkedIdsProvider.notifier).state = newSet;
 
                 // Firestoreに状態を保存するコードを追加
-                FirebaseFirestore.instance
+                await FirebaseFirestore.instance
                     .collection('tech_term')
                     .doc(docId)
-                    .update({'MY用語': value});
+                    .update({'MY用語': value, '登録数': registrationNumber});
               }
 
               return Container(
@@ -462,30 +466,21 @@ class ListWidget extends ConsumerWidget {
                   ),
                 ),
 
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                      child: Checkbox(
-                        value: checkedIds.contains(docId) || checkbox,
-                        onChanged: onChangedCheckbox,
-                      ),
+                child: ListTile(
+                  // mainAxisAlignment: MainAxisAlignment.start,
+                  leading: Checkbox(
+                    value: checkedIds.contains(docId) || checkbox,
+                    onChanged: onChangedCheckbox,
+                  ),
+                  title: Text(
+                    '$term',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
                     ),
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                      width: 200,
-                      child: Text(
-                        '$term',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
-                  ],
+                    textAlign: TextAlign.left,
+                  ),
                 ),
               );
             },
