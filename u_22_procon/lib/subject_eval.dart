@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/widgets.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+class review {//口コミ
+  String title; //タイトル
+  DateTime date; //追加日
+  int good; //いいね数
+  String content; //内容
+  review(this.title,this.date,this.good,this.content);
+}
+
 class SubjectEval extends StatelessWidget {
   const SubjectEval({super.key});
 
-  static String? dropdownValue = "2"; //口コミプルダウンリスト値
+  static String? dropdownValue = "1"; //口コミプルダウンリスト値
   static String? subject = 'オペレーティングシステム'; //科目
   static TextEditingController reviewtitle = TextEditingController(); //口コミタイトル
   static TextEditingController reviewcontent = TextEditingController(); //口コミ内容
-  static List<String> evaltitle = []; //口コミのタイトル
-  static List<String> evaldate = []; //口コミの追加日
-  static List<int> evalgood = []; //口コミの追加日
-  static List<String> evalcontent = []; //口コミの内容
+  static List<review> reviews = []; //口コミ一覧リスト
   static StateSetter? setreview; //口コミの一覧の状態を管理（ソートなどで更新されるから）
-  static var cont = OverlayPortalController();
 
   @override
   Widget build(BuildContext context)
@@ -165,7 +170,7 @@ class SubjectEval extends StatelessWidget {
           ),
 
           //口コミリスト
-          child: reviews(),
+          child: disreviews(),
         ),
 
         
@@ -228,8 +233,8 @@ class SubjectEval extends StatelessWidget {
                   color: Colors.black,
                 ),
                 for(var i=value;i<5;i++) const Icon(
-                  color: Colors.white,
                   Icons.star,
+                  color: Colors.white,
                 ),
               ],
             ),
@@ -295,7 +300,7 @@ class SubjectEval extends StatelessWidget {
   }
 
   //口コミ一覧
-  StatefulBuilder reviews(){
+  StatefulBuilder disreviews(){
     return StatefulBuilder(//状態を管理
       builder: (BuildContext context, StateSetter setState) {
         setreview = setState;//口コミ一覧を別のところからも更新できるようにする
@@ -327,20 +332,26 @@ class SubjectEval extends StatelessWidget {
               return const Text('MY用語がありません');
             }
 
-            evaltitle.clear();
-            evaldate.clear();
-            evalgood.clear();
-            evalcontent.clear();
+            reviews.clear();
             for(var i=0; i<docs.length; i++){
               var data = docs[i].data() as Map<String, dynamic>;
-              evaltitle.add(data['口コミタイトル'] ?? 'No title');
-              evaldate.add(data['追加日'] ?? 'No date');
-              evalgood.add(data['いいね数'] ?? 0);
-              evalcontent.add(data['口コミ内容'] ?? 'No content');
+              reviews.add(review(
+                data['口コミタイトル'] ?? 'No title',
+                data['追加日'].toDate() ?? DateTime(0),
+                data['いいね数'] ?? 0,
+                data['口コミ内容'] ?? 'No content'
+              ));
+            }
+            //sort
+            if(dropdownValue == "1"){ //新着順でソート（降順）
+              reviews.sort((a,b) => b.date.compareTo(a.date));
+            }
+            else{ //いいね順でソート（降順）
+              reviews.sort((a,b) => b.good.compareTo(a.good));
             }
 
             return ListView.builder(
-              itemCount: evaltitle.length,
+              itemCount: reviews.length,
               //itemCount分表示
               itemBuilder: (context, index) {
                 return GestureDetector(
@@ -349,9 +360,9 @@ class SubjectEval extends StatelessWidget {
                       context: context,
                       builder: (BuildContext context) {
                         return SimpleDialog(
-                          title: Text(evaltitle[index]),
+                          title: Text(reviews[index].title),
                           children: [
-                            Text(evalcontent[index]),
+                            Text(reviews[index].content),
                           ],
                         );
                       },
@@ -374,7 +385,7 @@ class SubjectEval extends StatelessWidget {
                           width: 200,
                           alignment: Alignment.centerLeft,//左寄せ
                           child: Text(
-                            evaltitle[index],
+                            reviews[index].title,
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
@@ -388,7 +399,7 @@ class SubjectEval extends StatelessWidget {
                           width: 100,
                           alignment: Alignment.centerLeft,//左寄せ
                           child: Text(
-                            evaldate[index],
+                            DateFormat('yyyy/MM/dd').format(reviews[index].date),
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
@@ -401,11 +412,44 @@ class SubjectEval extends StatelessWidget {
                         Container(
                           width: 40,
                           alignment: Alignment.centerLeft,//左寄せ
-                          child: const Icon(
-                            Icons.thumb_up,
-                            color: Colors.pink,
-                            size: 24.0,
-                          ),
+                          child: Stack(children:[
+                            //いいね数アイコン
+                            const Align(
+                              alignment: Alignment(0, 0),
+                              child: Icon(
+                                Icons.thumb_up,
+                                color: Colors.black,
+                                size: 24.0,
+                              ),
+                            ),
+                            //いいね数
+                            Align(
+                              alignment: const Alignment(1, 1),
+                              child: Container(
+                                width: 20,
+                                height: 20,
+                                alignment: Alignment.topCenter,
+                                decoration: BoxDecoration(//丸
+                                  color: const Color.fromARGB(255, 255, 255, 255),
+                                  border: Border.all(
+                                    color: Colors.black,
+                                    width: 2
+                                  ),
+                                  shape: BoxShape.circle,
+                                ),
+                                //数字
+                                child: Text(
+                                  reviews[index].good.toString(),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    // letterSpacing: 1,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ],),
                         ),
                       ],
                     ),
@@ -481,7 +525,7 @@ class SubjectEval extends StatelessWidget {
                       '科目': subject,
                       '口コミタイトル': title,
                       '口コミ内容': content,
-                      '追加日': '2024/07/21',
+                      '追加日': Timestamp.fromDate(DateTime.now()),
                       'いいね数': 0,
                     });
 
