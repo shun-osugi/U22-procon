@@ -10,7 +10,9 @@ class review {//口コミ
   DateTime date; //追加日
   int good; //いいね数
   String content; //内容
-  review(this.title,this.date,this.good,this.content);
+  String id; //datebaseid
+  bool isgood; //いいねを押したかどうか
+  review(this.title,this.date,this.good,this.content,this.id,this.isgood);
 }
 
 class SubjectEval extends StatelessWidget {
@@ -339,7 +341,9 @@ class SubjectEval extends StatelessWidget {
                 data['口コミタイトル'] ?? 'No title',
                 data['追加日'].toDate() ?? DateTime(0),
                 data['いいね数'] ?? 0,
-                data['口コミ内容'] ?? 'No content'
+                data['口コミ内容'] ?? 'No content',
+                docs[i].id,
+                false //ユーザーによって変更？
               ));
             }
             //sort
@@ -409,48 +413,7 @@ class SubjectEval extends StatelessWidget {
                           ),
                         ),
                         //いいね数
-                        Container(
-                          width: 40,
-                          alignment: Alignment.centerLeft,//左寄せ
-                          child: Stack(children:[
-                            //いいね数アイコン
-                            const Align(
-                              alignment: Alignment(0, 0),
-                              child: Icon(
-                                Icons.thumb_up,
-                                color: Colors.black,
-                                size: 24.0,
-                              ),
-                            ),
-                            //いいね数
-                            Align(
-                              alignment: const Alignment(1, 1),
-                              child: Container(
-                                width: 20,
-                                height: 20,
-                                alignment: Alignment.topCenter,
-                                decoration: BoxDecoration(//丸
-                                  color: const Color.fromARGB(255, 255, 255, 255),
-                                  border: Border.all(
-                                    color: Colors.black,
-                                    width: 2
-                                  ),
-                                  shape: BoxShape.circle,
-                                ),
-                                //数字
-                                child: Text(
-                                  reviews[index].good.toString(),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    // letterSpacing: 1,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                          ],),
-                        ),
+                        goodbutton(index),
                       ],
                     ),
                   ),
@@ -458,6 +421,67 @@ class SubjectEval extends StatelessWidget {
               }
             );
           }
+        );
+      }
+    );
+  }
+
+  //いいねボタン
+  StatefulBuilder goodbutton(int index){
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return Container(
+          width: 40,
+          alignment: Alignment.centerLeft,//左寄せ
+          child: GestureDetector(
+            onTap: () async {
+              //いいねしているか指定ないかを反転
+              reviews[index].isgood = !reviews[index].isgood;
+              await FirebaseFirestore.instance.collection('reviews').doc(reviews[index].id).update({
+                'いいね数': reviews[index].good + (reviews[index].isgood ? 1:0),
+              });
+              setState((){});
+            },
+            child: Stack(children:[//重ねて表示
+              //いいね数アイコン
+              Align(
+                alignment: const Alignment(0, 0),
+                child: Icon(
+                  Icons.thumb_up,
+                  //いいねの状態で色分け
+                  color: reviews[index].isgood ? Colors.red:Colors.black,
+                  size: 24.0,
+                ),
+              ),
+              //いいね数
+              Align(
+                alignment: const Alignment(1, 1),
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  alignment: Alignment.topCenter,
+                  decoration: BoxDecoration(//丸
+                    color: const Color.fromARGB(255, 255, 255, 255),
+                    border: Border.all(
+                      color: Colors.black,
+                      width: 2
+                    ),
+                    shape: BoxShape.circle,
+                  ),
+                  //数字
+                  child: Text(
+                    '${reviews[index].good + (reviews[index].isgood ? 1:0)}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      // letterSpacing: 1,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ],),
+          ),
         );
       }
     );
