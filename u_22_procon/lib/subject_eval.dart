@@ -24,10 +24,15 @@ class SubjectEval extends StatelessWidget {
   static TextEditingController reviewcontent = TextEditingController(); //口コミ内容
   static List<review> reviews = []; //口コミ一覧リスト
   static StateSetter? setreview; //口コミの一覧の状態を管理（ソートなどで更新されるから）
+  static double screenwidth = 0;
+  static double screenheight = 0;
 
   @override
   Widget build(BuildContext context)
   {
+    screenwidth = MediaQuery.of(context).size.width;
+    screenheight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.pink[100],
 
@@ -37,22 +42,21 @@ class SubjectEval extends StatelessWidget {
       ),
 
       body: Center(child: Column(children: [
-        const SizedBox(height: 30),
+        SizedBox(height: screenheight/50),
 
         //科目評価の枠組み
         Container(
-          width:  330,
-          height: 200,
+          width:  screenwidth/1.2,
+          height: screenheight/4,
           // color: const Color.fromARGB(255, 255, 255, 255),
           decoration: BoxDecoration(//角を丸くする
-            color: const Color.fromARGB(255, 255, 255, 255),
+            color: Colors.white,
             border: Border.all(
               color: Colors.grey,
               width: 2
             ),
             borderRadius: BorderRadius.circular(10),
           ),
-          padding: const EdgeInsets.all(5.0),
 
           //各評価
           child: FutureBuilder<QuerySnapshot>(
@@ -101,13 +105,13 @@ class SubjectEval extends StatelessWidget {
             }
           ),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: screenheight/70),
 
         //口コミ
         //上のバー
         Container(
-          width:  380,
-          height: 60,
+          width:  screenwidth/1.2,
+          height: screenheight/15,
 
           decoration: BoxDecoration(//角を丸くする
             color: Colors.grey[350],
@@ -122,18 +126,17 @@ class SubjectEval extends StatelessWidget {
               topRight: Radius.circular(10),
             ),
           ),
-          padding: const EdgeInsets.all(5.0),
 
           //各widget
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              const SizedBox(width: 80),
+              SizedBox(width: screenwidth/7),
 
               //テキスト
               Container(
-                width:  100,
-                height: 40,
+                width:  screenwidth/4,
+                height: screenheight/15,
                 alignment: Alignment.center,//左寄せ
                 child: const Text(
                   'みんな口コミ',
@@ -154,8 +157,8 @@ class SubjectEval extends StatelessWidget {
 
         //口コミのリスト一覧
         Container(
-          width:  380,
-          height: 180,
+          width:  screenwidth/1.2,
+          height: screenheight/2.5,
 
           decoration: const BoxDecoration(//角を丸くする
             color: Color.fromARGB(255, 255, 255, 255),
@@ -199,16 +202,16 @@ class SubjectEval extends StatelessWidget {
   //評価欄の各評価項目
   Container  evaltext(String? text,int value){
     return Container(
-      width:  300,
-      height: 40,
+      width:  screenwidth/1.4,
+      height: screenheight/20,
       color: Colors.grey[100],
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           //評価項目
           Container(
-            width:  100,
-            height: 40,
+            width:  screenwidth/4,
+            height: screenheight/20,
             alignment: Alignment.centerLeft,//左寄せ
             child: Text(
               '$text',
@@ -223,20 +226,42 @@ class SubjectEval extends StatelessWidget {
 
           //評価数(星)
           Container(
-            width:  140,
-            height: 40,
-            color: const Color.fromARGB(255, 54, 243, 33),
+            width:  screenwidth/3.5,
+            height: screenheight/20,
             alignment: Alignment.center,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                for(var i=0;i<value;i++) const Icon(
-                  Icons.star,
-                  color: Colors.black,
+                for(var i=0;i<value;i++) SizedBox(
+                  width: screenwidth/20,
+                  height: screenheight/25,
+                  child:Icon(
+                    Icons.star,
+                    color: Colors.black,
+                    size: screenheight / 30,
+                  ),
                 ),
-                for(var i=value;i<5;i++) const Icon(
-                  Icons.star,
-                  color: Colors.white,
+                for(var i=value;i<5;i++) SizedBox(
+                  width: screenwidth/20,
+                  height: screenheight/25,
+                  child:Stack(children: [
+                    Align(
+                      alignment: Alignment.center,
+                      child: Icon(
+                        Icons.star,
+                        color: Colors.black,
+                        size: screenheight / 30,
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Icon(
+                        Icons.star,
+                        color: Colors.white,
+                        size: screenheight / 50,
+                      ),
+                    ),
+                  ],),
                 ),
               ],
             ),
@@ -252,7 +277,7 @@ class SubjectEval extends StatelessWidget {
     return StatefulBuilder(//状態を管理
       builder: (BuildContext context, StateSetter setState) {
         return SizedBox(
-          width: 80,//104.8px
+          width: screenwidth/7,//104.8px
           child: DropdownButton<String>(
             value: dropdownValue,
             isExpanded: true,
@@ -364,17 +389,30 @@ class SubjectEval extends StatelessWidget {
                       context: context,
                       builder: (BuildContext context) {
                         return SimpleDialog(
+                          titleTextStyle: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                          titlePadding: const EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 10.0),
                           title: Text(reviews[index].title),
+                          contentPadding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 15.0),
                           children: [
-                            Text(reviews[index].content),
+                            Text(
+                              reviews[index].content,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                letterSpacing: 1,
+                              ),
+                            ),
                           ],
                         );
                       },
                     );
                   },
                   child: Container(
-                    width:  376,
-                    height: 40,
+                    width:  screenwidth/1.2,
+                    height: screenheight/15,
                     decoration: const BoxDecoration(
                       border: Border(
                         bottom: BorderSide(color: Colors.grey, width: 2),
@@ -386,10 +424,10 @@ class SubjectEval extends StatelessWidget {
                       children: [
                         //口コミタイトル
                         Container(
-                          width: 200,
+                          width: screenwidth/2.2,
                           alignment: Alignment.centerLeft,//左寄せ
                           child: Text(
-                            reviews[index].title,
+                            (reviews[index].title.length >= 14 ? reviews[index].title.substring(0,10)+'...': reviews[index].title),
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
@@ -398,9 +436,10 @@ class SubjectEval extends StatelessWidget {
                             textAlign: TextAlign.left,
                           ),
                         ),
+                        SizedBox(width: screenwidth/50),
                         //追加日
                         Container(
-                          width: 100,
+                          width: screenwidth/5,
                           alignment: Alignment.centerLeft,//左寄せ
                           child: Text(
                             DateFormat('yyyy/MM/dd').format(reviews[index].date),
@@ -431,7 +470,7 @@ class SubjectEval extends StatelessWidget {
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
         return Container(
-          width: 40,
+          width: screenwidth/10,
           alignment: Alignment.centerLeft,//左寄せ
           child: GestureDetector(
             onTap: () async {
@@ -450,21 +489,22 @@ class SubjectEval extends StatelessWidget {
                   Icons.thumb_up,
                   //いいねの状態で色分け
                   color: reviews[index].isgood ? Colors.red:Colors.black,
-                  size: 24.0,
+                  size: 15 + screenwidth * screenheight / 30000,
                 ),
               ),
               //いいね数
               Align(
-                alignment: const Alignment(1, 1),
+                //左：横方向，右：縦方向
+                alignment: const Alignment(0.8, 1),
                 child: Container(
-                  width: 20,
-                  height: 20,
-                  alignment: Alignment.topCenter,
+                  width: screenwidth/25,
+                  height: screenheight/25,
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(//丸
                     color: const Color.fromARGB(255, 255, 255, 255),
                     border: Border.all(
                       color: Colors.black,
-                      width: 2
+                      width: 1.5
                     ),
                     shape: BoxShape.circle,
                   ),
@@ -492,7 +532,7 @@ class SubjectEval extends StatelessWidget {
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
         return Container(
-          height: MediaQuery.of(context).size.height / 2,
+          height: screenheight/2,
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: <Widget>[
@@ -500,12 +540,14 @@ class SubjectEval extends StatelessWidget {
                 decoration: const InputDecoration(labelText: '口コミタイトル'),
                 controller: reviewtitle,
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: screenheight/30),
               TextField(
                 decoration: const InputDecoration(labelText: '口コミ内容'),
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
                 controller: reviewcontent,
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: screenheight/30),
               ElevatedButton(
                 onPressed: () async {
                   String title = reviewtitle.text;
