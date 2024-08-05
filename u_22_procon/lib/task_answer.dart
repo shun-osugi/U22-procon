@@ -5,14 +5,14 @@ import 'package:flutter/widgets.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class review {//口コミ
+class task {//口コミ
   String title; //タイトル
   DateTime date; //追加日
   int good; //いいね数
   String content; //内容
   String id; //datebaseid
   bool isgood; //いいねを押したかどうか
-  review(this.title,this.date,this.good,this.content,this.id,this.isgood);
+  task(this.title,this.date,this.good,this.content,this.id,this.isgood);
 }
 
 class TaskAnswer extends StatelessWidget {
@@ -22,7 +22,7 @@ class TaskAnswer extends StatelessWidget {
   static String? subject = 'オペレーティングシステム'; //科目
   static TextEditingController reviewtitle = TextEditingController(); //口コミタイトル
   static TextEditingController reviewcontent = TextEditingController(); //口コミ内容
-  static List<review> reviews = []; //口コミ一覧リスト
+  static List<task> tasks = []; //口コミ一覧リスト
   static StateSetter? setreview; //口コミの一覧の状態を管理（ソートなどで更新されるから）
   static double screenwidth = 0;
   static double screenheight = 0;
@@ -38,75 +38,11 @@ class TaskAnswer extends StatelessWidget {
 
       //ポップアップ（科目評価）
       appBar: AppBar(
-        title: const Text('科目評価画面'),
+        title: const Text('課題解答例画面'),
       ),
 
       body: Center(child: Column(children: [
         SizedBox(height: screenheight/50),
-
-        //科目評価の枠組み
-        Container(
-          width:  screenwidth/1.2,
-          height: screenheight/4,
-          // color: const Color.fromARGB(255, 255, 255, 255),
-          decoration: BoxDecoration(//角を丸くする
-            color: Colors.white,
-            border: Border.all(
-              color: Colors.grey,
-              width: 2
-            ),
-            borderRadius: BorderRadius.circular(10),
-          ),
-
-          //各評価
-          child: FutureBuilder<QuerySnapshot>(
-            // Firestore コレクションの参照を取得
-            future: FirebaseFirestore.instance.collection('eval').get(),
-            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                // 1. データが読み込まれるまでの間、ローディングインジケーターを表示
-                return const CircularProgressIndicator();
-              }
-              if (snapshot.hasError) {
-                // 2. エラーが発生した場合、エラーメッセージを表示
-                return Text('Error: ${snapshot.error}');
-              }
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                // 3. データが存在しない場合、メッセージを表示
-                return const Text('No data found');
-              }
-
-              //MY用語にtrueが格納されてるデータを探す
-              List<DocumentSnapshot> docs = snapshot.data!.docs.where((doc) {
-                var data = doc.data() as Map<String, dynamic>;
-                return data['科目'] == subject;
-              }).toList();
-
-              if (docs.isEmpty) {
-                // フィルタリングされた結果が空の場合、メッセージを表示
-                return const Text('MY用語がありません');
-              }
-
-              var data = docs[0].data() as Map<String, dynamic>;
-              var satis = data['満足度'] ?? 'No satis';
-              var credit = data['単位取得度'] ?? 'No credit';
-              var content = data['内容の難しさ'] ?? 'No content';
-              var task = data['課題の多さ'] ?? 'No task';
-
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,//余白を揃える
-                children: [
-                  evaltext('満足度', satis),
-                  evaltext('単位取得度', credit),
-                  evaltext('内容の難しさ', content),
-                  evaltext('課題の多さ', task),
-                ],
-              );
-            }
-          ),
-        ),
-        SizedBox(height: screenheight/70),
-
         //口コミ
         //上のバー
         Container(
@@ -131,7 +67,7 @@ class TaskAnswer extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              SizedBox(width: screenwidth/7),
+              SizedBox(width: screenwidth/6),
 
               //テキスト
               Container(
@@ -139,7 +75,7 @@ class TaskAnswer extends StatelessWidget {
                 height: screenheight/15,
                 alignment: Alignment.center,//左寄せ
                 child: const Text(
-                  'みんな口コミ',
+                  '課題解答例',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
@@ -158,7 +94,7 @@ class TaskAnswer extends StatelessWidget {
         //口コミのリスト一覧
         Container(
           width:  screenwidth/1.2,
-          height: screenheight/2.5,
+          height: screenheight/1.5,
 
           decoration: const BoxDecoration(//角を丸くする
             color: Color.fromARGB(255, 255, 255, 255),
@@ -199,85 +135,12 @@ class TaskAnswer extends StatelessWidget {
   }
   //main終わり
 
-  //評価欄の各評価項目
-  Container  evaltext(String? text,int value){
-    return Container(
-      width:  screenwidth/1.4,
-      height: screenheight/20,
-      color: Colors.grey[100],
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          //評価項目
-          Container(
-            width:  screenwidth/4,
-            height: screenheight/20,
-            alignment: Alignment.centerLeft,//左寄せ
-            child: Text(
-              '$text',
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
-              ),
-              textAlign: TextAlign.left,
-            ),
-          ),
-
-          //評価数(星)
-          Container(
-            width:  screenwidth/3.5,
-            height: screenheight/20,
-            alignment: Alignment.center,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                for(var i=0;i<value;i++) SizedBox(
-                  width: screenwidth/20,
-                  height: screenheight/25,
-                  child:Icon(
-                    Icons.star,
-                    color: Colors.black,
-                    size: screenheight / 30,
-                  ),
-                ),
-                for(var i=value;i<5;i++) SizedBox(
-                  width: screenwidth/20,
-                  height: screenheight/25,
-                  child:Stack(children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: Icon(
-                        Icons.star,
-                        color: Colors.black,
-                        size: screenheight / 30,
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.center,
-                      child: Icon(
-                        Icons.star,
-                        color: Colors.white,
-                        size: screenheight / 50,
-                      ),
-                    ),
-                  ],),
-                ),
-              ],
-            ),
-            // child: Text('$value'),//Icons.star
-          ),
-        ]
-      ),
-    );
-  }
-
   //プルダウンリスト
   StatefulBuilder dropdownlist(){
     return StatefulBuilder(//状態を管理
       builder: (BuildContext context, StateSetter setState) {
         return SizedBox(
-          width: screenwidth/7,//104.8px
+          width: screenwidth/6,//104.8px
           child: DropdownButton<String>(
             value: dropdownValue,
             isExpanded: true,
@@ -333,7 +196,7 @@ class TaskAnswer extends StatelessWidget {
         setreview = setState;//口コミ一覧を別のところからも更新できるようにする
         return FutureBuilder<QuerySnapshot>(
           // Firestore コレクションの参照を取得
-          future: FirebaseFirestore.instance.collection('reviews').get(),
+          future: FirebaseFirestore.instance.collection('tasks').get(),
           builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               // 1. データが読み込まれるまでの間、ローディングインジケーターを表示
@@ -359,28 +222,28 @@ class TaskAnswer extends StatelessWidget {
               return const Text('MY用語がありません');
             }
 
-            reviews.clear();
+            tasks.clear();
             for(var i=0; i<docs.length; i++){
               var data = docs[i].data() as Map<String, dynamic>;
-              reviews.add(review(
-                data['口コミタイトル'] ?? 'No title',
+              tasks.add(task(
+                data['課題タイトル'] ?? 'No title',
                 data['追加日'].toDate() ?? DateTime(0),
                 data['いいね数'] ?? 0,
-                data['口コミ内容'] ?? 'No content',
+                data['課題内容'] ?? 'No content',
                 docs[i].id,
                 false //ユーザーによって変更？
               ));
             }
             //sort
             if(dropdownValue == "1"){ //新着順でソート（降順）
-              reviews.sort((a,b) => b.date.compareTo(a.date));
+              tasks.sort((a,b) => b.date.compareTo(a.date));
             }
             else{ //いいね順でソート（降順）
-              reviews.sort((a,b) => b.good.compareTo(a.good));
+              tasks.sort((a,b) => b.good.compareTo(a.good));
             }
 
             return ListView.builder(
-              itemCount: reviews.length,
+              itemCount: tasks.length,
               //itemCount分表示
               itemBuilder: (context, index) {
                 return GestureDetector(
@@ -395,11 +258,11 @@ class TaskAnswer extends StatelessWidget {
                             letterSpacing: 1,
                           ),
                           titlePadding: const EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 10.0),
-                          title: Text(reviews[index].title),
+                          title: Text(tasks[index].title),
                           contentPadding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 15.0),
                           children: [
                             Text(
-                              reviews[index].content,
+                              tasks[index].content,
                               style: const TextStyle(
                                 fontSize: 12,
                                 letterSpacing: 1,
@@ -427,7 +290,7 @@ class TaskAnswer extends StatelessWidget {
                           width: screenwidth/2.2,
                           alignment: Alignment.centerLeft,//左寄せ
                           child: Text(
-                            (reviews[index].title.length >= 14 ? reviews[index].title.substring(0,10)+'...': reviews[index].title),
+                            (tasks[index].title.length >= 14 ? tasks[index].title.substring(0,10)+'...': tasks[index].title),
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
@@ -442,7 +305,7 @@ class TaskAnswer extends StatelessWidget {
                           width: screenwidth/5,
                           alignment: Alignment.centerLeft,//左寄せ
                           child: Text(
-                            DateFormat('yyyy/MM/dd').format(reviews[index].date),
+                            DateFormat('yyyy/MM/dd').format(tasks[index].date),
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
@@ -475,9 +338,9 @@ class TaskAnswer extends StatelessWidget {
           child: GestureDetector(
             onTap: () async {
               //いいねしているか指定ないかを反転
-              reviews[index].isgood = !reviews[index].isgood;
-              await FirebaseFirestore.instance.collection('reviews').doc(reviews[index].id).update({
-                'いいね数': reviews[index].good + (reviews[index].isgood ? 1:0),
+              tasks[index].isgood = !tasks[index].isgood;
+              await FirebaseFirestore.instance.collection('tasks').doc(tasks[index].id).update({
+                'いいね数': tasks[index].good + (tasks[index].isgood ? 1:0),
               });
               setState((){});
             },
@@ -488,7 +351,7 @@ class TaskAnswer extends StatelessWidget {
                 child: Icon(
                   Icons.thumb_up,
                   //いいねの状態で色分け
-                  color: reviews[index].isgood ? Colors.red:Colors.black,
+                  color: tasks[index].isgood ? Colors.red:Colors.black,
                   size: 15 + screenwidth * screenheight / 30000,
                 ),
               ),
@@ -510,7 +373,7 @@ class TaskAnswer extends StatelessWidget {
                   ),
                   //数字
                   child: Text(
-                    '${reviews[index].good + (reviews[index].isgood ? 1:0)}',
+                    '${tasks[index].good + (tasks[index].isgood ? 1:0)}',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -537,12 +400,12 @@ class TaskAnswer extends StatelessWidget {
           child: Column(
             children: <Widget>[
               TextField(
-                decoration: const InputDecoration(labelText: '口コミタイトル'),
+                decoration: const InputDecoration(labelText: '課題タイトル'),
                 controller: reviewtitle,
               ),
               SizedBox(height: screenheight/30),
               TextField(
-                decoration: const InputDecoration(labelText: '口コミ内容'),
+                decoration: const InputDecoration(labelText: '課題内容'),
                 keyboardType: TextInputType.multiline,
                 maxLines: null,
                 controller: reviewcontent,
@@ -587,10 +450,10 @@ class TaskAnswer extends StatelessWidget {
 
                   if (shouldSave) {
                     //ポップアップで「OK」を押したら保存
-                    await FirebaseFirestore.instance.collection('reviews').doc().set({
+                    await FirebaseFirestore.instance.collection('tasks').doc().set({
                       '科目': subject,
-                      '口コミタイトル': title,
-                      '口コミ内容': content,
+                      '課題タイトル': title,
+                      '課題内容': content,
                       '追加日': Timestamp.fromDate(DateTime.now()),
                       'いいね数': 0,
                     });

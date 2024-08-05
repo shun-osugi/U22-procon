@@ -84,7 +84,7 @@ class SubjectEval extends StatelessWidget {
 
               if (docs.isEmpty) {
                 // フィルタリングされた結果が空の場合、メッセージを表示
-                return const Text('MY用語がありません');
+                return const Text('科目評価がありません');
               }
 
               var data = docs[0].data() as Map<String, dynamic>;
@@ -131,7 +131,7 @@ class SubjectEval extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              SizedBox(width: screenwidth/7),
+              SizedBox(width: screenwidth/6),
 
               //テキスト
               Container(
@@ -139,7 +139,7 @@ class SubjectEval extends StatelessWidget {
                 height: screenheight/15,
                 alignment: Alignment.center,//左寄せ
                 child: const Text(
-                  'みんな口コミ',
+                  'みんなの口コミ',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
@@ -277,7 +277,7 @@ class SubjectEval extends StatelessWidget {
     return StatefulBuilder(//状態を管理
       builder: (BuildContext context, StateSetter setState) {
         return SizedBox(
-          width: screenwidth/7,//104.8px
+          width: screenwidth/6,//104.8px
           child: DropdownButton<String>(
             value: dropdownValue,
             isExpanded: true,
@@ -356,7 +356,7 @@ class SubjectEval extends StatelessWidget {
 
             if (docs.isEmpty) {
               // フィルタリングされた結果が空の場合、メッセージを表示
-              return const Text('MY用語がありません');
+              return const Text('口コミがありません');
             }
 
             reviews.clear();
