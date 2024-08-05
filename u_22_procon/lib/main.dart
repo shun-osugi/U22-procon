@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:u_22_procon/subject_details_updating.dart';
+import 'package:u_22_procon/task_answer.dart';
 import 'package:u_22_procon/todo.dart';
 import 'package:u_22_procon/class_timetable.dart';
 import 'package:u_22_procon/subject_details.dart';
@@ -71,7 +72,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                     path: 'subject_eval',
                     builder: (BuildContext context, GoRouterState state) {
                       return const SubjectEval();
-                    }),
+                  }),
+                GoRoute(
+                    path: 'task_answer',
+                    builder: (BuildContext context, GoRouterState state) {
+                      return const TaskAnswer();
+                  }),
                 GoRoute(
                     path: 'subject_settings',
                     parentNavigatorKey: rootNavigatorKey,
@@ -81,10 +87,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 GoRoute(
                     path: 'subject_details_updating',
                     // parentNavigatorKey: rootNavigatorKey,
-                    builder: (BuildContext context, GoRouterState state) {
-                      return const SubjectDetailsUpdating();
-                    }),
-              ]),
+                    pageBuilder: (BuildContext context, GoRouterState state) {
+                      return buildTransitionPage(child: const SubjectDetailsUpdating());
+                    },
+                ),],),
           GoRoute(
             path: '/subject_term',
             pageBuilder: (BuildContext context, GoRouterState state) {
