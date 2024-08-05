@@ -76,7 +76,7 @@ class SubjectDetailsUpdating extends StatelessWidget {
                     )),
                 GestureDetector(
                     onTap: () {
-                      GoRouter.of(context).go('/classTimetable/subject_eval');
+                      GoRouter.of(context).go('/classTimetable/task_answer');
                     },
                     child: Container(
                       decoration: BoxDecoration(
