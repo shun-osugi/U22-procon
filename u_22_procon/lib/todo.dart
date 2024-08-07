@@ -34,6 +34,11 @@ class _TodoState extends State<Todo> {
     _refreshData();
   }
 
+  void _deleteDocument(DocumentSnapshot doc) async {
+    await FirebaseFirestore.instance.collection('todo').doc(doc.id).delete();
+    _refreshData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,6 +54,8 @@ class _TodoState extends State<Todo> {
               _buildSection(context, '一週間以降'),
               SizedBox(height: 20),
               _buildSection(context, '完了'),
+              SizedBox(height: 20),
+              _buildSection(context, '期限超過'),
             ],
           ),
         ),
@@ -134,8 +141,32 @@ class _TodoState extends State<Todo> {
             var data = doc.data() as Map<String, dynamic>;
             return data['完了'] ?? false;
           }).toList();
+        } else if (filter == '期限超過') {
+          filteredDocs = docs.where((doc) {
+            var data = doc.data() as Map<String, dynamic>;
+            var dueDateStr = data['期限'] ?? '';
+            var isCompleted = data['完了'] ?? false;
+            if (dueDateStr.isNotEmpty && !isCompleted) {
+              DateTime dueDate = DateTime.parse(dueDateStr);
+              return dueDate.isBefore(now);
+            }
+            return false;
+          }).toList();
         } else {
           filteredDocs = docs;
+        }
+
+        // 完了状態かつ期限が過去のものを削除する
+        for (var doc in docs) {
+          var data = doc.data() as Map<String, dynamic>;
+          var dueDateStr = data['期限'] ?? '';
+          var isCompleted = data['完了'] ?? false;
+          if (dueDateStr.isNotEmpty && isCompleted) {
+            DateTime dueDate = DateTime.parse(dueDateStr);
+            if (dueDate.isBefore(now)) {
+              _deleteDocument(doc);
+            }
+          }
         }
 
         return Column(
@@ -181,7 +212,9 @@ class _TodoState extends State<Todo> {
                     task,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: isCompleted ? Colors.grey : Colors.black,
+                      color: isCompleted
+                          ? Colors.grey
+                          : (filter == '期限超過' ? Colors.red : Colors.black),
                       decoration: isCompleted
                           ? TextDecoration.lineThrough
                           : TextDecoration.none,
@@ -232,8 +265,8 @@ class _TodoState extends State<Todo> {
                               child: Text("アルゴリズム・データ構造"),
                             ),
                             DropdownMenuItem(
-                              value: "研究開発リテラシー",
-                              child: Text("研究開発リテラシー"),
+                              value: "プログラミング基礎",
+                              child: Text("プログラミング基礎"),
                             ),
                           ],
                           onChanged: (String? value) {
@@ -243,8 +276,8 @@ class _TodoState extends State<Todo> {
                           },
                         ),
                         TextField(
-                          decoration: InputDecoration(labelText: '課題名'),
                           controller: _workName,
+                          decoration: InputDecoration(labelText: '課題名'),
                         ),
                         SizedBox(height: 20),
                         Row(
