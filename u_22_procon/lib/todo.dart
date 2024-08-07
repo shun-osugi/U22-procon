@@ -26,6 +26,14 @@ class _TodoState extends State<Todo> {
     });
   }
 
+  void _updateCompletionStatus(DocumentSnapshot doc, bool isCompleted) async {
+    await FirebaseFirestore.instance
+        .collection('todo')
+        .doc(doc.id)
+        .update({'完了': isCompleted});
+    _refreshData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -163,6 +171,12 @@ class _TodoState extends State<Todo> {
               child: Card(
                 margin: const EdgeInsets.symmetric(vertical: 8.0),
                 child: ListTile(
+                  leading: Checkbox(
+                    value: isCompleted,
+                    onChanged: (bool? value) {
+                      _updateCompletionStatus(doc, value!);
+                    },
+                  ),
                   title: Text(
                     task,
                     style: TextStyle(
@@ -175,32 +189,6 @@ class _TodoState extends State<Todo> {
                   ),
                   subtitle: Text(
                       'Subject: $subject\nDate: $dateDisplay\nRepeat: $repeat'),
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text('$task\n$subject'),
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(dateDisplay),
-                              Text(remindDisplay),
-                              Text('繰り返し: $repeat'),
-                            ],
-                          ),
-                          actions: <Widget>[
-                            TextButton(
-                              child: Text('閉じる'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
                 ),
               ),
             );
