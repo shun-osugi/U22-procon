@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/widgets.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart'; // 追加：日付フォーマット用
+import 'package:intl/intl.dart';
 
 class Todo extends StatefulWidget {
   const Todo({super.key});
@@ -37,90 +36,11 @@ class _TodoState extends State<Todo> {
         child: Center(
           child: Column(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8.0),
-                width: MediaQuery.of(context).size.width / 1.2,
-                decoration: BoxDecoration(
-                  //角を丸くする
-                  color: const Color.fromARGB(255, 224, 224, 224),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start, // 左寄せに設定
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 9.0), // 左側にパディングを追加
-                      child: Text(
-                        '一週間以内',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
-                    // Cardの表示
-                    _buildCard(context, '一週間以内'),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20), // コンテナ間のスペース
-              Container(
-                padding: const EdgeInsets.all(8.0),
-                width: MediaQuery.of(context).size.width / 1.2,
-                decoration: BoxDecoration(
-                  //角を丸くする
-                  color: const Color.fromARGB(255, 224, 224, 224),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start, // 左寄せに設定
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 9.0), // 左側にパディングを追加
-                      child: Text(
-                        '一週間以降',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
-                    // Cardの表示
-                    _buildCard(context, '一週間以降'),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20), // コンテナ間のスペース
-              Container(
-                padding: const EdgeInsets.all(8.0),
-                width: MediaQuery.of(context).size.width / 1.2,
-                decoration: BoxDecoration(
-                  //角を丸くする
-                  color: const Color.fromARGB(255, 224, 224, 224),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start, // 左寄せに設定
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 9.0), // 左側にパディングを追加
-                      child: Text(
-                        '完了',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
-                    // Cardの表示
-                    _buildCard(context, '完了'),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20), // コンテナ間のスペース
+              _buildSection(context, '一週間以内'),
+              SizedBox(height: 20),
+              _buildSection(context, '一週間以降'),
+              SizedBox(height: 20),
+              _buildSection(context, '完了'),
             ],
           ),
         ),
@@ -130,9 +50,35 @@ class _TodoState extends State<Todo> {
     );
   }
 
-  // DBからデータを取得し、現在のToDoリストを表示する関数
+  Widget _buildSection(BuildContext context, String title) {
+    return Container(
+      padding: const EdgeInsets.all(8.0),
+      width: MediaQuery.of(context).size.width / 1.2,
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 224, 224, 224),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 9.0),
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.left,
+            ),
+          ),
+          _buildCard(context, title),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCard(BuildContext context, String filter) {
-    print('Card is being built');
     return FutureBuilder<QuerySnapshot>(
       future: _todoFuture,
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -147,22 +93,56 @@ class _TodoState extends State<Todo> {
         }
 
         List<DocumentSnapshot> docs = snapshot.data!.docs;
-        print('Docs length: ${docs.length}'); // デバッグ出力
 
-        // フィルタ処理（例: 一週間以内、一週間以降）
-        // ここにフィルタリングロジックを追加する必要があります
+        DateTime now = DateTime.now();
+        DateTime oneWeekFromNow = now.add(Duration(days: 7));
+
+        List<DocumentSnapshot> filteredDocs;
+
+        if (filter == '一週間以内') {
+          filteredDocs = docs.where((doc) {
+            var data = doc.data() as Map<String, dynamic>;
+            var dueDateStr = data['期限'] ?? '';
+            var isCompleted = data['完了'] ?? false;
+            if (dueDateStr.isNotEmpty && !isCompleted) {
+              DateTime dueDate = DateTime.parse(dueDateStr);
+              return dueDate.isAfter(now) && dueDate.isBefore(oneWeekFromNow);
+            }
+            return false;
+          }).toList();
+        } else if (filter == '一週間以降') {
+          filteredDocs = docs.where((doc) {
+            var data = doc.data() as Map<String, dynamic>;
+            var dueDateStr = data['期限'] ?? '';
+            var isCompleted = data['完了'] ?? false;
+            if (dueDateStr.isNotEmpty && !isCompleted) {
+              DateTime dueDate = DateTime.parse(dueDateStr);
+              return dueDate.isAfter(oneWeekFromNow);
+            }
+            return false;
+          }).toList();
+        } else if (filter == '完了') {
+          filteredDocs = docs.where((doc) {
+            var data = doc.data() as Map<String, dynamic>;
+            return data['完了'] ?? false;
+          }).toList();
+        } else {
+          filteredDocs = docs;
+        }
 
         return Column(
-          children: docs.map((doc) {
+          children: filteredDocs.map((doc) {
             var data = doc.data() as Map<String, dynamic>;
             var subject = data['科目'] ?? 'No subject';
             var task = data['課題'] ?? 'No task';
             var dateStr = data['期限'] ?? 'No date';
-            var remindStr = data['リマインド'] ?? 'No date';
+            var remindStr = data['リマインド'] ?? 'No remind';
+            var repeat = data['繰り返し'] ?? 'No repeat';
+            var isCompleted = data['完了'] ?? false;
             String dateDisplay = 'No date';
             try {
               if (dateStr != 'No date') {
-                DateTime date = DateFormat('yyyy-MM-dd HH:mm').parse(dateStr);
+                DateTime date = DateTime.parse(dateStr);
                 dateDisplay = DateFormat('yyyy-MM-dd HH:mm').format(date);
               }
             } catch (e) {
@@ -171,8 +151,7 @@ class _TodoState extends State<Todo> {
             String remindDisplay = 'No remind';
             try {
               if (remindStr != 'No remind') {
-                DateTime remind =
-                    DateFormat('yyyy-MM-dd HH:mm').parse(remindStr);
+                DateTime remind = DateTime.parse(remindStr);
                 remindDisplay = DateFormat('yyyy-MM-dd HH:mm').format(remind);
               }
             } catch (e) {
@@ -188,10 +167,14 @@ class _TodoState extends State<Todo> {
                     task,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: isCompleted ? Colors.grey : Colors.black,
+                      decoration: isCompleted
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
                     ),
                   ),
-                  subtitle: Text('Subject: $subject\nDate: $dateDisplay'),
+                  subtitle: Text(
+                      'Subject: $subject\nDate: $dateDisplay\nRepeat: $repeat'),
                   onTap: () {
                     showDialog(
                       context: context,
@@ -203,6 +186,7 @@ class _TodoState extends State<Todo> {
                             children: [
                               Text(dateDisplay),
                               Text(remindDisplay),
+                              Text('繰り返し: $repeat'),
                             ],
                           ),
                           actions: <Widget>[
@@ -226,7 +210,6 @@ class _TodoState extends State<Todo> {
     );
   }
 
-  // 入力フォームの関数
   Widget _buildFloatingActionButton(BuildContext context) {
     TextEditingController _workName = TextEditingController();
     String? _dropdownValue = "オペレーティングシステム";
@@ -234,6 +217,7 @@ class _TodoState extends State<Todo> {
     TimeOfDay? _selectedTime;
     DateTime? _remindDate;
     TimeOfDay? _remindTime;
+    String? _repeatValue = "なし";
 
     return FloatingActionButton(
       onPressed: () {
@@ -319,10 +303,10 @@ class _TodoState extends State<Todo> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 10),
+                        SizedBox(height: 20),
                         Row(
                           children: [
-                            Text('リマインダー', style: TextStyle(fontSize: 16)),
+                            Text('リマインド', style: TextStyle(fontSize: 16)),
                             SizedBox(width: 10),
                             ElevatedButton(
                               onPressed: () async {
@@ -365,95 +349,125 @@ class _TodoState extends State<Todo> {
                           ],
                         ),
                         SizedBox(height: 20),
+                        Row(
+                          children: [
+                            Text('繰り返し', style: TextStyle(fontSize: 16)),
+                            SizedBox(width: 10),
+                            DropdownButton<String>(
+                              value: _repeatValue,
+                              items: [
+                                DropdownMenuItem(
+                                  value: "なし",
+                                  child: Text("なし"),
+                                ),
+                                DropdownMenuItem(
+                                  value: "毎週",
+                                  child: Text("毎週"),
+                                ),
+                                DropdownMenuItem(
+                                  value: "隔週",
+                                  child: Text("隔週"),
+                                ),
+                              ],
+                              onChanged: (String? value) {
+                                setState(() {
+                                  _repeatValue = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: () async {
-                            String selectedCategory = _dropdownValue ?? "";
-                            String work = _workName.text;
-                            String? selectedDateTime;
-                            if (_selectedDate != null &&
-                                _selectedTime != null) {
-                              DateTime combinedDateTime = DateTime(
-                                _selectedDate!.year,
-                                _selectedDate!.month,
-                                _selectedDate!.day,
-                                _selectedTime!.hour,
-                                _selectedTime!.minute,
+                            if (_workName.text.isEmpty ||
+                                _dropdownValue == null ||
+                                _selectedDate == null ||
+                                _selectedTime == null) {
+                              // 必須フィールドのバリデーションチェック
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('すべての必須フィールドを入力してください。'),
+                                ),
                               );
-                              selectedDateTime = DateFormat('yyyy-MM-dd HH:mm')
-                                  .format(combinedDateTime);
+                              return;
                             }
-                            String? remindDateTime;
+
+                            DateTime combinedDateTime = DateTime(
+                              _selectedDate!.year,
+                              _selectedDate!.month,
+                              _selectedDate!.day,
+                              _selectedTime!.hour,
+                              _selectedTime!.minute,
+                            );
+
+                            DateTime? combinedRemindDateTime;
                             if (_remindDate != null && _remindTime != null) {
-                              DateTime combinedDateTime = DateTime(
+                              combinedRemindDateTime = DateTime(
                                 _remindDate!.year,
                                 _remindDate!.month,
                                 _remindDate!.day,
                                 _remindTime!.hour,
                                 _remindTime!.minute,
                               );
-                              remindDateTime = DateFormat('yyyy-MM-dd HH:mm')
-                                  .format(combinedDateTime);
                             }
 
-                            bool shouldSave = await showDialog<bool>(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: Text('この内容で保存しますか？'),
-                                      content: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: <Widget>[
-                                          Text('科目: $selectedCategory'),
-                                          Text('課題名: $work'),
-                                          Text('期限: $selectedDateTime'),
-                                          Text('リマインド日時: $remindDateTime'),
-                                        ],
-                                      ),
-                                      actions: <Widget>[
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pop(false);
-                                          },
-                                          child: Text('キャンセル'),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pop(true);
-                                          },
-                                          child: Text('OK'),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                ) ??
-                                false;
+                            bool? shouldSave = await showDialog<bool>(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text('この内容で保存しますか？'),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Text('科目: $_dropdownValue'),
+                                      Text('課題名: ${_workName.text}'),
+                                      Text(
+                                          '期限: ${DateFormat('yyyy-MM-dd HH:mm').format(combinedDateTime)}'),
+                                      Text(
+                                          'リマインド日時: ${combinedRemindDateTime != null ? DateFormat('yyyy-MM-dd HH:mm').format(combinedRemindDateTime) : 'なし'}'),
+                                    ],
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop(false);
+                                      },
+                                      child: Text('キャンセル'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop(true);
+                                      },
+                                      child: Text('OK'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
 
-                            if (shouldSave) {
-                              await FirebaseFirestore.instance
-                                  .collection('todo')
-                                  .doc()
-                                  .set({
-                                '科目': selectedCategory,
-                                '課題': work,
-                                '期限': selectedDateTime,
-                                'リマインド': remindDateTime,
-                              });
-
-                              _refreshData();
-
-                              setState(() {
-                                _dropdownValue = "オペレーティングシステム";
-                                _workName.clear();
-                                _selectedDate = null;
-                                _selectedTime = null;
-                                _remindDate = null;
-                                _remindTime = null;
-                              });
-
-                              Navigator.pop(context);
+                            if (shouldSave ?? false) {
+                              // Firebaseにデータを追加
+                              try {
+                                await FirebaseFirestore.instance
+                                    .collection('todo')
+                                    .add({
+                                  '科目': _dropdownValue,
+                                  '課題': _workName.text,
+                                  '期限': combinedDateTime.toIso8601String(),
+                                  'リマインド':
+                                      combinedRemindDateTime?.toIso8601String(),
+                                  '繰り返し': _repeatValue,
+                                  '完了': false,
+                                });
+                                Navigator.of(context).pop();
+                                _refreshData();
+                              } catch (e) {
+                                print('Error adding document: $e');
+                              }
                             }
                           },
-                          child: Text('保存'),
+                          child: const Text('追加'),
                         ),
                       ],
                     ),
