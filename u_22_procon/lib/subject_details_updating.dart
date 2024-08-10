@@ -70,7 +70,61 @@ class SubjectDetailsUpdating extends StatelessWidget {
                               ],
                             ),
                           ),
-                          const Text('更新日時'),
+                          FutureBuilder<QuerySnapshot>(
+                            // Firestore コレクションの参照を取得
+                            future: FirebaseFirestore.instance
+                                .collection('reviews')
+                                .where('追加日')
+                                .orderBy('追加日', descending: true)
+                                .limit(1)
+                                .get(),
+                            builder: (context,
+                                AsyncSnapshot<QuerySnapshot> snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                // 1. データが読み込まれるまでの間、ローディングインジケーターを表示
+                                return const CircularProgressIndicator();
+                              }
+                              if (snapshot.hasError) {
+                                // 2. エラーが発生した場合、エラーメッセージを表示
+                                return Text('Error: ${snapshot.error}');
+                              }
+                              if (!snapshot.hasData ||
+                                  snapshot.data!.docs.isEmpty) {
+                                // 3. データが存在しない場合、メッセージを表示
+                                return const Text('No data found');
+                              }
+
+                              //MY用語にtrueが格納されてるデータを探す
+                              List<DocumentSnapshot> docs =
+                                  snapshot.data!.docs.where((doc) {
+                                var data = doc.data() as Map<String, dynamic>;
+                                return data['科目'] == className;
+                              }).toList();
+
+                              if (docs.isEmpty) {
+                                // フィルタリングされた結果が空の場合、メッセージを表示
+                                return const Text('更新なし');
+                              }
+
+                              // データが存在する場合、UI に表示する
+                              return Column(
+                                children: docs.map<Widget>((doc) {
+                                  var data = doc.data() as Map<String, dynamic>;
+                                  var dateTimestamp =
+                                      data['追加日'] ?? 'No review';
+                                  if (dateTimestamp is Timestamp) {
+                                    DateTime date = dateTimestamp.toDate();
+                                    return Text(
+                                      '最終更新\n$date',
+                                      textAlign: TextAlign.center,
+                                    );
+                                  }
+                                  return const Text('');
+                                }).toList(),
+                              );
+                            },
+                          ),
                         ],
                       ),
                     )),
@@ -95,7 +149,7 @@ class SubjectDetailsUpdating extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          const Text('みんなの評価'),
+                          const Text('課題解答例'),
                           Container(
                             padding: const EdgeInsets.all(4),
                             child: const Column(
@@ -107,7 +161,61 @@ class SubjectDetailsUpdating extends StatelessWidget {
                               ],
                             ),
                           ),
-                          const Text('更新日時')
+                          FutureBuilder<QuerySnapshot>(
+                            // Firestore コレクションの参照を取得
+                            future: FirebaseFirestore.instance
+                                .collection('tasks')
+                                .where('追加日')
+                                .orderBy('追加日', descending: true)
+                                .limit(1)
+                                .get(),
+                            builder: (context,
+                                AsyncSnapshot<QuerySnapshot> snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                // 1. データが読み込まれるまでの間、ローディングインジケーターを表示
+                                return const CircularProgressIndicator();
+                              }
+                              if (snapshot.hasError) {
+                                // 2. エラーが発生した場合、エラーメッセージを表示
+                                return Text('Error: ${snapshot.error}');
+                              }
+                              if (!snapshot.hasData ||
+                                  snapshot.data!.docs.isEmpty) {
+                                // 3. データが存在しない場合、メッセージを表示
+                                return const Text('No data found');
+                              }
+
+                              //MY用語にtrueが格納されてるデータを探す
+                              List<DocumentSnapshot> docs =
+                                  snapshot.data!.docs.where((doc) {
+                                var data = doc.data() as Map<String, dynamic>;
+                                return data['科目'] == className;
+                              }).toList();
+
+                              if (docs.isEmpty) {
+                                // フィルタリングされた結果が空の場合、メッセージを表示
+                                return const Text('更新なし');
+                              }
+
+                              // データが存在する場合、UI に表示する
+                              return Column(
+                                children: docs.map<Widget>((doc) {
+                                  var data = doc.data() as Map<String, dynamic>;
+                                  var dateTimestamp =
+                                      data['追加日'] ?? 'No review';
+                                  if (dateTimestamp is Timestamp) {
+                                    DateTime date = dateTimestamp.toDate();
+                                    return Text(
+                                      '最終更新\n$date',
+                                      textAlign: TextAlign.center,
+                                    );
+                                  }
+                                  return const Text('');
+                                }).toList(),
+                              );
+                            },
+                          ),
                         ],
                       ),
                     )),
