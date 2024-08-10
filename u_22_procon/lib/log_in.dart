@@ -10,11 +10,6 @@ class LogIn extends StatefulWidget {
 
 String _email = ''; //Email
 String _password = ''; //パスワード
-String _userid = ''; //ユーザーID
-String _name = ''; //名前
-String _faculty = '情報工'; //学部:ドロップダウン
-String _department = '情報工'; //学科:ドロップダウン
-int _grade = 1; //学年:ドロップダウン
 
 class _LogIn extends State<LogIn> {
   @override
