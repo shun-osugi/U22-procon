@@ -421,7 +421,10 @@ class ListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<QuerySnapshot>(
-      future: FirebaseFirestore.instance.collection('test').get(),
+      future: FirebaseFirestore.instance
+          .collection('test')
+          .orderBy('test', descending: true)
+          .get(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // 1. データが読み込まれるまでの間、ローディングインジケーターを表示
