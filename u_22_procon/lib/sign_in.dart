@@ -173,6 +173,7 @@ class _LogIn extends State<SignIn> {
                           '名前': _name,
                           '学部': _faculty,
                           '学科': _department,
+                          '学年': _grade,
                           '作成日': Timestamp.fromDate(DateTime.now()),
                         });
 
