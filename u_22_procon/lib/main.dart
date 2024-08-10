@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:u_22_procon/sign_in.dart';
+import 'package:u_22_procon/log_in.dart';
 import 'package:u_22_procon/subject_details_updating.dart';
 import 'package:u_22_procon/task_answer.dart';
 import 'package:u_22_procon/todo.dart';
@@ -57,40 +59,43 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             //   ],
           ),
           GoRoute(
-              path: '/classTimetable',
-              pageBuilder: (BuildContext context, GoRouterState state) {
-                return buildTransitionPage(child: const ClassTimetable());
-              },
-              routes: <RouteBase>[
-                GoRoute(
-                    path: 'subjectDetails',
-                    // parentNavigatorKey: rootNavigatorKey,
-                    builder: (BuildContext context, GoRouterState state) {
-                      return const SubjectDetails();
-                    }),
-                GoRoute(
-                    path: 'subject_eval',
-                    builder: (BuildContext context, GoRouterState state) {
-                      return const SubjectEval();
+            path: '/classTimetable',
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              return buildTransitionPage(child: const ClassTimetable());
+            },
+            routes: <RouteBase>[
+              GoRoute(
+                  path: 'subjectDetails',
+                  // parentNavigatorKey: rootNavigatorKey,
+                  builder: (BuildContext context, GoRouterState state) {
+                    return const SubjectDetails();
                   }),
-                GoRoute(
-                    path: 'task_answer',
-                    builder: (BuildContext context, GoRouterState state) {
-                      return const TaskAnswer();
+              GoRoute(
+                  path: 'subject_eval',
+                  builder: (BuildContext context, GoRouterState state) {
+                    return const SubjectEval();
                   }),
-                GoRoute(
-                    path: 'subject_settings',
-                    parentNavigatorKey: rootNavigatorKey,
-                    builder: (BuildContext context, GoRouterState state) {
-                      return const Subject_settings();
-                    }),
-                GoRoute(
-                    path: 'subject_details_updating',
-                    // parentNavigatorKey: rootNavigatorKey,
-                    pageBuilder: (BuildContext context, GoRouterState state) {
-                      return buildTransitionPage(child: const SubjectDetailsUpdating());
-                    },
-                ),],),
+              GoRoute(
+                  path: 'task_answer',
+                  builder: (BuildContext context, GoRouterState state) {
+                    return const TaskAnswer();
+                  }),
+              GoRoute(
+                  path: 'subject_settings',
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (BuildContext context, GoRouterState state) {
+                    return const Subject_settings();
+                  }),
+              GoRoute(
+                path: 'subject_details_updating',
+                // parentNavigatorKey: rootNavigatorKey,
+                pageBuilder: (BuildContext context, GoRouterState state) {
+                  return buildTransitionPage(
+                      child: const SubjectDetailsUpdating());
+                },
+              ),
+            ],
+          ),
           GoRoute(
             path: '/subject_term',
             pageBuilder: (BuildContext context, GoRouterState state) {
@@ -99,9 +104,25 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             routes: <RouteBase>[
               GoRoute(
                   path: 'tech_term',
-                  parentNavigatorKey: rootNavigatorKey,
+                  // parentNavigatorKey: rootNavigatorKey,
                   builder: (BuildContext context, GoRouterState state) {
                     return const TechTermPage();
+                  }),
+            ],
+          ),
+          //一旦ユーザー登録をここに避難
+          GoRoute(
+            path: '/log_in',
+            // parentNavigatorKey: rootNavigatorKey,
+            pageBuilder: (BuildContext context, GoRouterState state) {
+              return buildTransitionPage(child: const LogIn());
+            },
+            routes: <RouteBase>[
+              GoRoute(
+                  path: 'sign_in',
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (BuildContext context, GoRouterState state) {
+                    return const SignIn();
                   }),
             ],
           ),
@@ -125,18 +146,22 @@ CustomTransitionPage<T> buildTransitionPage<T>({
 
 //main関数
 main() async {
-  //アプリ
-  const app = MyApp();
+  try {
+    //アプリ
+    const app = MyApp();
 
-  //データベース初期化
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+    //データベース初期化
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
 
-  //プロバイダースコープでアプリを囲む
-  const scop = ProviderScope(child: app);
-  runApp(scop);
+    //プロバイダースコープでアプリを囲む
+    const scop = ProviderScope(child: app);
+    runApp(scop);
+  } catch (e) {
+    print('error:$e');
+  }
 }
 
 //プロバイダー
@@ -152,7 +177,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(goRouterProvider);
     return MaterialApp.router(
-      title: 'Flutter Demo',
+      title: 'u22_procon',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
