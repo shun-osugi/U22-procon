@@ -15,6 +15,9 @@ class ClassTimetable extends StatelessWidget {
     String documentId = "test";
     String today = getDay();
     List<String> daysOfWeek = ['月', '火', '水', '木', '金', '土', '日'];
+    String subject;
+    String day;
+    int period;
 
     return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       future:
@@ -153,8 +156,16 @@ class ClassTimetable extends StatelessWidget {
                                         : Colors.cyan,
                                   ),
                                   onPressed: () {
-                                    GoRouter.of(context)
-                                        .go('/classTimetable/subjectDetails');
+                                    if (subjectName == null) {
+                                      day = daysOfWeek[dayIndex];
+                                      period = index + 1;
+                                      GoRouter.of(context)
+                                          .go('/classTimetable/subjectDetails');
+                                    } else {
+                                      subject = subjectName;
+                                      GoRouter.of(context).go(
+                                          '/classTimetable/subject_details_updating');
+                                    }
                                   },
                                 ),
                               );
