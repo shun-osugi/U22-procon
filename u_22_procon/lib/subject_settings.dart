@@ -4,6 +4,8 @@ import 'package:flutter/widgets.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Subject_settings extends StatefulWidget {
   const Subject_settings({super.key});
@@ -15,13 +17,22 @@ class Subject_settings extends StatefulWidget {
 class _Subject_settingsState extends State<Subject_settings> {
   @override
   Widget build(BuildContext context) {
-    String documentId = "test";
+    String? documentId = null;
     List<TimeOfDay?> startTimes = List.filled(7, null);
     List<TimeOfDay?> endTimes = List.filled(7, null);
     List<String> dayOfDisplay = ['平日のみ', '平日＋土', '平日＋土日'];
+
+    if (FirebaseAuth.instance.currentUser != null) {
+      documentId = FirebaseAuth.instance.currentUser?.uid;
+    } else {
+      GoRouter.of(context).go('/log_in');
+    }
+
     return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      future:
-          FirebaseFirestore.instance.collection('users').doc(documentId).get(),
+      future: FirebaseFirestore.instance
+          .collection('students')
+          .doc(documentId)
+          .get(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -38,8 +49,8 @@ class _Subject_settingsState extends State<Subject_settings> {
         int dayNum = data?['表示する曜日'] ?? 5;
         int classNum = data?['最大授業数'] ?? 5;
         for (var i = 0; i < 7; i++) {
-          String startTime = data?['授業時間']['${i + 1}s'] ?? '00:00';
-          String endTime = data?['授業時間']['${i + 1}e'] ?? '00:00';
+          String startTime = data?['授業時間']?['${i + 1}s'] ?? '00:00';
+          String endTime = data?['授業時間']?['${i + 1}e'] ?? '00:00';
           startTimes[i] = TimeOfDay(
               hour: int.parse(startTime.split(':')[0]),
               minute: int.parse(startTime.split(':')[1]));
@@ -54,6 +65,14 @@ class _Subject_settingsState extends State<Subject_settings> {
           appBar: AppBar(
             title: const Text('設定'),
             backgroundColor: Colors.grey[350],
+            actions: <Widget>[
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () {
+                  GoRouter.of(context).go('/class_timetable');
+                },
+              ),
+            ],
           ),
           body: SingleChildScrollView(
             child: Padding(
@@ -102,13 +121,12 @@ class _Subject_settingsState extends State<Subject_settings> {
                                     color: Colors.black),
                                 onPressed: () {
                                   classNum = 5;
-                                  setState(() {
-                                    FirebaseFirestore.instance
-                                        .collection('users')
-                                        .doc(documentId)
-                                        .set({'最大授業数': 5},
-                                            SetOptions(merge: true));
-                                  });
+                                  FirebaseFirestore.instance
+                                      .collection('students')
+                                      .doc(documentId)
+                                      .set({'最大授業数': 5},
+                                          SetOptions(merge: true));
+                                  setState(() {});
                                 },
                               ),
                             ),
@@ -131,13 +149,12 @@ class _Subject_settingsState extends State<Subject_settings> {
                                     color: Colors.black),
                                 onPressed: () {
                                   classNum = 6;
-                                  setState(() {
-                                    FirebaseFirestore.instance
-                                        .collection('users')
-                                        .doc(documentId)
-                                        .set({'最大授業数': 6},
-                                            SetOptions(merge: true));
-                                  });
+                                  FirebaseFirestore.instance
+                                      .collection('students')
+                                      .doc(documentId)
+                                      .set({'最大授業数': 6},
+                                          SetOptions(merge: true));
+                                  setState(() {});
                                 },
                               ),
                             ),
@@ -160,13 +177,12 @@ class _Subject_settingsState extends State<Subject_settings> {
                                     color: Colors.black),
                                 onPressed: () {
                                   classNum = 7;
-                                  setState(() {
-                                    FirebaseFirestore.instance
-                                        .collection('users')
-                                        .doc(documentId)
-                                        .set({'最大授業数': 7},
-                                            SetOptions(merge: true));
-                                  });
+                                  FirebaseFirestore.instance
+                                      .collection('students')
+                                      .doc(documentId)
+                                      .set({'最大授業数': 7},
+                                          SetOptions(merge: true));
+                                  setState(() {});
                                 },
                               ),
                             ),
@@ -209,7 +225,7 @@ class _Subject_settingsState extends State<Subject_settings> {
                                   if (dropdownValue == "平日のみ") {
                                     setState(() {
                                       FirebaseFirestore.instance
-                                          .collection('users')
+                                          .collection('students')
                                           .doc(documentId)
                                           .set({'表示する曜日': 5},
                                               SetOptions(merge: true));
@@ -218,7 +234,7 @@ class _Subject_settingsState extends State<Subject_settings> {
                                   } else if (dropdownValue == "平日＋土") {
                                     setState(() {
                                       FirebaseFirestore.instance
-                                          .collection('users')
+                                          .collection('students')
                                           .doc(documentId)
                                           .set({'表示する曜日': 6},
                                               SetOptions(merge: true));
@@ -227,7 +243,7 @@ class _Subject_settingsState extends State<Subject_settings> {
                                   } else if (dropdownValue == "平日＋土日") {
                                     setState(() {
                                       FirebaseFirestore.instance
-                                          .collection('users')
+                                          .collection('students')
                                           .doc(documentId)
                                           .set({'表示する曜日': 7},
                                               SetOptions(merge: true));
@@ -279,7 +295,7 @@ class _Subject_settingsState extends State<Subject_settings> {
                                           startTimes[index] = timeOfDay;
                                           setState(() {
                                             FirebaseFirestore.instance
-                                                .collection('users')
+                                                .collection('students')
                                                 .doc(documentId)
                                                 .set({
                                               '授業時間': {
@@ -314,7 +330,7 @@ class _Subject_settingsState extends State<Subject_settings> {
                                           endTimes[index] = timeOfDay;
                                           setState(() {
                                             FirebaseFirestore.instance
-                                                .collection('users')
+                                                .collection('students')
                                                 .doc(documentId)
                                                 .set({
                                               '授業時間': {

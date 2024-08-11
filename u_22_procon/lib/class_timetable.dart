@@ -6,19 +6,31 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ClassTimetable extends StatelessWidget {
   const ClassTimetable({super.key});
 
   @override
   Widget build(BuildContext context) {
-    String documentId = "test";
+    String? documentId = null;
     String today = getDay();
     List<String> daysOfWeek = ['月', '火', '水', '木', '金', '土', '日'];
+    String subject;
+    String day;
+    int period;
+
+    if (FirebaseAuth.instance.currentUser != null) {
+      documentId = FirebaseAuth.instance.currentUser?.uid;
+    } else {
+      GoRouter.of(context).go('/log_in');
+    }
 
     return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      future:
-          FirebaseFirestore.instance.collection('users').doc(documentId).get(),
+      future: FirebaseFirestore.instance
+          .collection('students')
+          .doc(documentId)
+          .get(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -27,7 +39,13 @@ class ClassTimetable extends StatelessWidget {
           return Center(child: Text('Error: ${snapshot.error}'));
         }
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return Center(child: Text('No data found'));
+          FirebaseFirestore.instance
+              .collection('students')
+              .doc(documentId)
+              .set({
+            '表示する曜日': 5,
+            '最大授業数': 5,
+          });
         }
 
         // Firestoreのデータを取得
@@ -48,7 +66,7 @@ class ClassTimetable extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.settings),
                   onPressed: () {
-                    GoRouter.of(context).go('/classTimetable/subject_settings');
+                    GoRouter.of(context).go('/subject_settings');
                   },
                 ),
               ],
@@ -153,8 +171,21 @@ class ClassTimetable extends StatelessWidget {
                                         : Colors.cyan,
                                   ),
                                   onPressed: () {
-                                    GoRouter.of(context)
-                                        .go('/classTimetable/subjectDetails');
+                                    if (subjectName == null) {
+                                      day = daysOfWeek[dayIndex];
+                                      period = index + 1;
+                                      GoRouter.of(context).go(
+                                          '/classTimetable/subjectDetails',
+                                          extra: {
+                                            'day': day,
+                                            'period': period
+                                          });
+                                    } else {
+                                      subject = subjectName;
+                                      GoRouter.of(context).go(
+                                          '/classTimetable/subject_details_updating',
+                                          extra: subject);
+                                    }
                                   },
                                 ),
                               );
