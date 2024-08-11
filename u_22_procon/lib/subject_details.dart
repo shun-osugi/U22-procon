@@ -168,6 +168,7 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                     int evaluationMethodPer1 = numberPickerValue1;
                     int evaluationMethodPer2 = numberPickerValue2;
                     int evaluationMethodPer3 = numberPickerValue3;
+                    int registrationNumber = 0;
 
                     // 確認メッセージのポップアップ表示
                     bool shouldSave = await showDialog<bool>(
@@ -227,6 +228,7 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                         '評価方法1の割合': evaluationMethodPer1,
                         '評価方法2の割合': evaluationMethodPer2,
                         '評価方法3の割合': evaluationMethodPer3,
+                        '登録数': registrationNumber,
                       });
 
                       // 入力フィールドの状態をクリア

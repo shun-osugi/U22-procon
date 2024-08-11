@@ -346,6 +346,9 @@ class ReadDB extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('$date曜$period限'),
+                          //
+                          //ここに自分の時間割を変更するコードを記述する必要あり
+                          //
                           IconButton(
                               onPressed: () {
                                 GoRouter.of(context)
