@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 
 class Subject_settings extends StatefulWidget {
   const Subject_settings({super.key});
@@ -56,6 +57,14 @@ class _Subject_settingsState extends State<Subject_settings> {
           appBar: AppBar(
             title: const Text('設定'),
             backgroundColor: Colors.grey[350],
+            actions: <Widget>[
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () {
+                  GoRouter.of(context).go('/class_timetable');
+                },
+              ),
+            ],
           ),
           body: SingleChildScrollView(
             child: Padding(
