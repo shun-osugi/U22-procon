@@ -68,7 +68,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   path: 'subjectDetails',
                   // parentNavigatorKey: rootNavigatorKey,
                   builder: (BuildContext context, GoRouterState state) {
-                    return const SubjectDetails();
+                    final Map<String, dynamic> data =
+                        state.extra as Map<String, dynamic>;
+                    return SubjectDetails(
+                        day: data['day'], period: data['period']);
                   }),
               GoRoute(
                   path: 'subject_eval',
@@ -90,8 +93,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 path: 'subject_details_updating',
                 // parentNavigatorKey: rootNavigatorKey,
                 pageBuilder: (BuildContext context, GoRouterState state) {
+                  final data = state.extra as String; // extraからデータを取得
                   return buildTransitionPage(
-                      child: const SubjectDetailsUpdating());
+                      child: SubjectDetailsUpdating(
+                    subject: data,
+                  ));
                 },
               ),
             ],

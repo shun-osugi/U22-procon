@@ -5,11 +5,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:go_router/go_router.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-const String className = 'オペレーティングシステム';
+import 'package:u_22_procon/class_timetable.dart';
 
 class SubjectDetailsUpdating extends StatelessWidget {
-  const SubjectDetailsUpdating({super.key});
+  final String subject;
+  SubjectDetailsUpdating({required this.subject});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class SubjectDetailsUpdating extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            const ReadDB(),
+            ReadDB(subject: subject),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -99,7 +99,7 @@ class SubjectDetailsUpdating extends StatelessWidget {
                               List<DocumentSnapshot> docs =
                                   snapshot.data!.docs.where((doc) {
                                 var data = doc.data() as Map<String, dynamic>;
-                                return data['科目'] == className;
+                                return data['科目'] == subject;
                               }).toList();
 
                               if (docs.isEmpty) {
@@ -190,7 +190,7 @@ class SubjectDetailsUpdating extends StatelessWidget {
                               List<DocumentSnapshot> docs =
                                   snapshot.data!.docs.where((doc) {
                                 var data = doc.data() as Map<String, dynamic>;
-                                return data['科目'] == className;
+                                return data['科目'] == subject;
                               }).toList();
 
                               if (docs.isEmpty) {
@@ -262,7 +262,9 @@ class SubjectDetailsUpdating extends StatelessWidget {
                         ),
                       ]),
                 ),
-                const ListWidget(),
+                ListWidget(
+                  subject: subject,
+                ),
               ],
             ),
           ],
@@ -273,10 +275,12 @@ class SubjectDetailsUpdating extends StatelessWidget {
 }
 
 class ReadDB extends StatelessWidget {
-  const ReadDB({super.key});
+  final String subject;
+  ReadDB({required this.subject});
 
   @override
   Widget build(BuildContext context) {
+    String className = subject;
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
       margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
@@ -483,7 +487,8 @@ final checkedIdsProvider = StateProvider<Set<String>>((ref) {
 
 //データベースから読み込んた教科をリストにするWidet
 class ListWidget extends ConsumerWidget {
-  const ListWidget({super.key});
+  final String subject;
+  ListWidget({required this.subject});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -509,7 +514,7 @@ class ListWidget extends ConsumerWidget {
         List<DocumentSnapshot> techTermDocs =
             snapshot.data!.docs.where((techTermDocs) {
           var data = techTermDocs.data() as Map<String, dynamic>;
-          return data['科目'] == className;
+          return data['科目'] == subject;
         }).toList();
 
         // データが存在する場合、UI に表示する
