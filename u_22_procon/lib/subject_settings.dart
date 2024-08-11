@@ -5,6 +5,7 @@ import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Subject_settings extends StatefulWidget {
   const Subject_settings({super.key});
@@ -16,10 +17,17 @@ class Subject_settings extends StatefulWidget {
 class _Subject_settingsState extends State<Subject_settings> {
   @override
   Widget build(BuildContext context) {
-    String documentId = "DC7yc4dIzua4TzSp8c7t0NkMSN53";
+    String? documentId = null;
     List<TimeOfDay?> startTimes = List.filled(7, null);
     List<TimeOfDay?> endTimes = List.filled(7, null);
     List<String> dayOfDisplay = ['平日のみ', '平日＋土', '平日＋土日'];
+
+    if (FirebaseAuth.instance.currentUser != null) {
+      documentId = FirebaseAuth.instance.currentUser?.uid;
+    } else {
+      GoRouter.of(context).go('/log_in');
+    }
+
     return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       future: FirebaseFirestore.instance
           .collection('students')
