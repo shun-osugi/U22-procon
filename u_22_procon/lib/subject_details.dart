@@ -6,12 +6,12 @@ import 'package:go_router/go_router.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:numberpicker/numberpicker.dart';
-
-const String tentativeDate = '月';
-const int tentativePeriod = 1;
+import 'package:u_22_procon/class_timetable.dart';
 
 class SubjectDetails extends StatelessWidget {
-  const SubjectDetails({super.key});
+  final String day;
+  final int period;
+  SubjectDetails({required this.day, required this.period});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class SubjectDetails extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            const WritePostDB(),
+            WritePostDB(day: day, period: period),
             Column(
               children: [
                 Container(
@@ -86,7 +86,10 @@ final numberPickerProvider2 = StateProvider<int>((ref) => 0);
 final numberPickerProvider3 = StateProvider<int>((ref) => 0);
 
 class WritePostDB extends ConsumerStatefulWidget {
-  const WritePostDB({super.key});
+  final String day;
+  final int period;
+  const WritePostDB({required this.day, required this.period, Key? key})
+      : super(key: key);
 
   @override
   _WritePostDBState createState() => _WritePostDBState();
@@ -100,9 +103,15 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
   late final TextEditingController _evaluationMethod2;
   late final TextEditingController _evaluationMethod3;
 
+  late String tentativeDate;
+  late int tentativePeriod;
+
   @override
   void initState() {
     super.initState();
+    tentativeDate = widget.day;
+    tentativePeriod = widget.period;
+
     _className = TextEditingController();
     _teacherName = TextEditingController();
     _classPlaceName = TextEditingController();
@@ -155,7 +164,7 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
             //曜日と時限を受け取ってデータベースに格納するコードを記述する必要あり
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('$tentativeDate曜$tentativePeriod限'),
+              Text('$tentativeDate曜$tentativePeriod限'),
               IconButton(
                 onPressed: () async {
                   try {
@@ -179,8 +188,8 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                               content: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: <Widget>[
-                                  const Text('曜日: $tentativeDate'),
-                                  const Text('時限: $tentativePeriod'),
+                                  Text('曜日: $tentativeDate'),
+                                  Text('時限: $tentativePeriod'),
                                   Text('教科名: $className'),
                                   Text('教員名: $teacherName'),
                                   Text('教室: $classPlaceName'),
