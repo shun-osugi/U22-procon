@@ -12,7 +12,7 @@ class ClassTimetable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String documentId = "test";
+    String documentId = "DC7yc4dIzua4TzSp8c7t0NkMSN53";
     String today = getDay();
     List<String> daysOfWeek = ['月', '火', '水', '木', '金', '土', '日'];
     String subject;
@@ -20,8 +20,10 @@ class ClassTimetable extends StatelessWidget {
     int period;
 
     return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      future:
-          FirebaseFirestore.instance.collection('users').doc(documentId).get(),
+      future: FirebaseFirestore.instance
+          .collection('students')
+          .doc(documentId)
+          .get(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
