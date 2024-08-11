@@ -6,18 +6,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ClassTimetable extends StatelessWidget {
   const ClassTimetable({super.key});
 
   @override
   Widget build(BuildContext context) {
-    String documentId = "DC7yc4dIzua4TzSp8c7t0NkMSN53";
+    String? documentId = null;
     String today = getDay();
     List<String> daysOfWeek = ['月', '火', '水', '木', '金', '土', '日'];
     String subject;
     String day;
     int period;
+
+    if (FirebaseAuth.instance.currentUser != null) {
+      documentId = FirebaseAuth.instance.currentUser?.uid;
+    } else {
+      GoRouter.of(context).go('/log_in');
+    }
 
     return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
       future: FirebaseFirestore.instance
@@ -32,7 +39,13 @@ class ClassTimetable extends StatelessWidget {
           return Center(child: Text('Error: ${snapshot.error}'));
         }
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return Center(child: Text('No data found'));
+          FirebaseFirestore.instance
+              .collection('students')
+              .doc(documentId)
+              .set({
+            '表示する曜日': 5,
+            '最大授業数': 5,
+          });
         }
 
         // Firestoreのデータを取得
