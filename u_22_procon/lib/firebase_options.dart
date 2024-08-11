@@ -2,6 +2,7 @@ import 'package:envied/envied.dart';
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
+// import 'env/env.dart';
 import 'env/env.dart';
 
 class DefaultFirebaseOptions {
@@ -38,7 +39,7 @@ class DefaultFirebaseOptions {
 
   static FirebaseOptions get web {
     return FirebaseOptions(
-      apiKey: 'Env.key',
+      apiKey: Env.api_key,
       appId: '1:184050155801:web:f4bfdb1c8374db126e4588',
       messagingSenderId: '184050155801',
       projectId: 'u22procon-bc3be',
@@ -49,7 +50,7 @@ class DefaultFirebaseOptions {
 
   static FirebaseOptions get android {
     return FirebaseOptions(
-      apiKey: 'Env.key',
+      apiKey: Env.api_key,
       appId: '1:184050155801:android:94289f8834387ef16e4588',
       messagingSenderId: '184050155801',
       projectId: 'u22procon-bc3be',
@@ -59,7 +60,7 @@ class DefaultFirebaseOptions {
 
   static FirebaseOptions get ios {
     return FirebaseOptions(
-      apiKey: 'Env.key',
+      apiKey: Env.api_key,
       appId: '1:184050155801:ios:20d82c10d7d042996e4588',
       messagingSenderId: '184050155801',
       projectId: 'u22procon-bc3be',
