@@ -53,7 +53,7 @@ class ClassTimetable extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.settings),
                   onPressed: () {
-                    GoRouter.of(context).go('/classTimetable/subject_settings');
+                    GoRouter.of(context).go('/subject_settings');
                   },
                 ),
               ],

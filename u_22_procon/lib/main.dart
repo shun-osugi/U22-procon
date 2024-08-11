@@ -49,14 +49,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             pageBuilder: (BuildContext context, GoRouterState state) {
               return buildTransitionPage(child: const Todo());
             },
-            // routes: <RouteBase>[
-            //   GoRoute(
-            //     path: 'subjectDetails',
-            //     parentNavigatorKey: rootNavigatorKey,
-            //     builder: (BuildContext context, GoRouterState state) {
-            //       return const SubjectDetails();
-            //     }),
-            //   ],
           ),
           GoRoute(
             path: '/classTimetable',
@@ -82,12 +74,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   path: 'task_answer',
                   builder: (BuildContext context, GoRouterState state) {
                     return const TaskAnswer();
-                  }),
-              GoRoute(
-                  path: 'subject_settings',
-                  parentNavigatorKey: rootNavigatorKey,
-                  builder: (BuildContext context, GoRouterState state) {
-                    return const Subject_settings();
                   }),
               GoRoute(
                 path: 'subject_details_updating',
@@ -116,6 +102,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   }),
             ],
           ),
+          GoRoute(
+              path: '/subject_settings',
+              pageBuilder: (BuildContext context, GoRouterState state) {
+                return buildTransitionPage(child: const Subject_settings());
+              }),
           //一旦ユーザー登録をここに避難
           GoRoute(
             path: '/log_in',
