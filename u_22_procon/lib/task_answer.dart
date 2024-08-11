@@ -1,9 +1,16 @@
+import 'package:file_picker/_internal/file_picker_web.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/widgets.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:file_picker/file_picker.dart';
+//flutter pub add file_picker:^8.0.6
+//flutter pub add firebase_storage:^12.1.0
+//flutter run -d chrome --web-renderer html
 
 class task {//口コミ
   String title; //タイトル
@@ -12,7 +19,8 @@ class task {//口コミ
   String content; //内容
   String id; //datebaseid
   bool isgood; //いいねを押したかどうか
-  task(this.title,this.date,this.good,this.content,this.id,this.isgood);
+  String image; //写真の名前
+  task(this.title,this.date,this.good,this.content,this.id,this.isgood,this.image);
 }
 
 class TaskAnswer extends StatelessWidget {
@@ -26,6 +34,8 @@ class TaskAnswer extends StatelessWidget {
   static StateSetter? setreview; //口コミの一覧の状態を管理（ソートなどで更新されるから）
   static double screenwidth = 0;
   static double screenheight = 0;
+  static String imagename = '';
+  static FilePickerResult? file;
 
   @override
   Widget build(BuildContext context)
@@ -94,7 +104,7 @@ class TaskAnswer extends StatelessWidget {
         //口コミのリスト一覧
         Container(
           width:  screenwidth/1.2,
-          height: screenheight/1.5,
+          height: screenheight/1.6,
 
           decoration: const BoxDecoration(//角を丸くする
             color: Color.fromARGB(255, 255, 255, 255),
@@ -114,7 +124,13 @@ class TaskAnswer extends StatelessWidget {
           child: disreviews(),
         ),
 
-        
+        // FittedBox(
+        //   fit: BoxFit.contain,
+        //   child: Image.network(
+        //     "https://firebasestorage.googleapis.com/v0/b/u22procon-bc3be.appspot.com/o/images%2Fsample.png?alt=media&token=93636749-267d-45df-8535-f7044e9eb32b",
+        //     fit: BoxFit.contain,
+        //   )
+        // )
       ],),),
 
       //口コミ追加ボタン
@@ -219,7 +235,7 @@ class TaskAnswer extends StatelessWidget {
 
             if (docs.isEmpty) {
               // フィルタリングされた結果が空の場合、メッセージを表示
-              return const Text('MY用語がありません');
+              return const Text('課題解答例がありません');
             }
 
             tasks.clear();
@@ -231,7 +247,8 @@ class TaskAnswer extends StatelessWidget {
                 data['いいね数'] ?? 0,
                 data['課題内容'] ?? 'No content',
                 docs[i].id,
-                false //ユーザーによって変更？
+                false, //ユーザーによって変更？
+                data['写真名'] ?? '',
               ));
             }
             //sort
@@ -261,6 +278,19 @@ class TaskAnswer extends StatelessWidget {
                           title: Text(tasks[index].title),
                           contentPadding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 15.0),
                           children: [
+                            Container(
+                              height: 80,
+                              width: 80,
+                              child: tasks[index].image != ''
+                                  ? FittedBox(
+                                    fit: BoxFit.contain,
+                                    child: Image.network(
+                                      tasks[index].image,
+                                      fit: BoxFit.contain,
+                                    )
+                                  )
+                                  : const Text("No data"),
+                            ),
                             Text(
                               tasks[index].content,
                               style: const TextStyle(
@@ -411,6 +441,29 @@ class TaskAnswer extends StatelessWidget {
                 controller: reviewcontent,
               ),
               SizedBox(height: screenheight/30),
+              IconButton(
+                onPressed: () async {
+                  /*Step 1:Pick image*/
+                  //Install image_picker
+                  //Import the corresponding library
+
+                  file = await FilePickerWeb.platform.pickFiles();
+                  //変更の必要あり
+                  // FilePickerResult? file =
+                      // await FilePicker.platform.pickFiles();
+                  
+
+                  // if (file == null) return;
+                  //Import dart:core
+                  // String uniqueFileName =
+                  //     DateTime.now().millisecondsSinceEpoch.toString();
+                  setState((){});
+                },
+                icon: const Icon(Icons.camera_alt)
+              ),
+              file != null 
+              ? Text(file!.files.first.name)
+              : Container(),
               ElevatedButton(
                 onPressed: () async {
                   String title = reviewtitle.text;
@@ -449,6 +502,26 @@ class TaskAnswer extends StatelessWidget {
                   false;
 
                   if (shouldSave) {
+                    try {
+                      if(file != null){
+                        PlatformFile files = file!.files.first;
+                        Reference referenceImageToUpload = FirebaseStorage.instance.ref()
+                        .child('images')
+                        .child(files.name);
+                        //Store the file
+                        await referenceImageToUpload.putData(
+                          files.bytes!,
+                          SettableMetadata(contentType: 'image/png',),
+                        );
+                        //Success: get the download URL
+                        imagename = await referenceImageToUpload.getDownloadURL();
+                      }
+                      // imagename = files.name;
+                    } catch (error) {
+                      print(error);
+                      //Some error occurred
+                    }
+
                     //ポップアップで「OK」を押したら保存
                     await FirebaseFirestore.instance.collection('tasks').doc().set({
                       '科目': subject,
@@ -456,12 +529,15 @@ class TaskAnswer extends StatelessWidget {
                       '課題内容': content,
                       '追加日': Timestamp.fromDate(DateTime.now()),
                       'いいね数': 0,
+                      '写真名': imagename,
                     });
 
                     // 入力フィールドとチェックボックスの状態をクリア
                     setState((){
                       reviewtitle.clear();
                       reviewcontent.clear();
+                      imagename = '';
+                      file = null;
                       setreview!((){});
                     });
 
