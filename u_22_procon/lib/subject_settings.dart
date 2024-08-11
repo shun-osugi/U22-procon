@@ -40,8 +40,8 @@ class _Subject_settingsState extends State<Subject_settings> {
         int dayNum = data?['表示する曜日'] ?? 5;
         int classNum = data?['最大授業数'] ?? 5;
         for (var i = 0; i < 7; i++) {
-          String startTime = data?['授業時間']['${i + 1}s'] ?? '00:00';
-          String endTime = data?['授業時間']['${i + 1}e'] ?? '00:00';
+          String startTime = data?['授業時間']?['${i + 1}s'] ?? '00:00';
+          String endTime = data?['授業時間']?['${i + 1}e'] ?? '00:00';
           startTimes[i] = TimeOfDay(
               hour: int.parse(startTime.split(':')[0]),
               minute: int.parse(startTime.split(':')[1]));
@@ -104,13 +104,12 @@ class _Subject_settingsState extends State<Subject_settings> {
                                     color: Colors.black),
                                 onPressed: () {
                                   classNum = 5;
-                                  setState(() {
-                                    FirebaseFirestore.instance
-                                        .collection('students')
-                                        .doc(documentId)
-                                        .set({'最大授業数': 5},
-                                            SetOptions(merge: true));
-                                  });
+                                  FirebaseFirestore.instance
+                                      .collection('students')
+                                      .doc(documentId)
+                                      .set({'最大授業数': 5},
+                                          SetOptions(merge: true));
+                                  setState(() {});
                                 },
                               ),
                             ),
@@ -133,13 +132,12 @@ class _Subject_settingsState extends State<Subject_settings> {
                                     color: Colors.black),
                                 onPressed: () {
                                   classNum = 6;
-                                  setState(() {
-                                    FirebaseFirestore.instance
-                                        .collection('students')
-                                        .doc(documentId)
-                                        .set({'最大授業数': 6},
-                                            SetOptions(merge: true));
-                                  });
+                                  FirebaseFirestore.instance
+                                      .collection('students')
+                                      .doc(documentId)
+                                      .set({'最大授業数': 6},
+                                          SetOptions(merge: true));
+                                  setState(() {});
                                 },
                               ),
                             ),
@@ -162,13 +160,12 @@ class _Subject_settingsState extends State<Subject_settings> {
                                     color: Colors.black),
                                 onPressed: () {
                                   classNum = 7;
-                                  setState(() {
-                                    FirebaseFirestore.instance
-                                        .collection('students')
-                                        .doc(documentId)
-                                        .set({'最大授業数': 7},
-                                            SetOptions(merge: true));
-                                  });
+                                  FirebaseFirestore.instance
+                                      .collection('students')
+                                      .doc(documentId)
+                                      .set({'最大授業数': 7},
+                                          SetOptions(merge: true));
+                                  setState(() {});
                                 },
                               ),
                             ),
