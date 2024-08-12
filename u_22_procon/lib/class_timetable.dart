@@ -101,7 +101,6 @@ class ClassTimetable extends StatelessWidget {
                       DataColumn(
                         label: Container(
                           width: 5.0,
-                          child: Center(child: Text('')),
                         ),
                       ),
                       ...List.generate(days, (dayIndex) {
@@ -155,8 +154,14 @@ class ClassTimetable extends StatelessWidget {
 
                               return DataCell(
                                 TextButton(
-                                  child: Center(
-                                    child: Text(subjectName ?? 'No Data'),
+                                  child: Container(
+                                    width: columnWidth,
+                                    child: Text(
+                                      subjectName ?? 'No Data',
+                                      softWrap: true,
+                                      overflow: TextOverflow.visible,
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ),
                                   style: TextButton.styleFrom(
                                     padding: EdgeInsets.zero,
