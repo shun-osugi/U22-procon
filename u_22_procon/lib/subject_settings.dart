@@ -65,14 +65,12 @@ class _Subject_settingsState extends State<Subject_settings> {
           appBar: AppBar(
             title: const Text('設定'),
             backgroundColor: Colors.grey[350],
-            actions: <Widget>[
-              IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () {
-                  GoRouter.of(context).go('/class_timetable');
-                },
-              ),
-            ],
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                GoRouter.of(context).go('/classTimetable');
+              },
+            ),
           ),
           body: SingleChildScrollView(
             child: Padding(
