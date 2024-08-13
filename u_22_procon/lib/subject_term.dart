@@ -15,7 +15,7 @@ class _SubjectTermState extends State<SubjectTerm> {
   // チェックボックスの状態管理のためのマップ
   Map<String, bool> _checkboxStates = {};
   final List<String> dayOrder = ['月曜日', '火曜日', '水曜日', '木曜日', '金曜日'];
-  
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -92,7 +92,8 @@ class _SubjectTermState extends State<SubjectTerm> {
                         return Text('No data found');
                       }
 
-                      List<DocumentSnapshot> docs = snapshot.data!.docs.where((doc) {
+                      List<DocumentSnapshot> docs =
+                          snapshot.data!.docs.where((doc) {
                         var data = doc.data() as Map<String, dynamic>;
                         return data['MY用語'] == true;
                       }).toList();
@@ -186,66 +187,71 @@ class _SubjectTermState extends State<SubjectTerm> {
                   ),
                   // 専門用語集タブのコンテンツ
                   StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('students')
-                      .snapshots(),
-                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                    if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
-                    }
-                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return Center(child: Text('No data found'));
-                    }
+                    stream: FirebaseFirestore.instance
+                        .collection('students')
+                        .snapshots(),
+                    builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      }
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return Center(child: Text('No data found'));
+                      }
 
-                    // Firestoreのドキュメントをリスト化
-                    var docs = snapshot.data!.docs;
+                      // Firestoreのドキュメントをリスト化
+                      var docs = snapshot.data!.docs;
 
-                    return ListView(
-                      padding: const EdgeInsets.all(8.0),
-                      children: docs.map((doc) {
-                        var data = doc.data() as Map<String, dynamic>;
-                        List<Widget> subjectWidgets = [];
+                      return ListView(
+                        padding: const EdgeInsets.all(8.0),
+                        children: docs.map((doc) {
+                          var data = doc.data() as Map<String, dynamic>;
+                          List<Widget> subjectWidgets = [];
 
-                        // 曜日ごとに科目を表示し、曜日順に並べ替え
-                        dayOrder.forEach((day) {
-                          if (data.containsKey(day)) {
-                            var subjects = data[day] as Map<String, dynamic>;
-                            subjectWidgets.add(
-                              Container(
-                                color: Colors.grey[300],
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 8, horizontal: 16),
-                                child: Text(
-                                  day,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                          // 曜日ごとに科目を表示し、曜日順に並べ替え
+                          dayOrder.forEach((day) {
+                            if (data.containsKey(day)) {
+                              var subjects = data[day] as Map<String, dynamic>;
+                              subjectWidgets.add(
+                                Container(
+                                  color: Colors.grey[300],
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 8, horizontal: 16),
+                                  child: Text(
+                                    day,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-
-                            subjects.forEach((key, value) {
-                              subjectWidgets.add(
-                                ListTile(
-                                  title: Text('$key : $value'),
-                                ),
                               );
-                            });
-                          }
-                        });
 
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: subjectWidgets,
-                        );
-                      }).toList(),
-                    );
-                  },
-                ),
+                              subjects.forEach((key, value) {
+                                subjectWidgets.add(
+                                  ListTile(
+                                    title: Text('$key : $value'),
+                                    onTap: () {
+                                      GoRouter.of(context).go(
+                                          '/subject_term/tech_term',
+                                          extra: value);
+                                    },
+                                  ),
+                                );
+                              });
+                            }
+                          });
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: subjectWidgets,
+                          );
+                        }).toList(),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
