@@ -133,17 +133,20 @@ class _TechTermPageState extends State<TechTermPage> {
                     leading: Checkbox(
                       value: _checkboxStates[docId],
                       onChanged: (bool? value) {
-                        setState(() {
+                        setState(() async {
                           _checkboxStates[docId] = value ?? false;
                           if (value == true) {
                             registrationNumber += 1;
                           } else {
                             registrationNumber -= 1;
                           }
-                          FirebaseFirestore.instance
+                          await FirebaseFirestore.instance //await追加
                               .collection('tech_term')
                               .doc(docId)
-                              .update({'MY用語': value});
+                              .update({
+                            'MY用語': value,
+                            '登録数': registrationNumber,
+                          });
                         });
                       },
                     ),
