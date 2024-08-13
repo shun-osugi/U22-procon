@@ -95,11 +95,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             },
             routes: <RouteBase>[
               GoRoute(
-                  path: 'tech_term',
-                  // parentNavigatorKey: rootNavigatorKey,
-                  builder: (BuildContext context, GoRouterState state) {
-                    return const TechTermPage();
-                  }),
+                path: 'tech_term',
+                builder: (BuildContext context, GoRouterState state) {
+                  final value = state.extra as String; // 'value' がここで取得される
+                  return TechTermPage(value);
+                },
+              ),
             ],
           ),
           GoRoute(

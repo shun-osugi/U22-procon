@@ -257,13 +257,6 @@ class _SubjectTermState extends State<SubjectTerm> {
             ),
           ]),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            GoRouter.of(context).go('/subject_term/tech_term');
-          },
-          child: const Icon(Icons.add),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       ),
     );
   }

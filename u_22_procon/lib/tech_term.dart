@@ -4,7 +4,9 @@ import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TechTermPage extends StatefulWidget {
-  const TechTermPage({super.key});
+  TechTermPage(this.subjectKey, {super.key});
+
+  String subjectKey;
 
   @override
   _TechTermPageState createState() => _TechTermPageState();
@@ -81,7 +83,10 @@ class _TechTermPageState extends State<TechTermPage> {
           return Text('No data found');
         }
 
-        List<DocumentSnapshot> docs = snapshot.data!.docs;
+        List<DocumentSnapshot> docs = snapshot.data!.docs.where((doc) {
+          var data = doc.data() as Map<String, dynamic>;
+          return data['科目'] == widget.subjectKey;
+        }).toList();
 
         if (docs.isEmpty) {
           return Text('登録されている専門用語はありません');
