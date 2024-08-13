@@ -194,7 +194,7 @@ class _TechTermPageState extends State<TechTermPage> {
   Widget _buildFloatingActionButton(BuildContext context) {
     TextEditingController _termName = TextEditingController();
     TextEditingController _description = TextEditingController();
-    String? _dropdownValue = "オペレーティングシステム";
+    String? _dropdownValue = widget.subjectKey;
     bool _isChecked = true;
     int registrationNumber = 1;
 
@@ -210,27 +210,12 @@ class _TechTermPageState extends State<TechTermPage> {
                   padding: EdgeInsets.all(16.0),
                   child: Column(
                     children: <Widget>[
-                      DropdownButton<String>(
-                        value: _dropdownValue,
-                        items: [
-                          DropdownMenuItem(
-                            value: "オペレーティングシステム",
-                            child: Text("オペレーティングシステム"),
-                          ),
-                          DropdownMenuItem(
-                            value: "アルゴリズム・データ構造",
-                            child: Text("アルゴリズム・データ構造"),
-                          ),
-                          DropdownMenuItem(
-                            value: "研究開発リテラシー",
-                            child: Text("研究開発リテラシー"),
-                          ),
-                        ],
-                        onChanged: (String? value) {
-                          setState(() {
-                            _dropdownValue = value;
-                          });
-                        },
+                      Text(
+                        widget.subjectKey,
+                        style: TextStyle(
+                          fontSize: 16, // もともとの大きさが16なら2倍の32に
+                          fontWeight: FontWeight.bold, // 太字に設定
+                        ),
                       ),
                       TextField(
                         decoration: InputDecoration(labelText: '用語名'),
@@ -257,7 +242,6 @@ class _TechTermPageState extends State<TechTermPage> {
                       ),
                       ElevatedButton(
                         onPressed: () async {
-                          String selectedCategory = _dropdownValue ?? "";
                           String term = _termName.text;
                           String description = _description.text;
                           DateTime registrationTime = DateTime.now();
@@ -270,7 +254,7 @@ class _TechTermPageState extends State<TechTermPage> {
                                     content: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: <Widget>[
-                                        Text('科目: $selectedCategory'),
+                                        Text('科目: $_dropdownValue'),
                                         Text('用語名: $term'),
                                         Text('説明: $description'),
                                       ],
@@ -299,7 +283,7 @@ class _TechTermPageState extends State<TechTermPage> {
                                 .collection('tech_term')
                                 .doc()
                                 .set({
-                              '科目': selectedCategory,
+                              '科目': _dropdownValue,
                               '用語': term,
                               '説明': description,
                               'MY用語': _isChecked,
