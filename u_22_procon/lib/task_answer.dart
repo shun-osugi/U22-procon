@@ -1,4 +1,5 @@
 import 'package:file_picker/_internal/file_picker_web.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:intl/intl.dart';
@@ -24,10 +25,10 @@ class task {//口コミ
 }
 
 class TaskAnswer extends StatelessWidget {
-  const TaskAnswer({super.key});
+  final String? subject; //科目
+  const TaskAnswer(this.subject,{super.key});
 
   static String? dropdownValue = "1"; //口コミプルダウンリスト値
-  static String? subject = 'オペレーティングシステム'; //科目
   static TextEditingController reviewtitle = TextEditingController(); //口コミタイトル
   static TextEditingController reviewcontent = TextEditingController(); //口コミ内容
   static List<task> tasks = []; //口コミ一覧リスト
@@ -36,6 +37,8 @@ class TaskAnswer extends StatelessWidget {
   static double screenheight = 0;
   static String imagename = '';
   static FilePickerResult? file;
+  static String? userid = FirebaseAuth.instance.currentUser?.uid;
+  static String filename = "";
 
   @override
   Widget build(BuildContext context)
@@ -52,6 +55,8 @@ class TaskAnswer extends StatelessWidget {
       ),
 
       body: Center(child: Column(children: [
+        Text(subject!),
+        // Text(userid!),
         SizedBox(height: screenheight/50),
         //口コミ
         //上のバー
@@ -123,14 +128,6 @@ class TaskAnswer extends StatelessWidget {
           //口コミリスト
           child: disreviews(),
         ),
-
-        // FittedBox(
-        //   fit: BoxFit.contain,
-        //   child: Image.network(
-        //     "https://firebasestorage.googleapis.com/v0/b/u22procon-bc3be.appspot.com/o/images%2Fsample.png?alt=media&token=93636749-267d-45df-8535-f7044e9eb32b",
-        //     fit: BoxFit.contain,
-        //   )
-        // )
       ],),),
 
       //口コミ追加ボタン
@@ -244,12 +241,18 @@ class TaskAnswer extends StatelessWidget {
               tasks.add(task(
                 data['課題タイトル'] ?? 'No title',
                 data['追加日'].toDate() ?? DateTime(0),
-                data['いいね数'] ?? 0,
+                0,
                 data['課題内容'] ?? 'No content',
                 docs[i].id,
                 false, //ユーザーによって変更？
                 data['写真名'] ?? '',
               ));
+              var se = data['いいね数'] as List;
+              tasks[i].good = se.length;
+              if(se.contains(userid)){
+                tasks[i].isgood = true;
+                tasks[i].good--;
+              }
             }
             //sort
             if(dropdownValue == "1"){ //新着順でソート（降順）
@@ -368,10 +371,17 @@ class TaskAnswer extends StatelessWidget {
           child: GestureDetector(
             onTap: () async {
               //いいねしているか指定ないかを反転
+              if(tasks[index].isgood){
+                await FirebaseFirestore.instance.collection('tasks').doc(tasks[index].id).update({
+                  'いいね数': FieldValue.arrayRemove([userid]),
+                });
+              }
+              else{
+                await FirebaseFirestore.instance.collection('tasks').doc(tasks[index].id).update({
+                  'いいね数': FieldValue.arrayUnion([userid]),
+                });
+              }
               tasks[index].isgood = !tasks[index].isgood;
-              await FirebaseFirestore.instance.collection('tasks').doc(tasks[index].id).update({
-                'いいね数': tasks[index].good + (tasks[index].isgood ? 1:0),
-              });
               setState((){});
             },
             child: Stack(children:[//重ねて表示
@@ -451,7 +461,7 @@ class TaskAnswer extends StatelessWidget {
                   //変更の必要あり
                   // FilePickerResult? file =
                       // await FilePicker.platform.pickFiles();
-                  
+                  filename = file!.files.first.name;
 
                   // if (file == null) return;
                   //Import dart:core
@@ -462,7 +472,7 @@ class TaskAnswer extends StatelessWidget {
                 icon: const Icon(Icons.camera_alt)
               ),
               file != null 
-              ? Text(file!.files.first.name)
+              ? Text(filename)
               : Container(),
               ElevatedButton(
                 onPressed: () async {
@@ -480,6 +490,7 @@ class TaskAnswer extends StatelessWidget {
                           children: <Widget>[
                             Text('タイトル: $title'),
                             Text('内容: $content'),
+                            Text('画像: $filename'),
                           ],
                         ),
                         actions: <Widget>[
@@ -528,7 +539,7 @@ class TaskAnswer extends StatelessWidget {
                       '課題タイトル': title,
                       '課題内容': content,
                       '追加日': Timestamp.fromDate(DateTime.now()),
-                      'いいね数': 0,
+                      'いいね数': [],
                       '写真名': imagename,
                     });
 
@@ -537,6 +548,7 @@ class TaskAnswer extends StatelessWidget {
                       reviewtitle.clear();
                       reviewcontent.clear();
                       imagename = '';
+                      filename = "";
                       file = null;
                       setreview!((){});
                     });
