@@ -18,6 +18,7 @@ class _TodoState extends State<Todo> {
   void initState() {
     super.initState();
     _todoFuture = FirebaseFirestore.instance.collection('todo').get();
+    _handleCompletedTasks(); // 初期化時に完了タスクの処理を実行
   }
 
   void _refreshData() {
@@ -27,11 +28,78 @@ class _TodoState extends State<Todo> {
   }
 
   void _updateCompletionStatus(DocumentSnapshot doc, bool isCompleted) async {
+    // チェックボックスの状態を更新
     await FirebaseFirestore.instance
         .collection('todo')
         .doc(doc.id)
         .update({'完了': isCompleted});
+
+    // 完了状態かつ期限が過去のものを処理
+    await _handleCompletedTask(doc, isCompleted);
+
+    // UIを更新
     _refreshData();
+  }
+
+  Future<void> _handleCompletedTask(
+      DocumentSnapshot doc, bool isCompleted) async {
+    var data = doc.data() as Map<String, dynamic>;
+    var subject = data['科目'] ?? 'No subject';
+    var task = data['課題'] ?? 'No task';
+    var repeat = data['繰り返し'] ?? 'なし';
+    var dueDateStr = data['期限'] ?? '';
+    var remindStr = data['リマインド'] ?? '';
+
+    if (dueDateStr.isNotEmpty && isCompleted) {
+      DateTime dueDate = DateTime.parse(dueDateStr);
+      DateTime now = DateTime.now();
+
+      if (dueDate.isBefore(now)) {
+        if (repeat == '毎週' || repeat == '隔週') {
+          int daysToAdd = repeat == '毎週' ? 7 : 14;
+
+          // 新しい期限とリマインド日時を計算
+          DateTime newDueDate = dueDate.add(Duration(days: daysToAdd));
+          DateTime? newRemindDate;
+
+          if (remindStr.isNotEmpty) {
+            DateTime remindDate = DateTime.parse(remindStr);
+            newRemindDate = remindDate.add(Duration(days: daysToAdd));
+          }
+
+          // 新しいデータを作成しデータベースに保存
+          await FirebaseFirestore.instance.collection('todo').add({
+            '科目': subject,
+            '課題': task,
+            '期限': newDueDate.toIso8601String(),
+            'リマインド': newRemindDate?.toIso8601String(),
+            '繰り返し': repeat,
+            '完了': false, // 新しいタスクなので完了状態をリセット
+          });
+
+          // 元のタスクを削除
+          _deleteDocument(doc);
+        } else {
+          // 繰り返し設定がない場合は削除
+          _deleteDocument(doc);
+        }
+      }
+    }
+  }
+
+  Future<void> _handleCompletedTasks() async {
+    // Firestoreからすべてのタスクを取得
+    var snapshot = await FirebaseFirestore.instance.collection('todo').get();
+    var docs = snapshot.docs;
+
+    for (var doc in docs) {
+      var data = doc.data() as Map<String, dynamic>;
+      bool isCompleted = data['完了'] ?? false;
+
+      if (isCompleted) {
+        await _handleCompletedTask(doc, isCompleted);
+      }
+    }
   }
 
   void _deleteDocument(DocumentSnapshot doc) async {
@@ -56,6 +124,7 @@ class _TodoState extends State<Todo> {
               _buildSection(context, '完了'),
               SizedBox(height: 20),
               _buildSection(context, '期限超過'),
+              SizedBox(height: 20),
             ],
           ),
         ),
@@ -154,19 +223,6 @@ class _TodoState extends State<Todo> {
           }).toList();
         } else {
           filteredDocs = docs;
-        }
-
-        // 完了状態かつ期限が過去のものを削除する
-        for (var doc in docs) {
-          var data = doc.data() as Map<String, dynamic>;
-          var dueDateStr = data['期限'] ?? '';
-          var isCompleted = data['完了'] ?? false;
-          if (dueDateStr.isNotEmpty && isCompleted) {
-            DateTime dueDate = DateTime.parse(dueDateStr);
-            if (dueDate.isBefore(now)) {
-              _deleteDocument(doc);
-            }
-          }
         }
 
         return Column(
