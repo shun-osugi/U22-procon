@@ -73,7 +73,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                   path: 'task_answer',
                   builder: (BuildContext context, GoRouterState state) {
-                    return const TaskAnswer();
+                    final data = state.extra as String;
+                    return TaskAnswer(data);
                   }),
               GoRoute(
                 path: 'subject_details_updating',
