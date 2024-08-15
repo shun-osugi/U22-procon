@@ -187,9 +187,15 @@ class ClassTimetable extends StatelessWidget {
                                           });
                                     } else {
                                       subject = subjectName;
+                                      day = daysOfWeek[dayIndex];
+                                      period = index + 1;
                                       GoRouter.of(context).go(
                                           '/classTimetable/subject_details_updating',
-                                          extra: subject);
+                                          extra: {
+                                            'subject': subject,
+                                            'day': day,
+                                            'period': period
+                                          });
                                     }
                                   },
                                 ),

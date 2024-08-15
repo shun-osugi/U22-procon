@@ -9,7 +9,10 @@ import 'package:u_22_procon/class_timetable.dart';
 
 class SubjectDetailsUpdating extends StatelessWidget {
   final String subject;
-  SubjectDetailsUpdating({required this.subject});
+  final String day;
+  final int period;
+  SubjectDetailsUpdating(
+      {required this.subject, required this.day, required this.period});
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +133,9 @@ class SubjectDetailsUpdating extends StatelessWidget {
                     )),
                 GestureDetector(
                     onTap: () {
+
                       GoRouter.of(context).go('/classTimetable/task_answer', extra:subject);
+
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -355,8 +360,12 @@ class ReadDB extends StatelessWidget {
                           //
                           IconButton(
                               onPressed: () {
-                                GoRouter.of(context)
-                                    .go('/classTimetable/subjectDetails');
+                                String date1 = date;
+                                int period1 = period;
+                                final data = {'day': date1, 'period': period1};
+                                GoRouter.of(context).go(
+                                    '/classTimetable/subjectDetails',
+                                    extra: data);
                               },
                               icon: const Icon(
                                 Icons.screen_rotation_alt_rounded,
