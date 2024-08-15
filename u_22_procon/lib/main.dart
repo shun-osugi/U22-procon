@@ -29,6 +29,8 @@ final shellNavigatorKeyProvider = Provider<GlobalKey<NavigatorState>>((ref) {
   return GlobalKey<NavigatorState>(debugLabel: 'shell');
 });
 
+String? globalData;
+
 final goRouterProvider = Provider<GoRouter>((ref) {
   final rootNavigatorKey = ref.watch(rootNavigatorKeyProvider);
   final shellNavigatorKey = ref.watch(shellNavigatorKeyProvider);
@@ -58,7 +60,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             routes: <RouteBase>[
               GoRoute(
                   path: 'subjectDetails',
-                  // parentNavigatorKey: rootNavigatorKey,
                   builder: (BuildContext context, GoRouterState state) {
                     final Map<String, dynamic> data =
                         state.extra as Map<String, dynamic>;
@@ -66,26 +67,41 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                         day: data['day'], period: data['period']);
                   }),
               GoRoute(
-                  path: 'subject_eval',
-                  builder: (BuildContext context, GoRouterState state) {
-                    return const SubjectEval();
-                  }),
-              GoRoute(
-                  path: 'task_answer',
-                  builder: (BuildContext context, GoRouterState state) {
-                    return const TaskAnswer();
-                  }),
-              GoRoute(
-                path: 'subject_details_updating',
-                // parentNavigatorKey: rootNavigatorKey,
-                pageBuilder: (BuildContext context, GoRouterState state) {
-                  final data = state.extra as String; // extraからデータを取得
-                  return buildTransitionPage(
-                      child: SubjectDetailsUpdating(
-                    subject: data,
-                  ));
-                },
-              ),
+                  path: 'subject_details_updating',
+                  pageBuilder: (BuildContext context, GoRouterState state) {
+                    final Map<String, dynamic>? data =
+                        state.extra as Map<String, dynamic>?;
+
+                    // デフォルト値を設定
+                    final subject = data?['subject'] ?? '';
+                    final day = data?['day'] ?? '';
+                    final period = data?['period'] ?? 999; //仮で999
+
+                    // final data = state.extra as String? ?? ''; // extraからデータを取得
+
+                    if (subject == '') {
+                      return buildTransitionPage(
+                          child: SubjectDetailsUpdating(
+                              subject: globalData!, day: day, period: period));
+                    } else {
+                      globalData = subject;
+                      return buildTransitionPage(
+                          child: SubjectDetailsUpdating(
+                              subject: subject, day: day, period: period));
+                    }
+                  },
+                  routes: <RouteBase>[
+                    GoRoute(
+                        path: 'subject_eval',
+                        builder: (BuildContext context, GoRouterState state) {
+                          return const SubjectEval();
+                        }),
+                    GoRoute(
+                        path: 'task_answer',
+                        builder: (BuildContext context, GoRouterState state) {
+                          return const TaskAnswer();
+                        }),
+                  ]),
             ],
           ),
           GoRoute(
@@ -96,7 +112,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             routes: <RouteBase>[
               GoRoute(
                   path: 'tech_term',
-                  // parentNavigatorKey: rootNavigatorKey,
                   builder: (BuildContext context, GoRouterState state) {
                     return const TechTermPage();
                   }),
