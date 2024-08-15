@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 
+String? documentId; // グローバル変数の定義
+
 class Todo extends StatefulWidget {
   const Todo({super.key});
 
@@ -21,15 +23,21 @@ class _TodoState extends State<Todo> {
   @override
   void initState() {
     super.initState();
-    _todoFuture = FirebaseFirestore.instance.collection('todo').get();
-    _handleCompletedTasks(); // 初期化時に完了タスクの処理を実行
+    documentId = FirebaseAuth.instance.currentUser?.uid; // グローバル変数に設定
     _fetchSubjects();
+    _refreshData(); // 初期化時にデータを読み込む
+    _handleCompletedTasks(); // 初期化時に完了タスクの処理を実行
   }
 
   void _refreshData() {
-    setState(() {
-      _todoFuture = FirebaseFirestore.instance.collection('todo').get();
-    });
+    if (documentId != null) {
+      setState(() {
+        _todoFuture = FirebaseFirestore.instance
+            .collection('todo')
+            .where('ユーザー', isEqualTo: documentId)
+            .get();
+      });
+    }
   }
 
   void _updateCompletionStatus(DocumentSnapshot doc, bool isCompleted) async {
@@ -49,6 +57,7 @@ class _TodoState extends State<Todo> {
   Future<void> _handleCompletedTask(
       DocumentSnapshot doc, bool isCompleted) async {
     var data = doc.data() as Map<String, dynamic>;
+    var user = data['ユーザー'] ?? 'No user';
     var subject = data['科目'] ?? 'No subject';
     var task = data['課題'] ?? 'No task';
     var repeat = data['繰り返し'] ?? 'なし';
@@ -74,6 +83,7 @@ class _TodoState extends State<Todo> {
 
           // 新しいデータを作成しデータベースに保存
           await FirebaseFirestore.instance.collection('todo').add({
+            'ユーザー': user,
             '科目': subject,
             '課題': task,
             '期限': newDueDate.toIso8601String(),
@@ -94,7 +104,10 @@ class _TodoState extends State<Todo> {
 
   Future<void> _handleCompletedTasks() async {
     // Firestoreからすべてのタスクを取得
-    var snapshot = await FirebaseFirestore.instance.collection('todo').get();
+    var snapshot = await FirebaseFirestore.instance
+        .collection('todo')
+        .where('ユーザー', isEqualTo: documentId)
+        .get();
     var docs = snapshot.docs;
 
     for (var doc in docs) {
@@ -114,8 +127,6 @@ class _TodoState extends State<Todo> {
 
   // Firestoreから授業名を取得するメソッド
   Future<void> _fetchSubjects() async {
-    String? documentId = FirebaseAuth.instance.currentUser?.uid;
-
     if (documentId == null) {
       // ユーザーがログインしていない場合の処理
       GoRouter.of(context).go('/log_in');
@@ -158,13 +169,6 @@ class _TodoState extends State<Todo> {
 
   @override
   Widget build(BuildContext context) {
-    String? documentId = null;
-    if (FirebaseAuth.instance.currentUser != null) {
-      documentId = FirebaseAuth.instance.currentUser?.uid;
-    } else {
-      GoRouter.of(context).go('/log_in');
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('ToDo'),
@@ -601,6 +605,7 @@ class _TodoState extends State<Todo> {
                                 await FirebaseFirestore.instance
                                     .collection('todo')
                                     .add({
+                                  'ユーザー': documentId,
                                   '科目': _dropdownValue,
                                   '課題': _workName.text,
                                   '期限': combinedDateTime.toIso8601String(),
