@@ -31,8 +31,7 @@ class SubjectDetailsUpdating extends StatelessWidget {
               children: [
                 GestureDetector(
                     onTap: () {
-                      GoRouter.of(context).go(
-                          '/classTimetable/subject_details_updating/subject_eval');
+                      GoRouter.of(context).go('/classTimetable/subject_eval', extra:subject);
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -134,8 +133,9 @@ class SubjectDetailsUpdating extends StatelessWidget {
                     )),
                 GestureDetector(
                     onTap: () {
-                      GoRouter.of(context).go(
-                          '/classTimetable/subject_details_updating/task_answer');
+
+                      GoRouter.of(context).go('/classTimetable/task_answer', extra:subject);
+
                     },
                     child: Container(
                       decoration: BoxDecoration(

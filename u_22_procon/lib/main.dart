@@ -67,6 +67,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                         day: data['day'], period: data['period']);
                   }),
               GoRoute(
+
                   path: 'subject_details_updating',
                   pageBuilder: (BuildContext context, GoRouterState state) {
                     final Map<String, dynamic>? data =
@@ -102,6 +103,30 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                           return const TaskAnswer();
                         }),
                   ]),
+
+                  path: 'subject_eval',
+                  builder: (BuildContext context, GoRouterState state) {
+                    final data = state.extra as String;
+                    return SubjectEval(data);
+                  }),
+              GoRoute(
+                  path: 'task_answer',
+                  builder: (BuildContext context, GoRouterState state) {
+                    final data = state.extra as String;
+                    return TaskAnswer(data);
+                  }),
+              GoRoute(
+                path: 'subject_details_updating',
+                // parentNavigatorKey: rootNavigatorKey,
+                pageBuilder: (BuildContext context, GoRouterState state) {
+                  final data = state.extra as String; // extraからデータを取得
+                  return buildTransitionPage(
+                      child: SubjectDetailsUpdating(
+                    subject: data,
+                  ));
+                },
+              ),
+
             ],
           ),
           GoRoute(
@@ -111,10 +136,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             },
             routes: <RouteBase>[
               GoRoute(
-                  path: 'tech_term',
-                  builder: (BuildContext context, GoRouterState state) {
-                    return const TechTermPage();
-                  }),
+                path: 'tech_term',
+                builder: (BuildContext context, GoRouterState state) {
+                  final value = state.extra as String; // 'value' がここで取得される
+                  return TechTermPage(value);
+                },
+              ),
             ],
           ),
           GoRoute(
