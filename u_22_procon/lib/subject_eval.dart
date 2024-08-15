@@ -108,7 +108,9 @@ class SubjectEval extends StatelessWidget {
             }
           ),
         ),
-        SizedBox(height: screenheight/70),
+        // SizedBox(height: screenheight/150),
+        evalbutton(),
+        SizedBox(height: screenheight/150),
 
         //口コミ
         //上のバー
@@ -272,6 +274,47 @@ class SubjectEval extends StatelessWidget {
           ),
         ]
       ),
+    );
+  }
+
+  //評価ボタン
+  StatefulBuilder evalbutton(){
+    return StatefulBuilder(//状態を管理
+      builder: (BuildContext context, StateSetter setState) {
+        return ElevatedButton(
+          onPressed: () async {
+            await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return SimpleDialog(
+                  titleTextStyle: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                  titlePadding: const EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 10.0),
+                  title: const Text('科目を評価する'),
+                  contentPadding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 15.0),
+                  children: [
+                    Text(
+                      '満足度',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
+                  // evaltext('満足度', satis),
+                  // evaltext('単位取得度', credit),
+                  // evaltext('内容の難しさ', content),
+                  // evaltext('課題の多さ', task),
+                );
+              },
+            );
+          },
+          child: const Text('評価する！')
+        );
+      }
     );
   }
 
