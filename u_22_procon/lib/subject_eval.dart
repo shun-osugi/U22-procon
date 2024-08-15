@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:intl/intl.dart';
@@ -16,16 +17,17 @@ class review {//口コミ
 }
 
 class SubjectEval extends StatelessWidget {
-  const SubjectEval({super.key});
+  final String? subject; //科目
+  const SubjectEval(this.subject, {super.key});
 
   static String? dropdownValue = "1"; //口コミプルダウンリスト値
-  static String? subject = 'オペレーティングシステム'; //科目
   static TextEditingController reviewtitle = TextEditingController(); //口コミタイトル
   static TextEditingController reviewcontent = TextEditingController(); //口コミ内容
   static List<review> reviews = []; //口コミ一覧リスト
   static StateSetter? setreview; //口コミの一覧の状態を管理（ソートなどで更新されるから）
   static double screenwidth = 0;
   static double screenheight = 0;
+  static String? userid = FirebaseAuth.instance.currentUser?.uid;
 
   @override
   Widget build(BuildContext context)
@@ -42,7 +44,8 @@ class SubjectEval extends StatelessWidget {
       ),
 
       body: Center(child: Column(children: [
-        SizedBox(height: screenheight/50),
+        Text(subject!),
+        SizedBox(height: screenheight/200),
 
         //科目評価の枠組み
         Container(
@@ -158,7 +161,7 @@ class SubjectEval extends StatelessWidget {
         //口コミのリスト一覧
         Container(
           width:  screenwidth/1.2,
-          height: screenheight/2.5,
+          height: screenheight/2.8,
 
           decoration: const BoxDecoration(//角を丸くする
             color: Color.fromARGB(255, 255, 255, 255),
@@ -365,11 +368,17 @@ class SubjectEval extends StatelessWidget {
               reviews.add(review(
                 data['口コミタイトル'] ?? 'No title',
                 data['追加日'].toDate() ?? DateTime(0),
-                data['いいね数'] ?? 0,
+                0,
                 data['口コミ内容'] ?? 'No content',
                 docs[i].id,
                 false //ユーザーによって変更？
               ));
+              var se = data['いいね数'] as List;
+              reviews[i].good = se.length;
+              if(se.contains(userid)){
+                reviews[i].isgood = true;
+                reviews[i].good--;
+              }
             }
             //sort
             if(dropdownValue == "1"){ //新着順でソート（降順）
@@ -475,10 +484,17 @@ class SubjectEval extends StatelessWidget {
           child: GestureDetector(
             onTap: () async {
               //いいねしているか指定ないかを反転
+              if(reviews[index].isgood){
+                await FirebaseFirestore.instance.collection('reviews').doc(reviews[index].id).update({
+                  'いいね数': FieldValue.arrayRemove([userid]),
+                });
+              }
+              else{
+                await FirebaseFirestore.instance.collection('reviews').doc(reviews[index].id).update({
+                  'いいね数': FieldValue.arrayUnion([userid]),
+                });
+              }
               reviews[index].isgood = !reviews[index].isgood;
-              await FirebaseFirestore.instance.collection('reviews').doc(reviews[index].id).update({
-                'いいね数': reviews[index].good + (reviews[index].isgood ? 1:0),
-              });
               setState((){});
             },
             child: Stack(children:[//重ねて表示
@@ -592,7 +608,7 @@ class SubjectEval extends StatelessWidget {
                       '口コミタイトル': title,
                       '口コミ内容': content,
                       '追加日': Timestamp.fromDate(DateTime.now()),
-                      'いいね数': 0,
+                      'いいね数': [],
                     });
 
                     // 入力フィールドとチェックボックスの状態をクリア
