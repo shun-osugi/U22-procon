@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:go_router/go_router.dart';
 
 class Todo extends StatefulWidget {
   const Todo({super.key});
@@ -13,12 +15,15 @@ class Todo extends StatefulWidget {
 
 class _TodoState extends State<Todo> {
   late Future<QuerySnapshot> _todoFuture;
+  String? _dropdownValue;
+  List<String> subjects = [];
 
   @override
   void initState() {
     super.initState();
     _todoFuture = FirebaseFirestore.instance.collection('todo').get();
     _handleCompletedTasks(); // 初期化時に完了タスクの処理を実行
+    _fetchSubjects();
   }
 
   void _refreshData() {
@@ -107,8 +112,59 @@ class _TodoState extends State<Todo> {
     _refreshData();
   }
 
+  // Firestoreから授業名を取得するメソッド
+  Future<void> _fetchSubjects() async {
+    String? documentId = FirebaseAuth.instance.currentUser?.uid;
+
+    if (documentId == null) {
+      // ユーザーがログインしていない場合の処理
+      GoRouter.of(context).go('/log_in');
+      return;
+    }
+
+    DocumentSnapshot studentDoc = await FirebaseFirestore.instance
+        .collection('students')
+        .doc(documentId)
+        .get();
+
+    if (studentDoc.exists) {
+      Map<String, dynamic> data = studentDoc.data() as Map<String, dynamic>;
+      List<String> fetchedSubjects = [];
+
+      // 曜日ごとに授業名を取得
+      for (var day in ['月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日']) {
+        var dayData = data[day] as Map<String, dynamic>?;
+        if (dayData != null) {
+          for (var key in dayData.keys) {
+            String subject = dayData[key] as String? ?? '';
+            if (subject.isNotEmpty && !fetchedSubjects.contains(subject)) {
+              fetchedSubjects.add(subject);
+            }
+          }
+        }
+      }
+
+      setState(() {
+        subjects = fetchedSubjects;
+        if (subjects.isNotEmpty) {
+          _dropdownValue = subjects.first; // デフォルトで最初の科目を選択
+        }
+      });
+    } else {
+      // ドキュメントが存在しない場合の処理
+      print("Document does not exist");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    String? documentId = null;
+    if (FirebaseAuth.instance.currentUser != null) {
+      documentId = FirebaseAuth.instance.currentUser?.uid;
+    } else {
+      GoRouter.of(context).go('/log_in');
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('ToDo'),
@@ -289,7 +345,7 @@ class _TodoState extends State<Todo> {
 
   Widget _buildFloatingActionButton(BuildContext context) {
     TextEditingController _workName = TextEditingController();
-    String? _dropdownValue = "オペレーティングシステム";
+    String? _dropdownValue;
     DateTime? _selectedDate;
     TimeOfDay? _selectedTime;
     DateTime? _remindDate;
@@ -310,28 +366,22 @@ class _TodoState extends State<Todo> {
                     padding: EdgeInsets.all(16.0),
                     child: Column(
                       children: <Widget>[
-                        DropdownButton<String>(
-                          value: _dropdownValue,
-                          items: [
-                            DropdownMenuItem(
-                              value: "オペレーティングシステム",
-                              child: Text("オペレーティングシステム"),
-                            ),
-                            DropdownMenuItem(
-                              value: "アルゴリズム・データ構造",
-                              child: Text("アルゴリズム・データ構造"),
-                            ),
-                            DropdownMenuItem(
-                              value: "プログラミング基礎",
-                              child: Text("プログラミング基礎"),
-                            ),
-                          ],
-                          onChanged: (String? value) {
-                            setState(() {
-                              _dropdownValue = value;
-                            });
-                          },
-                        ),
+                        subjects.isEmpty
+                            ? CircularProgressIndicator()
+                            : DropdownButton<String>(
+                                value: _dropdownValue,
+                                items: subjects.map((String subject) {
+                                  return DropdownMenuItem<String>(
+                                    value: subject,
+                                    child: Text(subject),
+                                  );
+                                }).toList(),
+                                onChanged: (String? value) {
+                                  setState(() {
+                                    _dropdownValue = value;
+                                  });
+                                },
+                              ),
                         TextField(
                           controller: _workName,
                           decoration: InputDecoration(labelText: '課題名'),
