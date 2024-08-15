@@ -67,7 +67,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                         day: data['day'], period: data['period']);
                   }),
               GoRoute(
-
                   path: 'subject_details_updating',
                   pageBuilder: (BuildContext context, GoRouterState state) {
                     final Map<String, dynamic>? data =
@@ -95,38 +94,16 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                     GoRoute(
                         path: 'subject_eval',
                         builder: (BuildContext context, GoRouterState state) {
-                          return const SubjectEval();
+                          final data = state.extra as String;
+                          return SubjectEval(data);
                         }),
                     GoRoute(
                         path: 'task_answer',
                         builder: (BuildContext context, GoRouterState state) {
-                          return const TaskAnswer();
+                          final data = state.extra as String;
+                          return TaskAnswer(data);
                         }),
                   ]),
-
-                  path: 'subject_eval',
-                  builder: (BuildContext context, GoRouterState state) {
-                    final data = state.extra as String;
-                    return SubjectEval(data);
-                  }),
-              GoRoute(
-                  path: 'task_answer',
-                  builder: (BuildContext context, GoRouterState state) {
-                    final data = state.extra as String;
-                    return TaskAnswer(data);
-                  }),
-              GoRoute(
-                path: 'subject_details_updating',
-                // parentNavigatorKey: rootNavigatorKey,
-                pageBuilder: (BuildContext context, GoRouterState state) {
-                  final data = state.extra as String; // extraからデータを取得
-                  return buildTransitionPage(
-                      child: SubjectDetailsUpdating(
-                    subject: data,
-                  ));
-                },
-              ),
-
             ],
           ),
           GoRoute(
