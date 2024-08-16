@@ -7,12 +7,17 @@ import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:u_22_procon/class_timetable.dart';
 
+final subjectProvider = StateProvider<String?>((ref) => null);
+
 class SubjectDetailsUpdating extends StatelessWidget {
+  final Map<String, dynamic> recievedData;
   final String subject;
   final String day;
   final int period;
-  SubjectDetailsUpdating(
-      {required this.subject, required this.day, required this.period});
+  SubjectDetailsUpdating({required this.recievedData})
+      : subject = recievedData['subject'] as String,
+        day = recievedData['day'] as String,
+        period = recievedData['period'] as int;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +36,8 @@ class SubjectDetailsUpdating extends StatelessWidget {
               children: [
                 GestureDetector(
                     onTap: () {
-                      GoRouter.of(context).go('/classTimetable/subject_eval', extra:subject);
+                      GoRouter.of(context)
+                          .go('/classTimetable/subject_eval', extra: subject);
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -133,9 +139,10 @@ class SubjectDetailsUpdating extends StatelessWidget {
                     )),
                 GestureDetector(
                     onTap: () {
-
-                      GoRouter.of(context).go('/classTimetable/task_answer', extra:subject);
-
+                      print(
+                          'Navigating to subject_eval with subject: $subject');
+                      GoRouter.of(context)
+                          .go('/classTimetable/task_answer', extra: subject);
                     },
                     child: Container(
                       decoration: BoxDecoration(
