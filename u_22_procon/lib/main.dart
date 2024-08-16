@@ -67,10 +67,27 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                         day: data['day'], period: data['period']);
                   }),
               GoRoute(
+                  path: 'subject_eval',
+                  builder: (BuildContext context, GoRouterState state) {
+                    final String data = state.extra as String;
+                    return SubjectEval(data);
+                  }),
+              GoRoute(
+                  path: 'task_answer',
+                  builder: (BuildContext context, GoRouterState state) {
+                    final String data = state.extra as String;
+                    return TaskAnswer(data);
+                  }),
+              GoRoute(
                   path: 'subject_details_updating',
                   pageBuilder: (BuildContext context, GoRouterState state) {
                     final Map<String, dynamic>? data =
                         state.extra as Map<String, dynamic>?;
+
+                    if (state.extra is Map<String, dynamic>)
+                      print('OK');
+                    else
+                      ('NO');
 
                     // デフォルト値を設定
                     final subject = data?['subject'] ?? '';
@@ -80,30 +97,27 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                     // final data = state.extra as String? ?? ''; // extraからデータを取得
 
                     if (subject == '') {
+                      Map<String, dynamic> sendData = {
+                        'subject': globalData!,
+                        'day': day,
+                        'period': period
+                      };
                       return buildTransitionPage(
-                          child: SubjectDetailsUpdating(
-                              subject: globalData!, day: day, period: period));
+                          child:
+                              SubjectDetailsUpdating(recievedData: sendData));
                     } else {
                       globalData = subject;
+                      Map<String, dynamic> sendData = {
+                        'subject': subject,
+                        'day': day,
+                        'period': period
+                      };
                       return buildTransitionPage(
-                          child: SubjectDetailsUpdating(
-                              subject: subject, day: day, period: period));
+                          child:
+                              SubjectDetailsUpdating(recievedData: sendData));
                     }
                   },
-                  routes: <RouteBase>[
-                    GoRoute(
-                        path: 'subject_eval',
-                        builder: (BuildContext context, GoRouterState state) {
-                          final data = state.extra as String;
-                          return SubjectEval(data);
-                        }),
-                    GoRoute(
-                        path: 'task_answer',
-                        builder: (BuildContext context, GoRouterState state) {
-                          final data = state.extra as String;
-                          return TaskAnswer(data);
-                        }),
-                  ]),
+                  routes: <RouteBase>[]),
             ],
           ),
           GoRoute(
