@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter/widgets.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
@@ -45,6 +46,12 @@ class TaskAnswer extends StatelessWidget {
   {
     screenwidth = MediaQuery.of(context).size.width;
     screenheight = MediaQuery.of(context).size.height;
+    dropdownValue = "1";
+    reviewtitle.clear();
+    reviewcontent.clear();
+    imagename = '';
+    filename = "";
+    file = null;
 
     return Scaffold(
       backgroundColor: Colors.pink[100],
@@ -457,10 +464,18 @@ class TaskAnswer extends StatelessWidget {
                   //Install image_picker
                   //Import the corresponding library
 
-                  file = await FilePickerWeb.platform.pickFiles();
-                  //変更の必要あり
-                  // FilePickerResult? file =
-                      // await FilePicker.platform.pickFiles();
+                  if (kIsWeb) {
+                    file = await FilePickerWeb.platform.pickFiles(
+                      type: FileType.image,
+                      // allowedExtensions: ['png', 'jpeg'], // ピックする拡張子を限定できる。
+                    );
+                    // Web上での実行時の処理
+                  } else {
+                    file = await FilePicker.platform.pickFiles(
+                      type: FileType.image,
+                    );
+                    // Web以外での実行時の処理
+                  }
                   filename = file!.files.first.name;
 
                   // if (file == null) return;
@@ -522,7 +537,7 @@ class TaskAnswer extends StatelessWidget {
                         //Store the file
                         await referenceImageToUpload.putData(
                           files.bytes!,
-                          SettableMetadata(contentType: 'image/png',),
+                          SettableMetadata(contentType: 'image/'+files.name.split('.').last,),
                         );
                         //Success: get the download URL
                         imagename = await referenceImageToUpload.getDownloadURL();
