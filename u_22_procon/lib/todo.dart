@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:u_22_procon/notification_service.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
@@ -79,6 +80,13 @@ class _TodoState extends State<Todo> {
           if (remindStr.isNotEmpty) {
             DateTime remindDate = DateTime.parse(remindStr);
             newRemindDate = remindDate.add(Duration(days: daysToAdd));
+
+            // 通知スケジュールの呼び出し
+            await scheduleReminderNotification(
+              'リマインダー: $subject',
+              '課題: $task\n期限: ${DateFormat('yyyy-MM-dd HH:mm').format(newDueDate)}',
+              newRemindDate,
+            );
           }
 
           // 新しいデータを作成しデータベースに保存
