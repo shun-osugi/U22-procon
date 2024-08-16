@@ -73,7 +73,7 @@ class SubjectDetails extends StatelessWidget {
                         ),
                       ]),
                 ),
-                const ListWidget(),
+                ListWidget(day: day, period: period),
               ],
             ),
           ],
@@ -163,7 +163,6 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
       child: Column(
         children: [
           Row(
-            //曜日と時限を受け取ってデータベースに格納するコードを記述する必要あり
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('$tentativeDate曜$tentativePeriod限'),
@@ -224,6 +223,7 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                         false;
 
                     if (shouldSave) {
+                      registrationNumber++;
                       // ポップアップで「OK」を押したら保存
                       await FirebaseFirestore.instance
                           .collection('class')
@@ -448,14 +448,19 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
 
 //データベースから読み込んた教科をリストにするWidet
 class ListWidget extends StatelessWidget {
-  const ListWidget({super.key});
+  final String day;
+  final int period;
+  const ListWidget({required this.day, required this.period, Key? key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    String? documentId = null;
+
     return FutureBuilder<QuerySnapshot>(
       future: FirebaseFirestore.instance
-          .collection('test')
-          .orderBy('test', descending: true)
+          .collection('class')
+          .orderBy('登録数', descending: true)
           .get(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -471,10 +476,16 @@ class ListWidget extends StatelessWidget {
           return const Text('No data found');
         }
 
-        List<DocumentSnapshot> docs = snapshot.data!.docs;
+        //MY用語にtrueが格納されてるデータを探す
+        List<DocumentSnapshot> docs = snapshot.data!.docs.where((doc) {
+          var data = doc.data() as Map<String, dynamic>;
+          return data['曜日'] == day && data['時限'] == period;
+        }).toList();
 
         // データが存在する場合、UI に表示する
-        if (docs.isEmpty) {}
+        if (docs.isEmpty) {
+          Text('科目なし');
+        }
 
         // 4. Firestore から取得したデータを表示
         return //口コミのリスト一覧
@@ -500,8 +511,11 @@ class ListWidget extends StatelessWidget {
             itemCount: docs.length,
             //itemCount分表示
             itemBuilder: (context, index) {
+              var doc = docs[index];
               var data = docs[index].data() as Map<String, dynamic>;
-              var message = data['test'] ?? 'No data found';
+              var className = data['教科名'] ?? 'No data found';
+              var registrationNumber = data['登録数'] ?? 'No data found';
+              var docId = doc.id;
               return Container(
                 width: 376,
                 height: 40,
@@ -517,14 +531,46 @@ class ListWidget extends StatelessWidget {
                   children: [
                     SizedBox(
                       width: MediaQuery.of(context).size.width / 2,
-                      child: Text(
-                        '$message',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
-                        textAlign: TextAlign.left,
+                      child: TextButton(
+                        child: Text('$className'),
+                        onPressed: () async {
+                          //
+                          //履修登録コード
+                          //
+                          if (FirebaseAuth.instance.currentUser != null) {
+                            documentId = FirebaseAuth.instance.currentUser?.uid;
+                            print(documentId);
+                          } else {
+                            GoRouter.of(context).go('/log_in');
+                          }
+                          String tentativeDate = day + '曜日';
+                          String period2 = period.toString();
+                          await FirebaseFirestore.instance
+                              .collection('students')
+                              .doc(documentId)
+                              .update({
+                            tentativeDate: {period2: className},
+                          });
+                          registrationNumber += 1;
+                          print(registrationNumber);
+                          //firestoreに保存
+                          await FirebaseFirestore.instance
+                              .collection('class')
+                              .doc(docId)
+                              .update({
+                            '登録数': registrationNumber,
+                          });
+                          // String date1 = date;
+                          // int period1 = period;
+                          // final data = {'day': date1, 'period': period1};
+                          GoRouter.of(context).go(
+                              '/classTimetable/subject_details_updating',
+                              extra: {
+                                'subject': className,
+                                'day': day,
+                                'period': period
+                              });
+                        },
                       ),
                     ),
                     Row(
@@ -541,7 +587,7 @@ class ListWidget extends StatelessWidget {
                         SizedBox(
                           width: MediaQuery.of(context).size.width / 10,
                           child: Text(
-                            '$message',
+                            '$registrationNumber',
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
