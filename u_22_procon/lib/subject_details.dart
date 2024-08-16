@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 //データベース
-import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_core/firebase_core.dart';
 import 'package:go_router/go_router.dart';
-import 'firebase_options.dart';
+// import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:numberpicker/numberpicker.dart';
-import 'package:u_22_procon/class_timetable.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:u_22_procon/todo.dart';
+// import 'package:u_22_procon/class_timetable.dart';
 
 class SubjectDetails extends StatelessWidget {
   final String day;
@@ -178,6 +180,7 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                     int evaluationMethodPer2 = numberPickerValue2;
                     int evaluationMethodPer3 = numberPickerValue3;
                     int registrationNumber = 0;
+                    String? documentId = null;
 
                     // 確認メッセージのポップアップ表示
                     bool shouldSave = await showDialog<bool>(
@@ -250,6 +253,24 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                       numberPickerController1.state = 100;
                       numberPickerController2.state = 0;
                       numberPickerController3.state = 0;
+
+                      //
+                      //履修登録
+                      //
+                      if (FirebaseAuth.instance.currentUser != null) {
+                        documentId = FirebaseAuth.instance.currentUser?.uid;
+                        print(documentId);
+                      } else {
+                        GoRouter.of(context).go('/log_in');
+                      }
+                      String tentativePeriod2 = tentativePeriod.toString();
+                      String tentativeDate2 = tentativeDate + '曜日';
+                      await FirebaseFirestore.instance
+                          .collection('students')
+                          .doc(documentId)
+                          .update({
+                        tentativeDate2: {tentativePeriod2: className},
+                      });
                     }
                   } catch (e) {
                     // エラーをキャッチしてログに出力
