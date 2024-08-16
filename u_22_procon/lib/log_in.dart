@@ -12,6 +12,8 @@ String _email = ''; //Email
 String _password = ''; //パスワード
 
 class _LogIn extends State<LogIn> {
+  bool _isObscure = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,9 +35,19 @@ class _LogIn extends State<LogIn> {
               ),
               //パスワード
               TextField(
-                decoration: const InputDecoration(labelText: 'Password'),
+                decoration: InputDecoration(
+                    labelText: 'Password',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                          _isObscure ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () {
+                        setState(() {
+                          _isObscure = !_isObscure;
+                        });
+                      },
+                    )),
                 //パスワードを隠す
-                obscureText: true,
+                obscureText: _isObscure,
                 onChanged: (String value) => setState(() {
                   _password = value;
                 }),
@@ -64,6 +76,7 @@ class _LogIn extends State<LogIn> {
                       print('ログインしました ${user.email}, ${user.uid}');
                     } catch (e) {
                       print(e);
+                      _showModal(context);
                     }
                   },
                   child: const Text('Log In')),
@@ -83,4 +96,30 @@ class _LogIn extends State<LogIn> {
       ),
     );
   }
+}
+
+void _showModal(BuildContext context) {
+  showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Dialog(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20.0),
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('ログインに失敗しました。'),
+                  // Text(e),
+                  SizedBox(
+                    height: 20,
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+      });
 }

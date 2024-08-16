@@ -18,6 +18,8 @@ String _department = '情報工'; //学科:ドロップダウン
 int _grade = 1; //学年:ドロップダウン
 
 class _LogIn extends State<SignIn> {
+  bool _isObscure = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,9 +41,19 @@ class _LogIn extends State<SignIn> {
               ),
               //パスワード
               TextField(
-                decoration: const InputDecoration(labelText: 'Password'),
+                decoration: InputDecoration(
+                    labelText: 'Password',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                          _isObscure ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () {
+                        setState(() {
+                          _isObscure = !_isObscure;
+                        });
+                      },
+                    )),
                 //パスワードを隠す
-                obscureText: true,
+                obscureText: _isObscure,
                 onChanged: (String value) => setState(() {
                   _password = value;
                 }),
