@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -15,6 +16,9 @@ class _SubjectTermState extends State<SubjectTerm> {
   // チェックボックスの状態管理のためのマップ
   Map<String, bool> _checkboxStates = {};
   final List<String> dayOrder = ['月曜日', '火曜日', '水曜日', '木曜日', '金曜日'];
+
+  // ユーザーID
+  final String? userId = FirebaseAuth.instance.currentUser?.uid;
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +83,9 @@ class _SubjectTermState extends State<SubjectTerm> {
                   // My用語集タブのコンテンツ
                   StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
-                        .collection('tech_term')
+                        .collection('user_terms')
+                        .doc(userId)
+                        .collection('terms')
                         .snapshots(),
                     builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -89,166 +95,167 @@ class _SubjectTermState extends State<SubjectTerm> {
                         return Text('Error: ${snapshot.error}');
                       }
                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                        return Text('No data found');
-                      }
-
-                      List<DocumentSnapshot> docs =
-                          snapshot.data!.docs.where((doc) {
-                        var data = doc.data() as Map<String, dynamic>;
-                        return data['MY用語'] == true;
-                      }).toList();
-
-                      if (docs.isEmpty) {
                         return Text('登録しているMY用語はありません');
                       }
+
+                      List<DocumentSnapshot> docs = snapshot.data!.docs;
 
                       return ListView.builder(
                         padding: const EdgeInsets.all(8.0),
                         itemCount: docs.length,
                         itemBuilder: (context, index) {
                           var doc = docs[index];
-                          var data = doc.data() as Map<String, dynamic>;
-                          var docId = doc.id;
-                          var subject = data['科目'] ?? 'No subject';
-                          var term = data['用語'] ?? 'No term';
-                          var description = data['説明'] ?? 'No description';
-                          var checkbox = data['MY用語'] ?? false;
-                          var registrationNumber = data['登録数'] ?? 0;
+                          var termId = doc.id; // ドキュメントIDをtermIdとして取得
+                          var checkbox = doc['MY用語'] ?? false; // チェックボックスの値を取得
 
-                          // 初期状態を設定
-                          if (!_checkboxStates.containsKey(docId)) {
-                            _checkboxStates[docId] = checkbox;
+                          // チェックボックスが false なら何も表示しない
+                          if (!checkbox) {
+                            return SizedBox.shrink(); // 空のウィジェットを返す
                           }
 
-                          return Align(
-                            alignment: Alignment.center,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color: Colors.grey,
+                          return FutureBuilder<DocumentSnapshot>(
+                            future: FirebaseFirestore.instance
+                                .collection('tech_term')
+                                .doc(termId)
+                                .get(),
+                            builder: (context,
+                                AsyncSnapshot<DocumentSnapshot>
+                                    techTermSnapshot) {
+                              if (techTermSnapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return CircularProgressIndicator();
+                              }
+                              if (techTermSnapshot.hasError) {
+                                return Text('Error: ${techTermSnapshot.error}');
+                              }
+                              if (!techTermSnapshot.hasData ||
+                                  !techTermSnapshot.data!.exists) {
+                                return Text('関連する専門用語が見つかりません');
+                              }
+
+                              var techTermData = techTermSnapshot.data!.data()
+                                  as Map<String, dynamic>;
+                              var subject = techTermData['科目'] ?? 'No subject';
+                              var term = techTermData['用語'] ?? 'No term';
+                              var description =
+                                  techTermData['説明'] ?? 'No description';
+
+                              return Container(
+                                margin: const EdgeInsets.only(
+                                    bottom: 2.0), // 下の余白を追加して下線とアイテムの間隔を確保
+                                decoration: const BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                        color: Colors.grey, width: 2), // 下線を設定
                                   ),
                                 ),
-                              ),
-                              child: ListTile(
-                                leading: Checkbox(
-                                  value: _checkboxStates[docId],
-                                  onChanged: (bool? value) {
-                                    setState(() async {
-                                      _checkboxStates[docId] = value ?? false;
-                                      if (value == true) {
-                                        registrationNumber += 1;
-                                      } else {
-                                        registrationNumber -= 1;
-                                      }
-                                      // Firestoreに状態を保存するコードを追加
+                                child: ListTile(
+                                  title: Text(
+                                    term,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  leading: Checkbox(
+                                    value: checkbox,
+                                    onChanged: (bool? value) async {
+                                      // 更新処理 (必要に応じて変更)
                                       await FirebaseFirestore.instance
-                                          .collection('tech_term')
-                                          .doc(docId)
-                                          .update({
-                                        'MY用語': value,
-                                        '登録数': registrationNumber,
-                                      });
-                                    });
+                                          .collection('user_terms')
+                                          .doc(userId)
+                                          .collection('terms')
+                                          .doc(termId)
+                                          .update({'MY用語': value});
+                                    },
+                                  ),
+                                  onTap: () {
+                                    // ダイアログ表示
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          title: Text('$term\n$subject'),
+                                          content: Text(description),
+                                          actions: <Widget>[
+                                            TextButton(
+                                              child: Text('閉じる'),
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
                                   },
                                 ),
-                                title: Text(
-                                  term,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                onTap: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        title: Text('$term\n$subject'),
-                                        content: Text(description),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            child: Text('閉じる'),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                              ),
-                            ),
+                              );
+                            },
                           );
                         },
                       );
                     },
                   ),
                   // 専門用語集タブのコンテンツ
-                  StreamBuilder<QuerySnapshot>(
+                  StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
                     stream: FirebaseFirestore.instance
                         .collection('students')
+                        .doc(userId)
                         .snapshots(),
-                    builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                    builder: (context,
+                        AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>>
+                            snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Center(child: CircularProgressIndicator());
                       }
                       if (snapshot.hasError) {
                         return Center(child: Text('Error: ${snapshot.error}'));
                       }
-                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      if (!snapshot.hasData || !snapshot.data!.exists) {
                         return Center(child: Text('No data found'));
                       }
 
-                      // Firestoreのドキュメントをリスト化
-                      var docs = snapshot.data!.docs;
+                      var data = snapshot.data!.data()!;
+                      List<Widget> subjectWidgets = [];
+
+                      // 曜日ごとに科目を表示し、曜日順に並べ替え
+                      dayOrder.forEach((day) {
+                        if (data.containsKey(day)) {
+                          var subjects = data[day] as Map<String, dynamic>;
+                          subjectWidgets.add(
+                            Container(
+                              color: Colors.grey[300],
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 8, horizontal: 16),
+                              child: Text(
+                                day,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          );
+
+                          subjects.forEach((key, value) {
+                            subjectWidgets.add(
+                              ListTile(
+                                title: Text('$key : $value'),
+                                onTap: () {
+                                  GoRouter.of(context).go(
+                                      '/subject_term/tech_term',
+                                      extra: value);
+                                },
+                              ),
+                            );
+                          });
+                        }
+                      });
 
                       return ListView(
                         padding: const EdgeInsets.all(8.0),
-                        children: docs.map((doc) {
-                          var data = doc.data() as Map<String, dynamic>;
-                          List<Widget> subjectWidgets = [];
-
-                          // 曜日ごとに科目を表示し、曜日順に並べ替え
-                          dayOrder.forEach((day) {
-                            if (data.containsKey(day)) {
-                              var subjects = data[day] as Map<String, dynamic>;
-                              subjectWidgets.add(
-                                Container(
-                                  color: Colors.grey[300],
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 8, horizontal: 16),
-                                  child: Text(
-                                    day,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ),
-                              );
-
-                              subjects.forEach((key, value) {
-                                subjectWidgets.add(
-                                  ListTile(
-                                    title: Text('$key : $value'),
-                                    onTap: () {
-                                      GoRouter.of(context).go(
-                                          '/subject_term/tech_term',
-                                          extra: value);
-                                    },
-                                  ),
-                                );
-                              });
-                            }
-                          });
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: subjectWidgets,
-                          );
-                        }).toList(),
+                        children: subjectWidgets,
                       );
                     },
                   ),

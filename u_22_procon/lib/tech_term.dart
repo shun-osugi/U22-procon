@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -15,6 +16,8 @@ class TechTermPage extends StatefulWidget {
 class _TechTermPageState extends State<TechTermPage> {
   final Map<String, bool> _checkboxStates = {};
   String _sortOption = '登録数順';
+  // ユーザーID
+  final String? userId = FirebaseAuth.instance.currentUser?.uid;
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +94,7 @@ class _TechTermPageState extends State<TechTermPage> {
     );
   }
 
+  // _buildTabBarView メソッドの修正
   Widget _buildTabBarView(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection('tech_term').snapshots(),
@@ -106,13 +110,9 @@ class _TechTermPageState extends State<TechTermPage> {
         }
 
         List<DocumentSnapshot> docs = snapshot.data!.docs.where((doc) {
-          var data = doc.data() as Map<String, dynamic>; // ここでキャストする
+          var data = doc.data() as Map<String, dynamic>;
           return data['科目'] == widget.subjectKey;
         }).toList();
-
-        if (docs.isEmpty) {
-          return Text('登録されている専門用語はありません');
-        }
 
         // ソートの実装
         if (_sortOption == '登録数順') {
@@ -129,6 +129,29 @@ class _TechTermPageState extends State<TechTermPage> {
                 .compareTo(dataA['登録時間'] as Timestamp);
           });
         }
+
+        // 用語を表示する前に、user_terms コレクションが存在しない場合は初期化
+        Future<void> _initializeUserTerms() async {
+          if (userId != null) {
+            for (var doc in docs) {
+              var docId = doc.id;
+              var userTermDoc = FirebaseFirestore.instance
+                  .collection('user_terms')
+                  .doc(userId)
+                  .collection('terms')
+                  .doc(docId);
+
+              var userTermSnapshot = await userTermDoc.get();
+              if (!userTermSnapshot.exists) {
+                await userTermDoc.set({
+                  'MY用語': false,
+                });
+              }
+            }
+          }
+        }
+
+        _initializeUserTerms(); // コレクションの初期化を呼び出す
 
         return Container(
           width: MediaQuery.of(context).size.width / 1.1,
@@ -150,76 +173,206 @@ class _TechTermPageState extends State<TechTermPage> {
             itemCount: docs.length,
             itemBuilder: (context, index) {
               var doc = docs[index];
-              var data = doc.data() as Map<String, dynamic>;
               var docId = doc.id;
-              var subject = data['科目'] ?? 'No subject';
-              var term = data['用語'] ?? 'No term';
-              var description = data['説明'] ?? 'No description';
-              var checkbox = data['MY用語'] ?? false;
-              var registrationNumber = data['登録数'] ?? 0;
 
-              if (!_checkboxStates.containsKey(docId)) {
-                _checkboxStates[docId] = checkbox;
-              }
+              return StreamBuilder<DocumentSnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('user_terms')
+                    .doc(userId)
+                    .collection('terms')
+                    .doc(docId)
+                    .snapshots(),
+                builder: (context,
+                    AsyncSnapshot<DocumentSnapshot> userTermSnapshot) {
+                  if (userTermSnapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  }
+                  if (userTermSnapshot.hasError) {
+                    return Text('Error: ${userTermSnapshot.error}');
+                  }
+                  if (!userTermSnapshot.hasData ||
+                      !userTermSnapshot.data!.exists) {
+                    return SizedBox.shrink(); // ユーザー用語がない場合
+                  }
 
-              return Center(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: Colors.grey, width: 2),
-                    ),
-                  ),
-                  child: ListTile(
-                    leading: Checkbox(
-                      value: _checkboxStates[docId],
-                      onChanged: (bool? value) async {
-                        setState(() {
-                          _checkboxStates[docId] = value ?? false;
-                          if (value == true) {
-                            registrationNumber += 1;
-                          } else {
-                            registrationNumber -= 1;
-                          }
-                        });
-                        await FirebaseFirestore.instance
-                            .collection('tech_term')
-                            .doc(docId)
-                            .update({
-                          'MY用語': value,
-                          '登録数': registrationNumber,
-                        });
-                      },
-                    ),
-                    title: Text(
-                      term,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                  var userTermData =
+                      userTermSnapshot.data!.data() as Map<String, dynamic>;
+                  var checkbox = userTermData['MY用語'] ?? false;
+
+                  var data = doc.data() as Map<String, dynamic>;
+                  var subject = data['科目'] ?? 'No subject';
+                  var term = data['用語'] ?? 'No term';
+                  var description = data['説明'] ?? 'No description';
+                  var registrationNumber = data['登録数'] ?? 0;
+
+                  return Center(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: Colors.grey, width: 2),
+                        ),
                       ),
-                    ),
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: Text('$term\n$subject'),
-                            content: Text(description),
-                            actions: <Widget>[
-                              TextButton(
-                                child: Text('閉じる'),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            ],
+                      child: ListTile(
+                        leading: Checkbox(
+                          value: checkbox,
+                          onChanged: (bool? value) async {
+                            setState(() {
+                              _checkboxStates[docId] = value ?? false;
+                            });
+
+                            await FirebaseFirestore.instance
+                                .collection('tech_term')
+                                .doc(docId)
+                                .update({
+                              'MY用語': value,
+                              '登録数':
+                                  registrationNumber + (value == true ? 1 : -1),
+                            });
+
+                            await FirebaseFirestore.instance
+                                .collection('user_terms')
+                                .doc(userId)
+                                .collection('terms')
+                                .doc(docId)
+                                .set({
+                              'MY用語': value,
+                            });
+                          },
+                        ),
+                        title: Text(
+                          term,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: Text('$term\n$subject'),
+                                content: Text(description),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: Text('閉じる'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
                           );
                         },
-                      );
-                    },
-                  ),
-                ),
+                      ),
+                    ),
+                  );
+                },
               );
             },
+          ),
+        );
+      },
+    );
+  }
+
+  // _buildListTile メソッドの修正
+  Widget _buildListTile(BuildContext context, DocumentSnapshot doc) {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('user_terms')
+          .doc(userId)
+          .collection('terms')
+          .doc(doc.id)
+          .snapshots(),
+      builder: (context, AsyncSnapshot<DocumentSnapshot> userTermSnapshot) {
+        if (userTermSnapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        }
+        if (userTermSnapshot.hasError) {
+          return Text('Error: ${userTermSnapshot.error}');
+        }
+
+        bool checkbox = false;
+        if (userTermSnapshot.hasData && userTermSnapshot.data!.exists) {
+          var userTermData =
+              userTermSnapshot.data!.data() as Map<String, dynamic>;
+          checkbox = userTermData['MY用語'] ?? false;
+        }
+
+        var data = doc.data() as Map<String, dynamic>;
+        var docId = doc.id;
+        var subject = data['科目'] ?? 'No subject';
+        var term = data['用語'] ?? 'No term';
+        var description = data['説明'] ?? 'No description';
+        var registrationNumber = data['登録数'] ?? 0;
+
+        if (!_checkboxStates.containsKey(docId)) {
+          _checkboxStates[docId] = checkbox;
+        }
+
+        return Center(
+          child: Container(
+            decoration: const BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: Colors.grey, width: 2),
+              ),
+            ),
+            child: ListTile(
+              leading: Checkbox(
+                value: _checkboxStates[docId] ?? checkbox,
+                onChanged: (bool? value) async {
+                  setState(() {
+                    _checkboxStates[docId] = value ?? false;
+                  });
+
+                  await FirebaseFirestore.instance
+                      .collection('tech_term')
+                      .doc(docId)
+                      .update({
+                    'MY用語': value,
+                    '登録数': registrationNumber + (value == true ? 1 : -1),
+                  });
+
+                  await FirebaseFirestore.instance
+                      .collection('user_terms')
+                      .doc(userId)
+                      .collection('terms')
+                      .doc(docId)
+                      .set({
+                    'MY用語': value,
+                  });
+                },
+              ),
+              title: Text(
+                term,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Text('$term\n$subject'),
+                      content: Text(description),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text('閉じる'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
           ),
         );
       },
@@ -292,8 +445,6 @@ class _TechTermPageState extends State<TechTermPage> {
                                         Text('科目: $_dropdownValue'),
                                         Text('用語名: $term'),
                                         Text('説明: $description'),
-                                        Text('MY用語: $_isChecked'),
-                                        Text('登録数: $registrationNumber'),
                                       ],
                                     ),
                                     actions: <Widget>[
@@ -316,16 +467,30 @@ class _TechTermPageState extends State<TechTermPage> {
                               false;
 
                           if (shouldSave) {
-                            await FirebaseFirestore.instance
+                            // 新しいドキュメントIDを自動生成
+                            DocumentReference techTermRef = FirebaseFirestore
+                                .instance
                                 .collection('tech_term')
-                                .doc()
-                                .set({
+                                .doc();
+                            String docId = techTermRef.id;
+
+                            // tech_term コレクションにデータを保存
+                            await techTermRef.set({
                               '科目': _dropdownValue,
                               '用語': term,
                               '説明': description,
-                              'MY用語': _isChecked,
                               '登録数': registrationNumber,
                               '登録時間': registrationTime,
+                            });
+
+                            // user_terms コレクションに MY用語 を保存
+                            await FirebaseFirestore.instance
+                                .collection('user_terms')
+                                .doc(userId)
+                                .collection('terms')
+                                .doc(docId) // tech_term の docId を使用
+                                .set({
+                              'MY用語': _isChecked,
                             });
 
                             setState(() {
