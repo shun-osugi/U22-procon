@@ -292,14 +292,23 @@ class TaskAnswer extends StatelessWidget {
                               height: 80,
                               width: 80,
                               child: tasks[index].image != ''
-                                  ? FittedBox(
-                                    fit: BoxFit.contain,
-                                    child: Image.network(
-                                      tasks[index].image,
-                                      fit: BoxFit.contain,
-                                    )
-                                  )
-                                  : const Text("No data"),
+                              ? FittedBox(
+                                fit: BoxFit.contain,
+                                child: Image.network(
+                                  tasks[index].image,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (c, o, s) {
+                                    return const Column(children: [
+                                      Icon(
+                                        Icons.error,
+                                        color: Colors.red,
+                                      ),
+                                      Text("画像が表示できませんでした"),
+                                    ]);
+                                  }
+                                )
+                              )
+                              : const Text("No data"),
                             ),
                             Text(
                               tasks[index].content,
