@@ -11,15 +11,22 @@ import 'package:u_22_procon/subject_term.dart';
 import 'package:u_22_procon/subject_eval.dart';
 import 'package:u_22_procon/subject_settings.dart';
 
-//データベース
+// データベース
 import 'package:firebase_core/firebase_core.dart';
 import 'package:u_22_procon/tech_term.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 
-//遷移先ファイルのインポート文を記述
-//下が例
+// ローカル通知関連
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'; // パッケージをインポート
+import 'notification_service.dart';
+
+// グローバルな GoRouter インスタンス
+GoRouter? globalRouter;
+
+// 遷移先ファイルのインポート文を記述
+// 下が例
 // import 'package:XXX/page_a.dart';
 
 final rootNavigatorKeyProvider = Provider<GlobalKey<NavigatorState>>((ref) {
@@ -35,7 +42,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
   final rootNavigatorKey = ref.watch(rootNavigatorKeyProvider);
   final shellNavigatorKey = ref.watch(shellNavigatorKeyProvider);
 
-  return GoRouter(
+  final router = GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/classTimetable',
     debugLogDiagnostics: true,
@@ -126,7 +133,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               pageBuilder: (BuildContext context, GoRouterState state) {
                 return buildTransitionPage(child: const Subject_settings());
               }),
-          //一旦ユーザー登録をここに避難
+          // 一旦ユーザー登録をここに避難
           GoRoute(
             path: '/log_in',
             // parentNavigatorKey: rootNavigatorKey,
@@ -146,6 +153,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+
+  // グローバル変数に設定
+  globalRouter = router;
+
+  return router;
 });
 
 CustomTransitionPage<T> buildTransitionPage<T>({
@@ -160,19 +172,26 @@ CustomTransitionPage<T> buildTransitionPage<T>({
   );
 }
 
-//main関数
+// ローカル通知の初期設定を保持する変数
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+// main関数
 main() async {
   try {
-    //アプリ
+    // アプリ
     const app = MyApp();
 
-    //データベース初期化
+    // データベース初期化
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
-    //プロバイダースコープでアプリを囲む
+    // 通知のスケジューリングをセットアップ
+    await setupNotifications(); // notification_service.dart で定義された関数を呼び出す
+
+    // プロバイダースコープでアプリを囲む
     const scop = ProviderScope(child: app);
     runApp(scop);
   } catch (e) {
@@ -180,10 +199,10 @@ main() async {
   }
 }
 
-//プロバイダー
+// プロバイダー
 final indexProvider = StateProvider((ref) {
-  //変化するデータ　0, 1, 2...(遷移先)
-  return 1; //時間割
+  // 変化するデータ 0, 1, 2...(遷移先)
+  return 1; // 時間割
 });
 
 class MyApp extends ConsumerWidget {
@@ -202,19 +221,19 @@ class MyApp extends ConsumerWidget {
   }
 }
 
-//画面
+// 画面
 class HeaderFooter extends ConsumerWidget {
   final Widget child;
   const HeaderFooter({required this.child, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    //インデックス
+    // インデックス
     final index = ref.watch(indexProvider);
 
-    //フッターアイテムたち
+    // フッターアイテムたち
     const footerItems = [
-      //画面1(仮)
+      // 画面1(仮)
       BottomNavigationBarItem(
         icon: Icon(
           Icons.format_list_bulleted_add,
@@ -222,7 +241,7 @@ class HeaderFooter extends ConsumerWidget {
         ),
         label: '',
       ),
-      //画面2(仮)
+      // 画面2(仮)
       BottomNavigationBarItem(
         icon: Icon(
           Icons.calendar_month,
@@ -230,7 +249,7 @@ class HeaderFooter extends ConsumerWidget {
         ),
         label: '',
       ),
-      //画面3(仮)
+      // 画面3(仮)
       BottomNavigationBarItem(
         icon: Icon(
           Icons.menu_book,
@@ -240,14 +259,14 @@ class HeaderFooter extends ConsumerWidget {
       ),
     ];
 
-    //footer
+    // footer
     final footerBar = BottomNavigationBar(
-      items: footerItems, //フッターアイテムたち
-      backgroundColor: Colors.grey[350], //背景色
-      selectedItemColor: Colors.cyan, //選択されたアイテムの色
-      unselectedItemColor: Colors.black, //選択せれていない時のアイテムの色
-      currentIndex: index, //インデックス
-      //タップされた時インデックス(画面)を変更する
+      items: footerItems, // フッターアイテムたち
+      backgroundColor: Colors.grey[350], // 背景色
+      selectedItemColor: Colors.cyan, // 選択されたアイテムの色
+      unselectedItemColor: Colors.black, // 選択せれていない時のアイテムの色
+      currentIndex: index, // インデックス
+      // タップされた時インデックス(画面)を変更する
       onTap: (int idx) {
         ref.read(indexProvider.notifier).state = idx;
         switch (idx) {
