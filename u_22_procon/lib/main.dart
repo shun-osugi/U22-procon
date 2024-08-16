@@ -15,7 +15,7 @@ import 'package:u_22_procon/subject_settings.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:u_22_procon/tech_term.dart';
 import 'firebase_options.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 
 // ローカル通知関連

@@ -189,6 +189,15 @@ class _LogIn extends State<SignIn> {
                     }
                   },
                   child: const Text('Sign In')),
+              //スペースを空ける
+              const SizedBox(
+                height: 8,
+              ),
+              TextButton(
+                  onPressed: () {
+                    GoRouter.of(context).go('/log_in');
+                  },
+                  child: const Text('ログインはこちら'))
             ],
           ),
         ),
