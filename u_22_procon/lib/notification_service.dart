@@ -61,6 +61,7 @@ Future<void> scheduleReminderNotification(
     androidAllowWhileIdle: true,
     uiLocalNotificationDateInterpretation:
         UILocalNotificationDateInterpretation.absoluteTime,
+    payload: 'todo', // 通知をタップしたときに渡す情報
   );
 }
 
