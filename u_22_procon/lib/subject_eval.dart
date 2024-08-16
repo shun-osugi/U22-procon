@@ -25,15 +25,22 @@ class SubjectEval extends StatelessWidget {
   static TextEditingController reviewcontent = TextEditingController(); //口コミ内容
   static List<review> reviews = []; //口コミ一覧リスト
   static StateSetter? setreview; //口コミの一覧の状態を管理（ソートなどで更新されるから）
+  static StateSetter? seteval; //口コミの一覧の状態を管理（ソートなどで更新されるから）
   static double screenwidth = 0;
   static double screenheight = 0;
   static String? userid = FirebaseAuth.instance.currentUser?.uid;
+  static List<int> usereval = [0, 0, 0, 0];
+  static List<String> etext = ['満足度', '単位取得度', '内容の難しさ', '課題の多さ'];
 
   @override
   Widget build(BuildContext context)
   {
     screenwidth = MediaQuery.of(context).size.width;
     screenheight = MediaQuery.of(context).size.height;
+    for(var j=0; j<4; j++) {usereval[j] = 0;}
+    dropdownValue = "1";
+    reviewtitle.clear();
+    reviewcontent.clear();
 
     return Scaffold(
       backgroundColor: Colors.pink[100],
@@ -62,53 +69,22 @@ class SubjectEval extends StatelessWidget {
           ),
 
           //各評価
-          child: FutureBuilder<QuerySnapshot>(
-            // Firestore コレクションの参照を取得
-            future: FirebaseFirestore.instance.collection('eval').get(),
-            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                // 1. データが読み込まれるまでの間、ローディングインジケーターを表示
-                return const CircularProgressIndicator();
-              }
-              if (snapshot.hasError) {
-                // 2. エラーが発生した場合、エラーメッセージを表示
-                return Text('Error: ${snapshot.error}');
-              }
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                // 3. データが存在しない場合、メッセージを表示
-                return const Text('No data found');
-              }
-
-              //MY用語にtrueが格納されてるデータを探す
-              List<DocumentSnapshot> docs = snapshot.data!.docs.where((doc) {
-                var data = doc.data() as Map<String, dynamic>;
-                return data['科目'] == subject;
-              }).toList();
-
-              if (docs.isEmpty) {
-                // フィルタリングされた結果が空の場合、メッセージを表示
-                return const Text('科目評価がありません');
-              }
-
-              var data = docs[0].data() as Map<String, dynamic>;
-              var satis = data['満足度'] ?? 'No satis';
-              var credit = data['単位取得度'] ?? 'No credit';
-              var content = data['内容の難しさ'] ?? 'No content';
-              var task = data['課題の多さ'] ?? 'No task';
-
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,//余白を揃える
-                children: [
-                  evaltext('満足度', satis),
-                  evaltext('単位取得度', credit),
-                  evaltext('内容の難しさ', content),
-                  evaltext('課題の多さ', task),
-                ],
-              );
-            }
-          ),
+          child: diseval(),
         ),
-        SizedBox(height: screenheight/70),
+        // SizedBox(height: screenheight/150),
+        // 評価ボタン
+        ElevatedButton(
+          onPressed: () async {
+            await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return evalstarbutton();
+              },
+            );
+          },
+          child: const Text('評価ボタン')
+        ),
+        SizedBox(height: screenheight/150),
 
         //口コミ
         //上のバー
@@ -202,6 +178,70 @@ class SubjectEval extends StatelessWidget {
   }
   //main終わり
 
+  //評価一覧
+  StatefulBuilder diseval(){
+    return StatefulBuilder(//状態を管理
+      builder: (BuildContext context, StateSetter setState) {
+        seteval = setState;
+        return FutureBuilder<QuerySnapshot>(
+          // Firestore コレクションの参照を取得
+          future: FirebaseFirestore.instance.collection('eval').get(),
+          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              // 1. データが読み込まれるまでの間、ローディングインジケーターを表示
+              return const CircularProgressIndicator();
+            }
+            if (snapshot.hasError) {
+              // 2. エラーが発生した場合、エラーメッセージを表示
+              return Text('Error: ${snapshot.error}');
+            }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              // 3. データが存在しない場合、メッセージを表示
+              return const Text('No data found');
+            }
+
+            //MY用語にtrueが格納されてるデータを探す
+            List<DocumentSnapshot> docs = snapshot.data!.docs.where((doc) {
+              var data = doc.data() as Map<String, dynamic>;
+              return data['科目'] == subject;
+            }).toList();
+
+            if (docs.isEmpty) {
+              // フィルタリングされた結果が空の場合、メッセージを表示
+              return const Text('科目評価がありません');
+            }
+
+            List<int> sum = [0,0,0,0];
+            List<int> count = [0,0,0,0];
+            for(var i=0; i<docs.length; i++){
+              var data = docs[i].data() as Map<String, dynamic>;
+              for(var j=0; j<4; j++){
+                int x = data[etext[j]] as int;
+                sum[j] += x;
+                if(x != 0) count[j]++;
+                if(data['userid'] == userid){
+                  usereval[j] = x;
+                }
+              }
+            }
+            for(var j=0; j<4; j++){
+              if(count[j] != 0){
+                sum[j] = sum[j] ~/ count[j];
+              }
+            }
+
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,//余白を揃える
+              children: [
+                for(var j=0; j<4; j++) evaltext(etext[j], sum[j])
+              ],
+            );
+          }
+        );
+      }
+    );
+  }
+
   //評価欄の各評価項目
   Container  evaltext(String? text,int value){
     return Container(
@@ -272,6 +312,90 @@ class SubjectEval extends StatelessWidget {
           ),
         ]
       ),
+    );
+  }
+
+  //評価星ボタン
+  StatefulBuilder evalstarbutton(){
+    return StatefulBuilder(//状態を管理
+      builder: (BuildContext context, StateSetter setState) {
+        return SimpleDialog(
+          titleTextStyle: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1,
+          ),
+          titlePadding: const EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 10.0),
+          title: const Text('科目を評価する', textAlign: TextAlign.center),
+          contentPadding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 15.0),
+          children: [
+            for(var i=0;i<4;i++) Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Container(
+                  width:  screenwidth/6,
+                  height: screenheight/20,
+                  alignment: Alignment.centerLeft,//左寄せ
+                  child: Text(
+                    etext[i],
+                    style: const TextStyle(
+                      fontSize: 12,
+                      letterSpacing: 1,
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                ),
+                for(var j=0;j<5;j++) SizedBox(
+                  width: screenwidth/20,
+                  height: screenheight/20,
+                  child: GestureDetector(
+                    onTap: () async {
+                      usereval[i]=j+1;
+                      setState((){});
+                    },
+                    child: j < usereval[i]
+                    ? Icon(
+                      Icons.star,
+                      color: Colors.black,
+                      size: screenheight / 30,
+                    )
+                    : Icon(
+                      Icons.star,
+                      color: Colors.white,
+                      size: screenheight / 30,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                // 確認メッセージのポップアップ表示
+                //何か評価されたなら
+                if (usereval.reduce((a, b) => a + b) > 0) {
+                  //ポップアップで「OK」を押したら保存
+                  await FirebaseFirestore.instance.collection('eval').doc().set({
+                    '科目': subject,
+                    '満足度': usereval[0],
+                    '単位取得度': usereval[1],
+                    '内容の難しさ': usereval[2],
+                    '課題の多さ': usereval[3],
+                    'userid' : userid
+                  });
+
+                  // 入力フィールドとチェックボックスの状態をクリア
+                  setState((){
+                    seteval!((){});
+                  });
+
+                  Navigator.pop(context); // モーダルシートを閉じる
+                }
+              },
+              child: const Text('評価する！'),
+            ),
+          ],
+        );
+      }
     );
   }
 
