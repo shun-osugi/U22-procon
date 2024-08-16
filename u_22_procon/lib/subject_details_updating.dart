@@ -336,7 +336,7 @@ class ReadDB extends StatelessWidget {
 
               if (docs.isEmpty) {
                 // フィルタリングされた結果が空の場合、メッセージを表示
-                return const Text('MY用語がありません');
+                return const Text('科目がありません');
               }
 
               // データが存在する場合、UI に表示する
@@ -354,6 +354,9 @@ class ReadDB extends StatelessWidget {
                   var classEvalPer2 = data['評価方法2の割合'] ?? 'No classEvalPer2';
                   var classEval3 = data['評価方法3'] ?? 'No classEval3';
                   var classEvalPer3 = data['評価方法3の割合'] ?? 'No classEvalPer3';
+                  var registrationNumber =
+                      data['登録数'] ?? 'No registrationNumber';
+                  var docId = doc.id;
 
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -366,7 +369,19 @@ class ReadDB extends StatelessWidget {
                           //ここに自分の時間割を変更するコードを記述する必要あり
                           //
                           IconButton(
-                              onPressed: () {
+                              onPressed: () async {
+                                //
+                                //登録数を減らすコード
+                                //
+                                registrationNumber -= 1;
+                                print(registrationNumber);
+                                //firestoreに保存
+                                await FirebaseFirestore.instance
+                                    .collection('class')
+                                    .doc(docId)
+                                    .update({
+                                  '登録数': registrationNumber,
+                                });
                                 String date1 = date;
                                 int period1 = period;
                                 final data = {'day': date1, 'period': period1};
