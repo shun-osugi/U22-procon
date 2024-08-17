@@ -1,9 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/widgets.dart';
-import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class review {//口コミ
@@ -28,8 +26,11 @@ class SubjectEval extends StatelessWidget {
   static StateSetter? seteval; //口コミの一覧の状態を管理（ソートなどで更新されるから）
   static double screenwidth = 0;
   static double screenheight = 0;
+  //ユーザid（何かしらのユーザがログインされているとする）
   static String? userid = FirebaseAuth.instance.currentUser?.uid;
-  static List<int> usereval = [0, 0, 0, 0];
+  static String? userdbid; //ユーザーの科目評価のDBid
+  static List<int> usereval = [0, 0, 0, 0]; //ログインユーザの科目評価
+  //各評価項目
   static List<String> etext = ['満足度', '単位取得度', '内容の難しさ', '課題の多さ'];
 
   @override
@@ -37,10 +38,13 @@ class SubjectEval extends StatelessWidget {
   {
     screenwidth = MediaQuery.of(context).size.width;
     screenheight = MediaQuery.of(context).size.height;
+
+    //初期化
     for(var j=0; j<4; j++) {usereval[j] = 0;}
     dropdownValue = "1";
     reviewtitle.clear();
     reviewcontent.clear();
+    userdbid = null;
 
     return Scaffold(
       backgroundColor: Colors.pink[100],
@@ -116,7 +120,7 @@ class SubjectEval extends StatelessWidget {
               Container(
                 width:  screenwidth/4,
                 height: screenheight/15,
-                alignment: Alignment.center,//左寄せ
+                alignment: Alignment.center,
                 child: const Text(
                   'みんなの口コミ',
                   style: TextStyle(
@@ -211,21 +215,28 @@ class SubjectEval extends StatelessWidget {
               return const Text('科目評価がありません');
             }
 
-            List<int> sum = [0,0,0,0];
-            List<int> count = [0,0,0,0];
+            List<int> sum = [0,0,0,0]; //全ての評価の各合計値
+            List<int> count = [0,0,0,0]; //評価されたユーザー数
             for(var i=0; i<docs.length; i++){
               var data = docs[i].data() as Map<String, dynamic>;
               for(var j=0; j<4; j++){
                 int x = data[etext[j]] as int;
                 sum[j] += x;
+                //0はユーザの評価としてカウントしない
+                //評価は最低でも1になる
                 if(x != 0) count[j]++;
-                if(data['userid'] == userid){
-                  usereval[j] = x;
+              }
+              //ユーザーが以前に評価したならそれを反映
+              if(data['userid'] == userid){
+                for(var j=0; j<4; j++){
+                  usereval[j] = data[etext[j]] as int;
                 }
+                userdbid = docs[i].id;
               }
             }
             for(var j=0; j<4; j++){
               if(count[j] != 0){
+                //評価の平均を求める
                 sum[j] = sum[j] ~/ count[j];
               }
             }
@@ -233,6 +244,7 @@ class SubjectEval extends StatelessWidget {
             return Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,//余白を揃える
               children: [
+                //各評価を表示
                 for(var j=0; j<4; j++) evaltext(etext[j], sum[j])
               ],
             );
@@ -374,14 +386,24 @@ class SubjectEval extends StatelessWidget {
                 //何か評価されたなら
                 if (usereval.reduce((a, b) => a + b) > 0) {
                   //ポップアップで「OK」を押したら保存
-                  await FirebaseFirestore.instance.collection('eval').doc().set({
-                    '科目': subject,
-                    '満足度': usereval[0],
-                    '単位取得度': usereval[1],
-                    '内容の難しさ': usereval[2],
-                    '課題の多さ': usereval[3],
-                    'userid' : userid
-                  });
+                  //ユーザの評価が初めてならそのまま追加
+                  if(userdbid == null){
+                    await FirebaseFirestore.instance.collection('eval').doc().set({
+                      '科目': subject,
+                      '満足度': usereval[0],
+                      '単位取得度': usereval[1],
+                      '内容の難しさ': usereval[2],
+                      '課題の多さ': usereval[3],
+                      'userid' : userid
+                    });
+                  }else{ //そうでないなら元の評価を更新
+                    await FirebaseFirestore.instance.collection('eval').doc(userdbid).update({
+                      '満足度': usereval[0],
+                      '単位取得度': usereval[1],
+                      '内容の難しさ': usereval[2],
+                      '課題の多さ': usereval[3],
+                    });
+                  }
 
                   // 入力フィールドとチェックボックスの状態をクリア
                   setState((){
@@ -495,10 +517,12 @@ class SubjectEval extends StatelessWidget {
                 0,
                 data['口コミ内容'] ?? 'No content',
                 docs[i].id,
-                false //ユーザーによって変更？
+                false
               ));
+              //いいね数はいいねしたユーザのリストになっている
               var se = data['いいね数'] as List;
               reviews[i].good = se.length;
+              //ユーザーが過去にいいねしたなら最初からいいねした状態にしておく
               if(se.contains(userid)){
                 reviews[i].isgood = true;
                 reviews[i].good--;
@@ -518,6 +542,7 @@ class SubjectEval extends StatelessWidget {
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () async {
+                    //内容の詳細をダイアログで表示
                     await showDialog(
                       context: context,
                       builder: (BuildContext context) {
@@ -543,6 +568,7 @@ class SubjectEval extends StatelessWidget {
                       },
                     );
                   },
+                  //元から表示されるリスト
                   child: Container(
                     width:  screenwidth/1.2,
                     height: screenheight/15,
@@ -607,17 +633,18 @@ class SubjectEval extends StatelessWidget {
           alignment: Alignment.centerLeft,//左寄せ
           child: GestureDetector(
             onTap: () async {
-              //いいねしているか指定ないかを反転
               if(reviews[index].isgood){
+                //いいねを取り消すなら口コミへの評価のユーザを消す
                 await FirebaseFirestore.instance.collection('reviews').doc(reviews[index].id).update({
                   'いいね数': FieldValue.arrayRemove([userid]),
                 });
-              }
-              else{
+              }else{
+                //いいねをするなら口コミへの評価のユーザを追加する
                 await FirebaseFirestore.instance.collection('reviews').doc(reviews[index].id).update({
                   'いいね数': FieldValue.arrayUnion([userid]),
                 });
               }
+              //いいねしているか指定ないかを反転
               reviews[index].isgood = !reviews[index].isgood;
               setState((){});
             },
@@ -735,7 +762,7 @@ class SubjectEval extends StatelessWidget {
                       'いいね数': [],
                     });
 
-                    // 入力フィールドとチェックボックスの状態をクリア
+                    // 入力フィールドなどの状態をクリア
                     setState((){
                       reviewtitle.clear();
                       reviewcontent.clear();
