@@ -1,10 +1,8 @@
 import 'package:file_picker/_internal/file_picker_web.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/widgets.dart';
-import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
@@ -36,16 +34,19 @@ class TaskAnswer extends StatelessWidget {
   static StateSetter? setreview; //口コミの一覧の状態を管理（ソートなどで更新されるから）
   static double screenwidth = 0;
   static double screenheight = 0;
-  static String imagename = '';
-  static FilePickerResult? file;
+  static String imagename = ''; //写真URL
+  static String filename = ""; //写真の名前
+  static FilePickerResult? file; //選択ファイル
+  //ユーザid（何かしらのユーザがログインされているとする）
   static String? userid = FirebaseAuth.instance.currentUser?.uid;
-  static String filename = "";
 
   @override
   Widget build(BuildContext context)
   {
     screenwidth = MediaQuery.of(context).size.width;
     screenheight = MediaQuery.of(context).size.height;
+
+    //初期化
     dropdownValue = "1";
     reviewtitle.clear();
     reviewcontent.clear();
@@ -251,11 +252,13 @@ class TaskAnswer extends StatelessWidget {
                 0,
                 data['課題内容'] ?? 'No content',
                 docs[i].id,
-                false, //ユーザーによって変更？
+                false,
                 data['写真名'] ?? '',
               ));
+              //いいね数はいいねしたユーザのリストになっている
               var se = data['いいね数'] as List;
               tasks[i].good = se.length;
+              //ユーザーが過去にいいねしたなら最初からいいねした状態にしておく
               if(se.contains(userid)){
                 tasks[i].isgood = true;
                 tasks[i].good--;
@@ -275,6 +278,7 @@ class TaskAnswer extends StatelessWidget {
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () async {
+                    //内容の詳細をダイアログで表示
                     await showDialog(
                       context: context,
                       builder: (BuildContext context) {
@@ -297,6 +301,7 @@ class TaskAnswer extends StatelessWidget {
                                 child: Image.network(
                                   tasks[index].image,
                                   fit: BoxFit.contain,
+                                  //画像表示のエラーを検出
                                   errorBuilder: (c, o, s) {
                                     return const Column(children: [
                                       Icon(
@@ -322,6 +327,8 @@ class TaskAnswer extends StatelessWidget {
                       },
                     );
                   },
+
+                  //元から表示されるリスト
                   child: Container(
                     width:  screenwidth/1.2,
                     height: screenheight/15,
@@ -386,17 +393,18 @@ class TaskAnswer extends StatelessWidget {
           alignment: Alignment.centerLeft,//左寄せ
           child: GestureDetector(
             onTap: () async {
-              //いいねしているか指定ないかを反転
               if(tasks[index].isgood){
+                //いいねを取り消すなら口コミへの評価のユーザを消す
                 await FirebaseFirestore.instance.collection('tasks').doc(tasks[index].id).update({
                   'いいね数': FieldValue.arrayRemove([userid]),
                 });
-              }
-              else{
+              }else{
+                //いいねをするなら口コミへの評価のユーザを追加する
                 await FirebaseFirestore.instance.collection('tasks').doc(tasks[index].id).update({
                   'いいね数': FieldValue.arrayUnion([userid]),
                 });
               }
+              //いいねしているか指定ないかを反転
               tasks[index].isgood = !tasks[index].isgood;
               setState((){});
             },
@@ -475,7 +483,7 @@ class TaskAnswer extends StatelessWidget {
 
                   if (kIsWeb) {
                     file = await FilePickerWeb.platform.pickFiles(
-                      type: FileType.image,
+                      type: FileType.image, //写真ファイルのみ抽出
                       // allowedExtensions: ['png', 'jpeg'], // ピックする拡張子を限定できる。
                     );
                     // Web上での実行時の処理
@@ -487,16 +495,12 @@ class TaskAnswer extends StatelessWidget {
                   }
                   filename = file!.files.first.name;
 
-                  // if (file == null) return;
-                  //Import dart:core
-                  // String uniqueFileName =
-                  //     DateTime.now().millisecondsSinceEpoch.toString();
                   setState((){});
                 },
                 icon: const Icon(Icons.camera_alt)
               ),
               file != null 
-              ? Text(filename)
+              ? Text(filename) //ファイルを選択したならファイル名を表示
               : Container(),
               ElevatedButton(
                 onPressed: () async {
@@ -538,12 +542,15 @@ class TaskAnswer extends StatelessWidget {
 
                   if (shouldSave) {
                     try {
+                      //ファイルを選択していないなら何もしない
                       if(file != null){
                         PlatformFile files = file!.files.first;
+                        //ファイルはfirestoreではなくfirestorageにアップロード
                         Reference referenceImageToUpload = FirebaseStorage.instance.ref()
                         .child('images')
                         .child(files.name);
                         //Store the file
+                        //metaデータをつけてUint8listでデータをアップ
                         await referenceImageToUpload.putData(
                           files.bytes!,
                           SettableMetadata(contentType: 'image/'+files.name.split('.').last,),
@@ -551,10 +558,8 @@ class TaskAnswer extends StatelessWidget {
                         //Success: get the download URL
                         imagename = await referenceImageToUpload.getDownloadURL();
                       }
-                      // imagename = files.name;
                     } catch (error) {
                       print(error);
-                      //Some error occurred
                     }
 
                     //ポップアップで「OK」を押したら保存
@@ -567,7 +572,7 @@ class TaskAnswer extends StatelessWidget {
                       '写真名': imagename,
                     });
 
-                    // 入力フィールドとチェックボックスの状態をクリア
+                    // 入力フィールドなどの状態をクリア
                     setState((){
                       reviewtitle.clear();
                       reviewcontent.clear();
