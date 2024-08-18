@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 // import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:u_22_procon/todo.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:u_22_procon/class_timetable.dart';
 
 final subjectProvider = StateProvider<String?>((ref) => null);
@@ -31,6 +33,53 @@ class SubjectDetailsUpdating extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             ReadDB(subject: subject),
+            ElevatedButton(
+                onPressed: () async {
+                  if (FirebaseAuth.instance.currentUser != null) {
+                    documentId = FirebaseAuth.instance.currentUser?.uid;
+                    print(documentId);
+                  } else {
+                    GoRouter.of(context).go('/log_in');
+                  }
+                  await FirebaseFirestore.instance
+                      .collection('students')
+                      .doc(documentId)
+                      .update(
+                    {
+                      '${day}曜日.${period.toString()}': FieldValue.delete(),
+                    },
+                  );
+                  print('削除完了');
+                  QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                      .collection('class')
+                      .where('教科名', isEqualTo: subject)
+                      .get();
+
+                  if (querySnapshot.docs.isEmpty) {
+                    print('科目がありません');
+                    return;
+                  }
+
+                  // ドキュメントIDを取得
+                  DocumentSnapshot doc = querySnapshot.docs.first;
+                  var data = doc.data() as Map<String, dynamic>;
+                  int registrationNumber = data['登録数'] ?? 0;
+                  String docId = doc.id;
+                  //
+                  //登録数を減らすコード
+                  //
+                  registrationNumber -= 1;
+                  print(registrationNumber);
+                  //firestoreに保存
+                  await FirebaseFirestore.instance
+                      .collection('class')
+                      .doc(docId)
+                      .update({
+                    '登録数': registrationNumber,
+                  });
+                  GoRouter.of(context).go('/classTimetable');
+                },
+                child: Text('削除')),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
