@@ -47,6 +47,20 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/classTimetable',
     debugLogDiagnostics: true,
     routes: <RouteBase>[
+      GoRoute(
+        path: '/log_in',
+        pageBuilder: (BuildContext context, GoRouterState state) {
+          return buildTransitionPage(child: const LogIn());
+        },
+        routes: <RouteBase>[
+          GoRoute(
+              path: 'sign_in',
+              parentNavigatorKey: rootNavigatorKey,
+              builder: (BuildContext context, GoRouterState state) {
+                return const SignIn();
+              }),
+        ],
+      ),
       ShellRoute(
         navigatorKey: shellNavigatorKey,
         builder: (BuildContext context, GoRouterState state, Widget child) {
@@ -148,21 +162,21 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 return buildTransitionPage(child: const Subject_settings());
               }),
           // 一旦ユーザー登録をここに避難
-          GoRoute(
-            path: '/log_in',
-            // parentNavigatorKey: rootNavigatorKey,
-            pageBuilder: (BuildContext context, GoRouterState state) {
-              return buildTransitionPage(child: const LogIn());
-            },
-            routes: <RouteBase>[
-              GoRoute(
-                  path: 'sign_in',
-                  parentNavigatorKey: rootNavigatorKey,
-                  builder: (BuildContext context, GoRouterState state) {
-                    return const SignIn();
-                  }),
-            ],
-          ),
+          // GoRoute(
+          //   path: '/log_in',
+          //   // parentNavigatorKey: rootNavigatorKey,
+          //   pageBuilder: (BuildContext context, GoRouterState state) {
+          //     return buildTransitionPage(child: const LogIn());
+          //   },
+          //   routes: <RouteBase>[
+          //     GoRoute(
+          //         path: 'sign_in',
+          //         parentNavigatorKey: rootNavigatorKey,
+          //         builder: (BuildContext context, GoRouterState state) {
+          //           return const SignIn();
+          //         }),
+          //   ],
+          // ),
         ],
       ),
     ],
