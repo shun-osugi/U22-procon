@@ -413,6 +413,9 @@ class _TechTermPageState extends State<TechTermPage> {
                       TextField(
                         decoration: InputDecoration(labelText: '説明'),
                         controller: _description,
+                        maxLines: null, // 複数行入力を許可する
+                        keyboardType:
+                            TextInputType.multiline, // 複数行のテキスト入力をサポート
                       ),
                       SizedBox(height: 20),
                       Checkbox(
