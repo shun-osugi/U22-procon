@@ -182,45 +182,74 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                     String? documentId = null;
 
                     // 確認メッセージのポップアップ表示
-                    bool shouldSave = await showDialog<bool>(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text('この内容で保存しますか？'),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  Text('曜日: $tentativeDate'),
-                                  Text('時限: $tentativePeriod'),
-                                  Text('教科名: $className'),
-                                  Text('教員名: $teacherName'),
-                                  Text('教室: $classPlaceName'),
-                                  Text(
-                                      '評価方法1: $evaluationMethod1,$evaluationMethodPer1%'),
-                                  Text(
-                                      '評価方法2: $evaluationMethod2,$evaluationMethodPer2%'),
-                                  Text(
-                                      '評価方法3: $evaluationMethod3,$evaluationMethodPer3%'),
+                    bool shouldSave = false;
+                    if (className == "") {
+                      shouldSave = await showDialog<bool>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    const Text(
+                                      '教科名を入力してください',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop(false);
+                                      },
+                                      child: const Text('閉じる'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ) ??
+                          false;
+                    } else {
+                      shouldSave = await showDialog<bool>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('この内容で保存しますか？'),
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Text('曜日: $tentativeDate'),
+                                    Text('時限: $tentativePeriod'),
+                                    Text('教科名: $className'),
+                                    Text('教員名: $teacherName'),
+                                    Text('教室: $classPlaceName'),
+                                    Text(
+                                        '評価方法1: $evaluationMethod1,$evaluationMethodPer1%'),
+                                    Text(
+                                        '評価方法2: $evaluationMethod2,$evaluationMethodPer2%'),
+                                    Text(
+                                        '評価方法3: $evaluationMethod3,$evaluationMethodPer3%'),
+                                  ],
+                                ),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(false);
+                                    },
+                                    child: const Text('キャンセル'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(true);
+                                    },
+                                    child: const Text('OK'),
+                                  ),
                                 ],
-                              ),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop(false);
-                                  },
-                                  child: const Text('キャンセル'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop(true);
-                                  },
-                                  child: const Text('OK'),
-                                ),
-                              ],
-                            );
-                          },
-                        ) ??
-                        false;
+                              );
+                            },
+                          ) ??
+                          false;
+                    }
 
                     if (shouldSave) {
                       registrationNumber++;
