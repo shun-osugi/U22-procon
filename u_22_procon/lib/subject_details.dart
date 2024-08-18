@@ -268,9 +268,17 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                       await FirebaseFirestore.instance
                           .collection('students')
                           .doc(documentId)
-                          .update({
+                          .set({
                         tentativeDate2: {tentativePeriod2: className},
-                      });
+                      }, SetOptions(merge: true));
+
+                      GoRouter.of(context).go(
+                          '/classTimetable/subject_details_updating',
+                          extra: {
+                            'subject': className,
+                            'day': tentativeDate,
+                            'period': tentativePeriod
+                          });
                     }
                   } catch (e) {
                     // エラーをキャッチしてログに出力
@@ -548,9 +556,9 @@ class ListWidget extends StatelessWidget {
                           await FirebaseFirestore.instance
                               .collection('students')
                               .doc(documentId)
-                              .update({
+                              .set({
                             tentativeDate: {period2: className},
-                          });
+                          }, SetOptions(merge: true));
                           registrationNumber += 1;
                           print(registrationNumber);
                           //firestoreに保存
