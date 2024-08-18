@@ -157,6 +157,12 @@ class _SubjectTermState extends State<SubjectTerm> {
                                       color: Colors.black,
                                     ),
                                   ),
+                                  subtitle: Text(
+                                    subject,
+                                    style: TextStyle(
+                                      color: Colors.grey[600], // 説明のテキストの色を設定
+                                    ),
+                                  ),
                                   leading: Checkbox(
                                     value: checkbox,
                                     onChanged: (bool? value) async {
