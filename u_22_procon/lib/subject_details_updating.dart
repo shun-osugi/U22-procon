@@ -416,7 +416,6 @@ class ReadDB extends StatelessWidget {
                   var classEvalPer3 = data['評価方法3の割合'] ?? 'No classEvalPer3';
                   var registrationNumber =
                       data['登録数'] ?? 'No registrationNumber';
-                  var docId = doc.id;
 
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -430,6 +429,28 @@ class ReadDB extends StatelessWidget {
                           //
                           IconButton(
                               onPressed: () async {
+                                if (FirebaseAuth.instance.currentUser != null) {
+                                  documentId =
+                                      FirebaseAuth.instance.currentUser?.uid;
+                                  print(documentId);
+                                } else {
+                                  GoRouter.of(context).go('/log_in');
+                                }
+                                //
+                                //履修削除機能
+                                //
+                                await FirebaseFirestore.instance
+                                    .collection('students')
+                                    .doc(documentId)
+                                    .update(
+                                  {
+                                    '${date}曜日.${period.toString()}':
+                                        FieldValue.delete(),
+                                    '${date}曜日.${classId.toString()}':
+                                        FieldValue.delete(),
+                                  },
+                                );
+                                print('削除完了');
                                 //
                                 //登録数を減らすコード
                                 //
@@ -438,7 +459,7 @@ class ReadDB extends StatelessWidget {
                                 //firestoreに保存
                                 await FirebaseFirestore.instance
                                     .collection('class')
-                                    .doc(docId)
+                                    .doc(classId)
                                     .update({
                                   '登録数': registrationNumber,
                                 });
