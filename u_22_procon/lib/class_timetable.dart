@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 //データベース
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -17,6 +17,7 @@ class ClassTimetable extends StatelessWidget {
     String today = getDay();
     List<String> daysOfWeek = ['月', '火', '水', '木', '金', '土', '日'];
     String subject;
+    String classId;
     String day;
     int period;
 
@@ -148,9 +149,12 @@ class ClassTimetable extends StatelessWidget {
                               ),
                             )),
                             ...List.generate(days, (dayIndex) {
-                              String? subjectName =
+                              String? classDocId =
                                   data?['${daysOfWeek[dayIndex]}曜日']
                                       ?['${index + 1}'];
+                              String? subjectName =
+                                  data?['${daysOfWeek[dayIndex]}曜日']
+                                      ?[classDocId];
 
                               return DataCell(
                                 TextButton(
@@ -176,7 +180,7 @@ class ClassTimetable extends StatelessWidget {
                                         : Colors.cyan,
                                   ),
                                   onPressed: () {
-                                    if (subjectName == null) {
+                                    if (classDocId == null) {
                                       day = daysOfWeek[dayIndex];
                                       period = index + 1;
                                       GoRouter.of(context).go(
@@ -186,13 +190,15 @@ class ClassTimetable extends StatelessWidget {
                                             'period': period
                                           });
                                     } else {
-                                      subject = subjectName;
+                                      subject = subjectName ?? 'No Name';
+                                      classId = classDocId;
                                       day = daysOfWeek[dayIndex];
                                       period = index + 1;
                                       GoRouter.of(context).go(
                                           '/classTimetable/subject_details_updating',
                                           extra: {
                                             'subject': subject,
+                                            'classId': classId,
                                             'day': day,
                                             'period': period
                                           });

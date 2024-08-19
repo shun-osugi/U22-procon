@@ -14,15 +14,21 @@ final subjectProvider = StateProvider<String?>((ref) => null);
 class SubjectDetailsUpdating extends StatelessWidget {
   final Map<String, dynamic> recievedData;
   final String subject;
+  final String classId;
   final String day;
   final int period;
   SubjectDetailsUpdating({required this.recievedData})
       : subject = recievedData['subject'] as String,
+        classId = recievedData['classId'] as String,
         day = recievedData['day'] as String,
         period = recievedData['period'] as int;
 
   @override
   Widget build(BuildContext context) {
+    if (FirebaseAuth.instance.currentUser == null) {
+      GoRouter.of(context).go('/log_in');
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('時間割'),
@@ -32,7 +38,7 @@ class SubjectDetailsUpdating extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            ReadDB(subject: subject),
+            ReadDB(subject: subject, classId: classId),
             ElevatedButton(
                 onPressed: () async {
                   if (FirebaseAuth.instance.currentUser != null) {
@@ -41,42 +47,45 @@ class SubjectDetailsUpdating extends StatelessWidget {
                   } else {
                     GoRouter.of(context).go('/log_in');
                   }
+                  //
+                  //履修削除機能
+                  //
                   await FirebaseFirestore.instance
                       .collection('students')
                       .doc(documentId)
                       .update(
                     {
                       '${day}曜日.${period.toString()}': FieldValue.delete(),
+                      '${day}曜日.${classId.toString()}': FieldValue.delete(),
                     },
                   );
                   print('削除完了');
-                  QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                  DocumentSnapshot documentSnapshot = await FirebaseFirestore
+                      .instance
                       .collection('class')
-                      .where('教科名', isEqualTo: subject)
+                      .doc(classId)
                       .get();
 
-                  if (querySnapshot.docs.isEmpty) {
+                  if (!documentSnapshot.exists) {
                     print('科目がありません');
                     return;
+                  } else {
+                    // ドキュメントIDを取得
+                    var data = documentSnapshot.data() as Map<String, dynamic>;
+                    int registrationNumber = data['登録数'] ?? 0;
+                    //
+                    //登録数を減らすコード
+                    //
+                    registrationNumber -= 1;
+                    print(registrationNumber);
+                    //firestoreに保存
+                    await FirebaseFirestore.instance
+                        .collection('class')
+                        .doc(classId)
+                        .update({
+                      '登録数': registrationNumber,
+                    });
                   }
-
-                  // ドキュメントIDを取得
-                  DocumentSnapshot doc = querySnapshot.docs.first;
-                  var data = doc.data() as Map<String, dynamic>;
-                  int registrationNumber = data['登録数'] ?? 0;
-                  String docId = doc.id;
-                  //
-                  //登録数を減らすコード
-                  //
-                  registrationNumber -= 1;
-                  print(registrationNumber);
-                  //firestoreに保存
-                  await FirebaseFirestore.instance
-                      .collection('class')
-                      .doc(docId)
-                      .update({
-                    '登録数': registrationNumber,
-                  });
                   GoRouter.of(context).go('/classTimetable');
                 },
                 child: Text('削除')),
@@ -337,7 +346,8 @@ class SubjectDetailsUpdating extends StatelessWidget {
 
 class ReadDB extends StatelessWidget {
   final String subject;
-  ReadDB({required this.subject});
+  final String classId;
+  ReadDB({required this.subject, required this.classId});
 
   @override
   Widget build(BuildContext context) {
@@ -376,11 +386,12 @@ class ReadDB extends StatelessWidget {
                 // 3. データが存在しない場合、メッセージを表示
                 return const Text('No data found');
               }
-
+              print(subject);
+              print(classId);
               //MY用語にtrueが格納されてるデータを探す
               List<DocumentSnapshot> docs = snapshot.data!.docs.where((doc) {
                 var data = doc.data() as Map<String, dynamic>;
-                return data['教科名'] == className;
+                return data['教科名'] == className && doc.id == classId;
               }).toList();
 
               if (docs.isEmpty) {
