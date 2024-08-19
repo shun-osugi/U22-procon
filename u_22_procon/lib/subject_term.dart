@@ -31,32 +31,43 @@ class _SubjectTermState extends State<SubjectTerm> {
         backgroundColor: Colors.white,
         appBar: AppBar(
           title: const Text('専門用語集'),
-          backgroundColor: Colors.white,
+          backgroundColor: Color.fromARGB(255, 214, 214, 214), // AppBar の背景色
           bottom: PreferredSize(
-            preferredSize: Size.fromHeight(kToolbarHeight),
-            child: Align(
-              alignment: Alignment.center,
-              child: Container(
-                width: screenWidth * 0.7,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, width: 2),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10),
+            preferredSize: Size.fromHeight(kToolbarHeight + 20), // 空白分の高さを加算
+            child: Column(
+              children: [
+                Container(
+                  height: 20, // 空白の高さ
+                  color: Colors.white, // 空白の背景色を白に設定
+                ),
+                Container(
+                  width: double.infinity, // コンテナを画面全体に広げる
+                  color: Colors.white, // PreferredSize 内の背景色を白に設定
+                  child: Center(
+                    child: Container(
+                      width: screenWidth * 0.7, // TabBar の幅
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey, width: 2),
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            topRight: Radius.circular(10),
+                          ),
+                        ),
+                        child: const TabBar(
+                          indicatorColor: Colors.transparent,
+                          labelColor: Colors.black,
+                          unselectedLabelColor: Colors.grey,
+                          tabs: [
+                            Tab(text: 'My用語集'),
+                            Tab(text: '専門用語集'),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                  child: const TabBar(
-                    indicatorColor: Colors.transparent,
-                    labelColor: Colors.black,
-                    unselectedLabelColor: Colors.grey,
-                    tabs: [
-                      Tab(text: 'My用語集'),
-                      Tab(text: '専門用語集'),
-                    ],
-                  ),
                 ),
-              ),
+              ],
             ),
           ),
         ),

@@ -180,11 +180,13 @@ class _TodoState extends State<Todo> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('ToDo'),
+        backgroundColor: Color.fromARGB(255, 214, 214, 214),
       ),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
             children: [
+              SizedBox(height: 20),
               _buildSection(context, '一週間以内'),
               SizedBox(height: 20),
               _buildSection(context, '一週間以降'),

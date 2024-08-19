@@ -24,10 +24,12 @@ class _TechTermPageState extends State<TechTermPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('専門用語集'),
+        backgroundColor: Color.fromARGB(255, 214, 214, 214),
       ),
       body: Center(
         child: Column(
           children: [
+            SizedBox(height: 20),
             Container(
               width: MediaQuery.of(context).size.width / 1.4,
               height: MediaQuery.of(context).size.height / 13,
