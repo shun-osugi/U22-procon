@@ -17,6 +17,10 @@ class SubjectDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (FirebaseAuth.instance.currentUser == null) {
+      GoRouter.of(context).go('/log_in');
+    }
+
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -268,10 +272,9 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                     if (shouldSave) {
                       registrationNumber++;
                       // ポップアップで「OK」を押したら保存
-                      await FirebaseFirestore.instance
-                          .collection('class')
-                          .doc()
-                          .set({
+                      DocumentReference docRef =
+                          FirebaseFirestore.instance.collection('class').doc();
+                      await docRef.set({
                         '曜日': tentativeDate,
                         '時限': tentativePeriod,
                         '教科名': className,
@@ -285,6 +288,9 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                         '評価方法3の割合': evaluationMethodPer3,
                         '登録数': registrationNumber,
                       });
+
+                      //科目ID(ドキュメントID)を取得
+                      String classDocId = docRef.id;
 
                       // 入力フィールドの状態をクリア
                       _className.clear();
@@ -309,13 +315,17 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                           .collection('students')
                           .doc(documentId)
                           .set({
-                        tentativeDate2: {tentativePeriod2: className},
+                        tentativeDate2: {
+                          tentativePeriod2: classDocId,
+                          classDocId: className
+                        },
                       }, SetOptions(merge: true));
 
                       GoRouter.of(context).go(
                           '/classTimetable/subject_details_updating',
                           extra: {
                             'subject': className,
+                            'classId': classDocId,
                             'day': tentativeDate,
                             'period': tentativePeriod
                           });
@@ -616,7 +626,7 @@ class ListWidget extends StatelessWidget {
               var data = docs[index].data() as Map<String, dynamic>;
               var className = data['教科名'] ?? 'No data found';
               var registrationNumber = data['登録数'] ?? 'No data found';
-              var docId = doc.id;
+              var classDocId = doc.id;
               return Container(
                 width: 376,
                 height: 40,
@@ -650,24 +660,25 @@ class ListWidget extends StatelessWidget {
                               .collection('students')
                               .doc(documentId)
                               .set({
-                            tentativeDate: {period2: className},
+                            tentativeDate: {
+                              period2: classDocId,
+                              classDocId: className
+                            },
                           }, SetOptions(merge: true));
                           registrationNumber += 1;
                           print(registrationNumber);
                           //firestoreに保存
                           await FirebaseFirestore.instance
                               .collection('class')
-                              .doc(docId)
+                              .doc(classDocId)
                               .update({
                             '登録数': registrationNumber,
                           });
-                          // String date1 = date;
-                          // int period1 = period;
-                          // final data = {'day': date1, 'period': period1};
                           GoRouter.of(context).go(
                               '/classTimetable/subject_details_updating',
                               extra: {
                                 'subject': className,
+                                'classId': classDocId,
                                 'day': day,
                                 'period': period
                               });

@@ -36,7 +36,8 @@ final shellNavigatorKeyProvider = Provider<GlobalKey<NavigatorState>>((ref) {
   return GlobalKey<NavigatorState>(debugLabel: 'shell');
 });
 
-String? globalData;
+String? globalClassName;
+String? globalClassId;
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final rootNavigatorKey = ref.watch(rootNavigatorKeyProvider);
@@ -112,14 +113,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
                     // デフォルト値を設定
                     final subject = data?['subject'] ?? '';
+                    final classId = data?['classId'] ?? '';
                     final day = data?['day'] ?? '';
                     final period = data?['period'] ?? 999; //仮で999
 
-                    // final data = state.extra as String? ?? ''; // extraからデータを取得
-
-                    if (subject == '') {
+                    if (subject == '' || period == '') {
                       Map<String, dynamic> sendData = {
-                        'subject': globalData!,
+                        'subject': globalClassName!,
+                        'classId': globalClassId!,
                         'day': day,
                         'period': period
                       };
@@ -127,9 +128,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                           child:
                               SubjectDetailsUpdating(recievedData: sendData));
                     } else {
-                      globalData = subject;
+                      globalClassName = subject;
+                      globalClassId = classId;
                       Map<String, dynamic> sendData = {
                         'subject': subject,
+                        'classId': classId,
                         'day': day,
                         'period': period
                       };
