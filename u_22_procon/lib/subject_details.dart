@@ -35,7 +35,7 @@ class SubjectDetails extends StatelessWidget {
             Column(
               children: [
                 Container(
-                  width: MediaQuery.of(context).size.width / 1.1,
+                  width: MediaQuery.of(context).size.width / 1.4,
                   height: MediaQuery.of(context).size.height / 13,
                   decoration: BoxDecoration(
                     //角を丸くする
@@ -83,10 +83,6 @@ class SubjectDetails extends StatelessWidget {
   }
 }
 
-final numberPickerProvider1 = StateProvider<int>((ref) => 100);
-final numberPickerProvider2 = StateProvider<int>((ref) => 0);
-final numberPickerProvider3 = StateProvider<int>((ref) => 0);
-
 class WritePostDB extends ConsumerStatefulWidget {
   final String day;
   final int period;
@@ -107,6 +103,10 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
 
   late String tentativeDate;
   late int tentativePeriod;
+
+  int perValue1 = 0;
+  int perValue2 = 0;
+  int perValue3 = 0;
 
   @override
   void initState() {
@@ -135,21 +135,25 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
 
   @override
   Widget build(BuildContext context) {
-    //評価方法の割合のプロバイダー
-    final numberPickerValue1 = ref.watch(numberPickerProvider1);
-    final numberPickerController1 = ref.read(numberPickerProvider1.notifier);
+    int _maxValue1(int value2, int value3) {
+      return 100 - value2 - value3;
+    }
 
-    final numberPickerValue2 = ref.watch(numberPickerProvider2);
-    final numberPickerController2 = ref.read(numberPickerProvider2.notifier);
+    int _maxValue2(int value1, int value3) {
+      return 100 - value1 - value3;
+    }
 
-    final numberPickerValue3 = ref.watch(numberPickerProvider3);
-    final numberPickerController3 = ref.read(numberPickerProvider3.notifier);
+    int _maxValue3(int value1, int value2) {
+      return 100 - value1 - value2;
+    }
+
+    bool _longPressFlag = false;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+      padding: const EdgeInsets.fromLTRB(20, 5, 20, 5),
       margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-      width: MediaQuery.of(context).size.height / 1.6,
-      height: MediaQuery.of(context).size.height / 3.5,
+      width: MediaQuery.of(context).size.width / 1.4,
+      height: MediaQuery.of(context).size.height / 3,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: Colors.grey[300],
@@ -165,7 +169,12 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('$tentativeDate曜$tentativePeriod限'),
+              Text(
+                '$tentativeDate曜$tentativePeriod限',
+                style: const TextStyle(
+                  fontSize: 20,
+                ),
+              ),
               IconButton(
                 onPressed: () async {
                   try {
@@ -175,9 +184,9 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                     String evaluationMethod1 = _evaluationMethod1.text;
                     String evaluationMethod2 = _evaluationMethod2.text;
                     String evaluationMethod3 = _evaluationMethod3.text;
-                    int evaluationMethodPer1 = numberPickerValue1;
-                    int evaluationMethodPer2 = numberPickerValue2;
-                    int evaluationMethodPer3 = numberPickerValue3;
+                    int evaluationMethodPer1 = perValue1;
+                    int evaluationMethodPer2 = perValue2;
+                    int evaluationMethodPer3 = perValue3;
                     int registrationNumber = 0;
                     String? documentId = null;
 
@@ -218,17 +227,22 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                                 content: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: <Widget>[
-                                    Text('曜日: $tentativeDate'),
-                                    Text('時限: $tentativePeriod'),
-                                    Text('教科名: $className'),
-                                    Text('教員名: $teacherName'),
+                                    Text('$tentativeDate曜$tentativePeriod限'),
+                                    Text(
+                                      '教科: $className',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    Text(''),
+                                    Text('教員: $teacherName'),
                                     Text('教室: $classPlaceName'),
                                     Text(
-                                        '評価方法1: $evaluationMethod1,$evaluationMethodPer1%'),
+                                        '評価方法1: $evaluationMethod1  $evaluationMethodPer1%'),
                                     Text(
-                                        '評価方法2: $evaluationMethod2,$evaluationMethodPer2%'),
+                                        '評価方法2: $evaluationMethod2  $evaluationMethodPer2%'),
                                     Text(
-                                        '評価方法3: $evaluationMethod3,$evaluationMethodPer3%'),
+                                        '評価方法3: $evaluationMethod3  $evaluationMethodPer3%'),
                                   ],
                                 ),
                                 actions: <Widget>[
@@ -279,9 +293,6 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                       _evaluationMethod1.clear();
                       _evaluationMethod2.clear();
                       _evaluationMethod3.clear();
-                      numberPickerController1.state = 100;
-                      numberPickerController2.state = 0;
-                      numberPickerController3.state = 0;
 
                       //
                       //履修登録
@@ -321,16 +332,19 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
             ],
           ),
           SizedBox(
-            width: MediaQuery.of(context).size.height / 2,
+            width: MediaQuery.of(context).size.height / 1.4,
             child: Column(
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     SizedBox(
-                      width: MediaQuery.of(context).size.width / 1.5,
+                      width: MediaQuery.of(context).size.width / 1.6,
                       height: MediaQuery.of(context).size.height / 30,
                       child: TextField(
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
                         decoration: const InputDecoration(
                           border: InputBorder.none,
                           icon: Icon(
@@ -342,14 +356,15 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                         controller: _className,
                       ),
                     ),
-                    const Text('')
+                    Expanded(child: SizedBox()),
                   ],
                 ),
+                Text(''),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     SizedBox(
-                      width: MediaQuery.of(context).size.width / 2.8,
+                      width: MediaQuery.of(context).size.width / 3.2,
                       height: MediaQuery.of(context).size.height / 30,
                       child: TextField(
                         decoration: const InputDecoration(
@@ -363,7 +378,7 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                       ),
                     ),
                     SizedBox(
-                      width: MediaQuery.of(context).size.width / 2.8,
+                      width: MediaQuery.of(context).size.width / 3.2,
                       height: MediaQuery.of(context).size.height / 30,
                       child: TextField(
                         decoration: const InputDecoration(
@@ -376,6 +391,7 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                         controller: _classPlaceName,
                       ),
                     ),
+                    Expanded(child: SizedBox()),
                   ],
                 ),
                 Row(
@@ -396,16 +412,32 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                       ),
                     ),
                     Row(
-                      children: [
-                        NumberPicker(
-                            itemCount: 1,
-                            itemHeight: 25,
-                            value: numberPickerValue1,
-                            minValue: 0,
-                            maxValue: 100,
-                            onChanged: (value) =>
-                                numberPickerController1.state = value),
-                        const Text('%'),
+                      children: <Widget>[
+                        IconButton(
+                          icon: const Icon(Icons.expand_more,
+                              color: Colors.black),
+                          onPressed: () {
+                            perValue1 = perValue1 > 5 ? perValue1 - 5 : 0;
+                            setState(() {});
+                          },
+                        ),
+                        Text(
+                          perValue1.toString() + '%',
+                          style: const TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.expand_less,
+                              color: Colors.black),
+                          onPressed: () {
+                            perValue1 =
+                                perValue1 < _maxValue1(perValue2, perValue3)
+                                    ? perValue1 + 5
+                                    : _maxValue1(perValue2, perValue3);
+                            setState(() {});
+                          },
+                        ),
                       ],
                     ),
                   ],
@@ -428,16 +460,32 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                       ),
                     ),
                     Row(
-                      children: [
-                        NumberPicker(
-                            itemCount: 1,
-                            itemHeight: 25,
-                            value: numberPickerValue2,
-                            minValue: 0,
-                            maxValue: 100,
-                            onChanged: (value) =>
-                                numberPickerController2.state = value),
-                        const Text('%'),
+                      children: <Widget>[
+                        IconButton(
+                          icon: const Icon(Icons.expand_more,
+                              color: Colors.black),
+                          onPressed: () {
+                            perValue2 = perValue2 > 5 ? perValue2 - 5 : 0;
+                            setState(() {});
+                          },
+                        ),
+                        Text(
+                          perValue2.toString() + '%',
+                          style: const TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.expand_less,
+                              color: Colors.black),
+                          onPressed: () {
+                            perValue2 =
+                                perValue2 < _maxValue2(perValue1, perValue3)
+                                    ? perValue2 + 5
+                                    : _maxValue2(perValue1, perValue3);
+                            setState(() {});
+                          },
+                        ),
                       ],
                     ),
                   ],
@@ -460,16 +508,32 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
                       ),
                     ),
                     Row(
-                      children: [
-                        NumberPicker(
-                            itemCount: 1,
-                            itemHeight: 25,
-                            value: numberPickerValue3,
-                            minValue: 0,
-                            maxValue: 100,
-                            onChanged: (value) =>
-                                numberPickerController3.state = value),
-                        const Text('%'),
+                      children: <Widget>[
+                        IconButton(
+                          icon: const Icon(Icons.expand_more,
+                              color: Colors.black),
+                          onPressed: () {
+                            perValue3 = perValue3 > 5 ? perValue3 - 5 : 0;
+                            setState(() {});
+                          },
+                        ),
+                        Text(
+                          perValue3.toString() + '%',
+                          style: const TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.expand_less,
+                              color: Colors.black),
+                          onPressed: () {
+                            perValue3 =
+                                perValue3 < _maxValue3(perValue2, perValue1)
+                                    ? perValue3 + 5
+                                    : _maxValue3(perValue2, perValue1);
+                            setState(() {});
+                          },
+                        ),
                       ],
                     ),
                   ],
@@ -527,7 +591,7 @@ class ListWidget extends StatelessWidget {
         // 4. Firestore から取得したデータを表示
         return //口コミのリスト一覧
             Container(
-          width: MediaQuery.of(context).size.width / 1.1,
+          width: MediaQuery.of(context).size.width / 1.4,
           height: MediaQuery.of(context).size.height / 2.5,
           decoration: const BoxDecoration(
             //角を丸くする
