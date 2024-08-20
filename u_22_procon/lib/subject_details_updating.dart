@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-// import 'package:firebase_core/firebase_core.dart';
 import 'package:go_router/go_router.dart';
-// import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:u_22_procon/todo.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:u_22_procon/class_timetable.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'firebase_options.dart';
 
 final subjectProvider = StateProvider<String?>((ref) => null);
 
@@ -88,6 +87,11 @@ class SubjectDetailsUpdating extends StatelessWidget {
                   }
                   GoRouter.of(context).go('/classTimetable');
                 },
+                style: ElevatedButton.styleFrom(
+                    minimumSize: Size(
+                  MediaQuery.of(context).size.width / 6,
+                  MediaQuery.of(context).size.height / 18,
+                )),
                 child: Text('削除')),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -417,171 +421,187 @@ class ReadDB extends StatelessWidget {
                   var registrationNumber =
                       data['登録数'] ?? 'No registrationNumber';
 
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('$date曜$period限'),
-                          //
-                          //ここに自分の時間割を変更するコードを記述する必要あり
-                          //
-                          IconButton(
-                              onPressed: () async {
-                                if (FirebaseAuth.instance.currentUser != null) {
-                                  documentId =
-                                      FirebaseAuth.instance.currentUser?.uid;
-                                  print(documentId);
-                                } else {
-                                  GoRouter.of(context).go('/log_in');
-                                }
-                                //
-                                //履修削除機能
-                                //
-                                await FirebaseFirestore.instance
-                                    .collection('students')
-                                    .doc(documentId)
-                                    .update(
-                                  {
-                                    '${date}曜日.${period.toString()}':
-                                        FieldValue.delete(),
-                                    '${date}曜日.${classId.toString()}':
-                                        FieldValue.delete(),
-                                  },
-                                );
-                                print('削除完了');
-                                //
-                                //登録数を減らすコード
-                                //
-                                registrationNumber -= 1;
-                                print(registrationNumber);
-                                //firestoreに保存
-                                await FirebaseFirestore.instance
-                                    .collection('class')
-                                    .doc(classId)
-                                    .update({
-                                  '登録数': registrationNumber,
-                                });
-                                String date1 = date;
-                                int period1 = period;
-                                final data = {'day': date1, 'period': period1};
-                                GoRouter.of(context).go(
-                                    '/classTimetable/subjectDetails',
-                                    extra: data);
-                              },
-                              icon: const Icon(
-                                Icons.screen_rotation_alt_rounded,
-                                color: Colors.black,
-                                size: 32,
-                              ))
-                        ],
-                      ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.height / 2.5,
-                        child: Column(
+                  return Container(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(
-                                  child: Container(
-                                    child: Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.edit_square,
-                                          color: Colors.black,
-                                        ),
-                                        Text(className),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                const Text(''),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(
-                                    height:
-                                        MediaQuery.of(context).size.height / 20,
-                                    child: Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.person,
-                                          color: Colors.black,
-                                        ),
-                                        Text(teacher),
-                                      ],
-                                    )),
-                                SizedBox(
-                                    child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.location_pin,
-                                      color: Colors.black,
-                                    ),
-                                    Text(classPlace),
-                                  ],
+                            Text('$date曜$period限'),
+                            //
+                            //ここに自分の時間割を変更するコードを記述する必要あり
+                            //
+                            IconButton(
+                                onPressed: () async {
+                                  if (FirebaseAuth.instance.currentUser !=
+                                      null) {
+                                    documentId =
+                                        FirebaseAuth.instance.currentUser?.uid;
+                                    print(documentId);
+                                  } else {
+                                    GoRouter.of(context).go('/log_in');
+                                  }
+                                  //
+                                  //履修削除機能
+                                  //
+                                  await FirebaseFirestore.instance
+                                      .collection('students')
+                                      .doc(documentId)
+                                      .update(
+                                    {
+                                      '${date}曜日.${period.toString()}':
+                                          FieldValue.delete(),
+                                      '${date}曜日.${classId.toString()}':
+                                          FieldValue.delete(),
+                                    },
+                                  );
+                                  print('削除完了');
+                                  //
+                                  //登録数を減らすコード
+                                  //
+                                  registrationNumber -= 1;
+                                  print(registrationNumber);
+                                  //firestoreに保存
+                                  await FirebaseFirestore.instance
+                                      .collection('class')
+                                      .doc(classId)
+                                      .update({
+                                    '登録数': registrationNumber,
+                                  });
+                                  String date1 = date;
+                                  int period1 = period;
+                                  final data = {
+                                    'day': date1,
+                                    'period': period1
+                                  };
+                                  GoRouter.of(context).go(
+                                      '/classTimetable/subjectDetails',
+                                      extra: data);
+                                },
+                                icon: const Icon(
+                                  Icons.screen_rotation_alt_rounded,
+                                  color: Colors.black,
+                                  size: 32,
                                 ))
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(
-                                    child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.edit,
-                                      color: Colors.black,
-                                    ),
-                                    Text(classEval1),
-                                  ],
-                                )),
-                                SizedBox(
-                                    child: Text('${classEvalPer1.toString()}%'))
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(
-                                    child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.edit,
-                                      color: Colors.cyan[300],
-                                    ),
-                                    Text(classEval2),
-                                  ],
-                                )),
-                                SizedBox(
-                                    child: Text('${classEvalPer2.toString()}%'))
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(
-                                    child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.edit,
-                                      color: Colors.cyan[300],
-                                    ),
-                                    Text(classEval3),
-                                  ],
-                                )),
-                                SizedBox(
-                                    child: Text('${classEvalPer3.toString()}%'))
-                              ],
-                            ),
                           ],
                         ),
-                      ),
-                    ],
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width / 1.5,
+                          height: MediaQuery.of(context).size.height / 4.7,
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  SizedBox(
+                                    child: Container(
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.edit_square,
+                                            color: Colors.black,
+                                          ),
+                                          Text(className),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const Text(''),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height /
+                                              20,
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.person,
+                                            color: Colors.black,
+                                          ),
+                                          Text(teacher),
+                                        ],
+                                      )),
+                                  SizedBox(
+                                      child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.location_pin,
+                                        color: Colors.black,
+                                      ),
+                                      Text(classPlace),
+                                    ],
+                                  ))
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  SizedBox(
+                                      child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.edit,
+                                        color: Colors.black,
+                                      ),
+                                      Text(classEval1),
+                                    ],
+                                  )),
+                                  SizedBox(
+                                      child:
+                                          Text('${classEvalPer1.toString()}%'))
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  SizedBox(
+                                      child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.edit,
+                                        color: Colors.cyan[300],
+                                      ),
+                                      Text(classEval2),
+                                    ],
+                                  )),
+                                  SizedBox(
+                                      child:
+                                          Text('${classEvalPer2.toString()}%'))
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  SizedBox(
+                                      child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.edit,
+                                        color: Colors.cyan[300],
+                                      ),
+                                      Text(classEval3),
+                                    ],
+                                  )),
+                                  SizedBox(
+                                      child:
+                                          Text('${classEvalPer3.toString()}%'))
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   );
                 }).toList(),
               );
@@ -651,7 +671,7 @@ class ListWidget extends ConsumerWidget {
 
         return Container(
           width: MediaQuery.of(context).size.width / 1.1,
-          height: MediaQuery.of(context).size.height / 2.5,
+          height: MediaQuery.of(context).size.height / 5,
           decoration: const BoxDecoration(
             color: Color.fromARGB(255, 255, 255, 255),
             border: Border(
