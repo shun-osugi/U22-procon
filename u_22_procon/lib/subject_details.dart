@@ -22,11 +22,6 @@ class SubjectDetails extends StatelessWidget {
     }
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          GoRouter.of(context).go('/classTimetable/subject_details_updating');
-        },
-      ),
       appBar: AppBar(
         title: const Text('時間割'),
         backgroundColor: Colors.grey[350],

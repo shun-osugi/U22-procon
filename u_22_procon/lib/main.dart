@@ -53,8 +53,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
               path: 'sign_in',
               parentNavigatorKey: rootNavigatorKey,
-              builder: (BuildContext context, GoRouterState state) {
-                return const SignIn();
+              pageBuilder: (BuildContext context, GoRouterState state) {
+                return buildTransitionPage(child: const SignIn());
               }),
         ],
       ),
@@ -78,23 +78,24 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             routes: <RouteBase>[
               GoRoute(
                   path: 'subjectDetails',
-                  builder: (BuildContext context, GoRouterState state) {
+                  pageBuilder: (BuildContext context, GoRouterState state) {
                     final Map<String, dynamic> data =
                         state.extra as Map<String, dynamic>;
-                    return SubjectDetails(
-                        day: data['day'], period: data['period']);
+                    return buildTransitionPage(
+                        child: SubjectDetails(
+                            day: data['day'], period: data['period']));
                   }),
               GoRoute(
                   path: 'subject_eval',
-                  builder: (BuildContext context, GoRouterState state) {
+                  pageBuilder: (BuildContext context, GoRouterState state) {
                     final String data = state.extra as String;
-                    return SubjectEval(data);
+                    return buildTransitionPage(child: SubjectEval(data));
                   }),
               GoRoute(
                   path: 'task_answer',
-                  builder: (BuildContext context, GoRouterState state) {
+                  pageBuilder: (BuildContext context, GoRouterState state) {
                     final String data = state.extra as String;
-                    return TaskAnswer(data);
+                    return buildTransitionPage(child: TaskAnswer(data));
                   }),
               GoRoute(
                   path: 'subject_details_updating',
@@ -148,9 +149,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             routes: <RouteBase>[
               GoRoute(
                 path: 'tech_term',
-                builder: (BuildContext context, GoRouterState state) {
+                pageBuilder: (BuildContext context, GoRouterState state) {
                   final value = state.extra as String; // 'value' がここで取得される
-                  return TechTermPage(value);
+                  return buildTransitionPage(child: TechTermPage(value));
                 },
               ),
             ],
@@ -160,22 +161,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               pageBuilder: (BuildContext context, GoRouterState state) {
                 return buildTransitionPage(child: const Subject_settings());
               }),
-          // 一旦ユーザー登録をここに避難
-          // GoRoute(
-          //   path: '/log_in',
-          //   // parentNavigatorKey: rootNavigatorKey,
-          //   pageBuilder: (BuildContext context, GoRouterState state) {
-          //     return buildTransitionPage(child: const LogIn());
-          //   },
-          //   routes: <RouteBase>[
-          //     GoRoute(
-          //         path: 'sign_in',
-          //         parentNavigatorKey: rootNavigatorKey,
-          //         builder: (BuildContext context, GoRouterState state) {
-          //           return const SignIn();
-          //         }),
-          //   ],
-          // ),
         ],
       ),
     ],
