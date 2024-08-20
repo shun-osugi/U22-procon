@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:u_22_procon/notification_service.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
@@ -63,7 +62,6 @@ class _TodoState extends State<Todo> {
     var task = data['課題'] ?? 'No task';
     var repeat = data['繰り返し'] ?? 'なし';
     var dueDateStr = data['期限'] ?? '';
-    var remindStr = data['リマインド'] ?? '';
 
     if (dueDateStr.isNotEmpty && isCompleted) {
       DateTime dueDate = DateTime.parse(dueDateStr);
@@ -75,19 +73,6 @@ class _TodoState extends State<Todo> {
 
           // 新しい期限とリマインド日時を計算
           DateTime newDueDate = dueDate.add(Duration(days: daysToAdd));
-          DateTime? newRemindDate;
-
-          if (remindStr.isNotEmpty) {
-            DateTime remindDate = DateTime.parse(remindStr);
-            newRemindDate = remindDate.add(Duration(days: daysToAdd));
-
-            // 通知スケジュールの呼び出し
-            await scheduleReminderNotification(
-              'リマインダー: $subject',
-              '課題: $task\n期限: ${DateFormat('yyyy-MM-dd HH:mm').format(newDueDate)}',
-              newRemindDate,
-            );
-          }
 
           // 新しいデータを作成しデータベースに保存
           await FirebaseFirestore.instance.collection('todo').add({
@@ -95,7 +80,6 @@ class _TodoState extends State<Todo> {
             '科目': subject,
             '課題': task,
             '期限': newDueDate.toIso8601String(),
-            'リマインド': newRemindDate?.toIso8601String(),
             '繰り返し': repeat,
             '完了': false, // 新しいタスクなので完了状態をリセット
           });
@@ -301,7 +285,6 @@ class _TodoState extends State<Todo> {
             var subject = data['科目'] ?? 'No subject';
             var task = data['課題'] ?? 'No task';
             var dateStr = data['期限'] ?? 'No date';
-            var remindStr = data['リマインド'] ?? 'No remind';
             var repeat = data['繰り返し'] ?? 'No repeat';
             var isCompleted = data['完了'] ?? false;
             String dateDisplay = 'No date';
@@ -312,15 +295,6 @@ class _TodoState extends State<Todo> {
               }
             } catch (e) {
               dateDisplay = 'Invalid date format';
-            }
-            String remindDisplay = 'No remind';
-            try {
-              if (remindStr != 'No remind') {
-                DateTime remind = DateTime.parse(remindStr);
-                remindDisplay = DateFormat('yyyy-MM-dd HH:mm').format(remind);
-              }
-            } catch (e) {
-              remindDisplay = 'Invalid remind format';
             }
 
             return Padding(
@@ -362,10 +336,7 @@ class _TodoState extends State<Todo> {
     String? _dropdownValue;
     DateTime? _selectedDate;
     TimeOfDay? _selectedTime;
-    DateTime? _remindDate;
-    TimeOfDay? _remindTime;
     String? _repeatValue = "なし";
-    String _remindOption = "なし";
 
     return FloatingActionButton(
       onPressed: () {
@@ -448,72 +419,6 @@ class _TodoState extends State<Todo> {
                         SizedBox(height: 20),
                         Row(
                           children: [
-                            Text('リマインド', style: TextStyle(fontSize: 16)),
-                            SizedBox(width: 10),
-                            DropdownButton<String>(
-                              value: _remindOption,
-                              items: [
-                                DropdownMenuItem(
-                                  value: "あり",
-                                  child: Text("あり"),
-                                ),
-                                DropdownMenuItem(
-                                  value: "なし",
-                                  child: Text("なし"),
-                                ),
-                              ],
-                              onChanged: (String? value) {
-                                setState(() {
-                                  _remindOption = value!;
-                                });
-                              },
-                            ),
-                            if (_remindOption == "あり") ...[
-                              SizedBox(width: 10),
-                              ElevatedButton(
-                                onPressed: () async {
-                                  DateTime? pickedDate = await showDatePicker(
-                                    context: context,
-                                    initialDate: DateTime.now(),
-                                    firstDate: DateTime.now(),
-                                    lastDate:
-                                        DateTime.now().add(Duration(days: 365)),
-                                  );
-
-                                  if (pickedDate != null) {
-                                    setState(() {
-                                      _remindDate = pickedDate;
-                                    });
-                                  }
-                                },
-                                child: Text(_remindDate == null
-                                    ? '日付を選択'
-                                    : '${_remindDate.toString().split(' ')[0]}'),
-                              ),
-                              SizedBox(width: 10),
-                              ElevatedButton(
-                                onPressed: () async {
-                                  TimeOfDay? pickedTime = await showTimePicker(
-                                    context: context,
-                                    initialTime: TimeOfDay.now(),
-                                  );
-
-                                  if (pickedTime != null) {
-                                    setState(() {
-                                      _remindTime = pickedTime;
-                                    });
-                                  }
-                                },
-                                child: Text(_remindTime == null
-                                    ? '時間を選択'
-                                    : '${_remindTime?.format(context)}'),
-                              ),
-                            ],
-                          ],
-                        ),
-                        SizedBox(height: 20),
-                        Row(
-                          children: [
                             Text('繰り返し', style: TextStyle(fontSize: 16)),
                             SizedBox(width: 10),
                             DropdownButton<String>(
@@ -564,17 +469,6 @@ class _TodoState extends State<Todo> {
                               _selectedTime!.minute,
                             );
 
-                            DateTime? combinedRemindDateTime;
-                            if (_remindDate != null && _remindTime != null) {
-                              combinedRemindDateTime = DateTime(
-                                _remindDate!.year,
-                                _remindDate!.month,
-                                _remindDate!.day,
-                                _remindTime!.hour,
-                                _remindTime!.minute,
-                              );
-                            }
-
                             bool? shouldSave = await showDialog<bool>(
                               context: context,
                               builder: (BuildContext context) {
@@ -587,8 +481,6 @@ class _TodoState extends State<Todo> {
                                       Text('課題名: ${_workName.text}'),
                                       Text(
                                           '期限: ${DateFormat('yyyy-MM-dd HH:mm').format(combinedDateTime)}'),
-                                      Text(
-                                          'リマインド日時: ${combinedRemindDateTime != null ? DateFormat('yyyy-MM-dd HH:mm').format(combinedRemindDateTime) : 'なし'}'),
                                     ],
                                   ),
                                   actions: <Widget>[
@@ -619,8 +511,6 @@ class _TodoState extends State<Todo> {
                                   '科目': _dropdownValue,
                                   '課題': _workName.text,
                                   '期限': combinedDateTime.toIso8601String(),
-                                  'リマインド':
-                                      combinedRemindDateTime?.toIso8601String(),
                                   '繰り返し': _repeatValue,
                                   '完了': false,
                                 });

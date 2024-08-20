@@ -18,10 +18,6 @@ import 'firebase_options.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 
-// ローカル通知関連
-import 'package:flutter_local_notifications/flutter_local_notifications.dart'; // パッケージをインポート
-import 'notification_service.dart';
-
 // グローバルな GoRouter インスタンス
 GoRouter? globalRouter;
 
@@ -203,10 +199,6 @@ CustomTransitionPage<T> buildTransitionPage<T>({
   );
 }
 
-// ローカル通知の初期設定を保持する変数
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
-
 // main関数
 main() async {
   try {
@@ -218,9 +210,6 @@ main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-
-    // 通知のスケジューリングをセットアップ
-    await setupNotifications(); // notification_service.dart で定義された関数を呼び出す
 
     // プロバイダースコープでアプリを囲む
     const scop = ProviderScope(child: app);
