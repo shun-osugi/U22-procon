@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'firebase_options.dart';
 
 String? documentId; // グローバル変数の定義
 
@@ -139,9 +139,18 @@ class _TodoState extends State<Todo> {
         var dayData = data[day] as Map<String, dynamic>?;
         if (dayData != null) {
           for (var key in dayData.keys) {
-            String subject = dayData[key] as String? ?? '';
-            if (subject.isNotEmpty && !fetchedSubjects.contains(subject)) {
-              fetchedSubjects.add(subject);
+            //キーが1~7の文字列を排除
+            if (!(key == '1' ||
+                key == '2' ||
+                key == '3' ||
+                key == '4' ||
+                key == '5' ||
+                key == '6' ||
+                key == '7')) {
+              String subject = dayData[key] as String? ?? '';
+              if (subject.isNotEmpty && !fetchedSubjects.contains(subject)) {
+                fetchedSubjects.add(subject);
+              }
             }
           }
         }
@@ -333,7 +342,6 @@ class _TodoState extends State<Todo> {
 
   Widget _buildFloatingActionButton(BuildContext context) {
     TextEditingController _workName = TextEditingController();
-    String? _dropdownValue;
     DateTime? _selectedDate;
     TimeOfDay? _selectedTime;
     String? _repeatValue = "なし";

@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'firebase_options.dart';
 
 class SubjectTerm extends StatefulWidget {
   const SubjectTerm({super.key});
@@ -240,6 +240,26 @@ class _SubjectTermState extends State<SubjectTerm> {
                       dayOrder.forEach((day) {
                         if (data.containsKey(day)) {
                           var subjects = data[day] as Map<String, dynamic>;
+                          Map<String, dynamic> filtered_subjects = {};
+                          Map<String, dynamic> id_subjects = {};
+                          Map<String, dynamic> name_subjects = {};
+                          for (var key in subjects.keys) {
+                            if (key == '1' ||
+                                key == '2' ||
+                                key == '3' ||
+                                key == '4' ||
+                                key == '5' ||
+                                key == '6' ||
+                                key == '7') {
+                              id_subjects.addAll({subjects[key]: key});
+                            } else {
+                              name_subjects.addAll({key: subjects[key]});
+                            }
+                          }
+                          for (var idKey in id_subjects.keys) {
+                            filtered_subjects.addAll(
+                                {id_subjects[idKey]: name_subjects[idKey]});
+                          }
                           subjectWidgets.add(
                             Container(
                               color: Colors.grey[300],
@@ -255,7 +275,7 @@ class _SubjectTermState extends State<SubjectTerm> {
                             ),
                           );
 
-                          subjects.forEach((key, value) {
+                          filtered_subjects.forEach((key, value) {
                             subjectWidgets.add(
                               ListTile(
                                 title: Text('$key : $value'),
