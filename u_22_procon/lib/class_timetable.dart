@@ -8,8 +8,27 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class ClassTimetable extends StatelessWidget {
-  const ClassTimetable({super.key});
+class ClassTimetable extends StatefulWidget {
+  @override
+  _ClassTimetableState createState() => _ClassTimetableState();
+}
+
+class _ClassTimetableState extends State<ClassTimetable> {
+  //
+  //画面をリフレッシュ
+  //
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (ModalRoute.of(context)?.isCurrent == true) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => ClassTimetable()),
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

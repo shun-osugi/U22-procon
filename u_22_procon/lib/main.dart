@@ -77,7 +77,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/classTimetable',
             pageBuilder: (BuildContext context, GoRouterState state) {
-              return buildTransitionPage(child: const ClassTimetable());
+              return buildTransitionPage(child: ClassTimetable());
             },
             routes: <RouteBase>[
               GoRoute(
