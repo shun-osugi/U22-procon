@@ -374,7 +374,7 @@ class _TodoState extends State<Todo> {
                         SizedBox(height: 20),
                         Row(
                           children: [
-                            Text('期限　　　　', style: TextStyle(fontSize: 16)),
+                            Text('期限', style: TextStyle(fontSize: 16)),
                             SizedBox(width: 10),
                             ElevatedButton(
                               onPressed: () async {
