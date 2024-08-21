@@ -124,10 +124,6 @@ class _LogIn extends State<SignIn> {
                         //Textでユーザーに見えるようにする
                         child: Text('情報工学部'),
                       ),
-                      DropdownMenuItem(
-                        value: '理工',
-                        child: Text('理工学部'),
-                      ),
                     ],
                     //現在選択されているもの以外が選択された時
                     onChanged: (String? value) {
