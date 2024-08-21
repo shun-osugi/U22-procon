@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-//データベース
-// import 'package:firebase_core/firebase_core.dart';
+
 import 'package:go_router/go_router.dart';
-// import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:numberpicker/numberpicker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:numberpicker/numberpicker.dart';
 // import 'package:u_22_procon/todo.dart';
 // import 'package:u_22_procon/class_timetable.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'firebase_options.dart';
 
 class SubjectDetails extends StatelessWidget {
   final String day;
@@ -34,7 +34,7 @@ class SubjectDetails extends StatelessWidget {
             Column(
               children: [
                 Container(
-                  width: MediaQuery.of(context).size.width / 1.4,
+                  width: MediaQuery.of(context).size.width / 1.1,
                   height: MediaQuery.of(context).size.height / 13,
                   decoration: BoxDecoration(
                     //角を丸くする
@@ -149,7 +149,7 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 5, 20, 5),
       margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-      width: MediaQuery.of(context).size.width / 1.4,
+      width: MediaQuery.of(context).size.width / 1.1,
       height: MediaQuery.of(context).size.height / 3,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
@@ -334,199 +334,214 @@ class _WritePostDBState extends ConsumerState<WritePostDB> {
               ),
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width / 1.6,
-                height: MediaQuery.of(context).size.height / 30,
-                child: TextField(
-                  style: TextStyle(
-                    fontSize: 20,
-                  ),
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    icon: Icon(
-                      Icons.edit_square,
-                      color: Colors.black,
+          SizedBox(
+            width: MediaQuery.of(context).size.width / 1.45,
+            height: MediaQuery.of(context).size.height / 3.8,
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width / 1.6,
+                      height: MediaQuery.of(context).size.height / 30,
+                      child: TextField(
+                        style: TextStyle(),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          icon: Icon(
+                            Icons.edit_square,
+                            color: Colors.black,
+                          ),
+                          hintText: '教科名',
+                        ),
+                        controller: _className,
+                      ),
                     ),
-                    hintText: '教科名',
-                  ),
-                  controller: _className,
+                    Expanded(child: SizedBox()),
+                  ],
                 ),
-              ),
-              Expanded(child: SizedBox()),
-            ],
-          ),
-          Text(''),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width / 3.2,
-                height: MediaQuery.of(context).size.height / 30,
-                child: TextField(
-                  decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      icon: Icon(
-                        Icons.person,
-                        color: Colors.black,
+                Text(''),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width / 3.2,
+                      height: MediaQuery.of(context).size.height / 30,
+                      child: TextField(
+                        decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            icon: Icon(
+                              Icons.person,
+                              color: Colors.black,
+                            ),
+                            hintText: '教員名'),
+                        controller: _teacherName,
                       ),
-                      hintText: '教員名'),
-                  controller: _teacherName,
-                ),
-              ),
-              SizedBox(
-                width: MediaQuery.of(context).size.width / 3.2,
-                height: MediaQuery.of(context).size.height / 30,
-                child: TextField(
-                  decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      icon: Icon(
-                        Icons.location_pin,
-                        color: Colors.black,
-                      ),
-                      hintText: '教室名'),
-                  controller: _classPlaceName,
-                ),
-              ),
-              Expanded(child: SizedBox()),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width / 2.5,
-                height: MediaQuery.of(context).size.height / 30,
-                child: TextField(
-                  decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      icon: Icon(
-                        Icons.edit,
-                        color: Colors.black,
-                      ),
-                      hintText: '評価方法1'),
-                  controller: _evaluationMethod1,
-                ),
-              ),
-              Row(
-                children: <Widget>[
-                  IconButton(
-                    icon: const Icon(Icons.expand_more, color: Colors.black),
-                    onPressed: () {
-                      perValue1 = perValue1 > 5 ? perValue1 - 5 : 0;
-                      setState(() {});
-                    },
-                  ),
-                  Text(
-                    perValue1.toString() + '%',
-                    style: const TextStyle(
-                      fontSize: 20,
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.expand_less, color: Colors.black),
-                    onPressed: () {
-                      perValue1 = perValue1 < _maxValue1(perValue2, perValue3)
-                          ? perValue1 + 5
-                          : _maxValue1(perValue2, perValue3);
-                      setState(() {});
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width / 2.5,
-                height: MediaQuery.of(context).size.height / 30,
-                child: TextField(
-                  decoration: InputDecoration(
-                      border: InputBorder.none,
-                      icon: Icon(
-                        Icons.edit_square,
-                        color: Colors.grey[300],
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width / 3.2,
+                      height: MediaQuery.of(context).size.height / 30,
+                      child: TextField(
+                        decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            icon: Icon(
+                              Icons.location_pin,
+                              color: Colors.black,
+                            ),
+                            hintText: '教室名'),
+                        controller: _classPlaceName,
                       ),
-                      hintText: '評価方法2'),
-                  controller: _evaluationMethod2,
-                ),
-              ),
-              Row(
-                children: <Widget>[
-                  IconButton(
-                    icon: const Icon(Icons.expand_more, color: Colors.black),
-                    onPressed: () {
-                      perValue2 = perValue2 > 5 ? perValue2 - 5 : 0;
-                      setState(() {});
-                    },
-                  ),
-                  Text(
-                    perValue2.toString() + '%',
-                    style: const TextStyle(
-                      fontSize: 20,
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.expand_less, color: Colors.black),
-                    onPressed: () {
-                      perValue2 = perValue2 < _maxValue2(perValue1, perValue3)
-                          ? perValue2 + 5
-                          : _maxValue2(perValue1, perValue3);
-                      setState(() {});
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width / 2.5,
-                height: MediaQuery.of(context).size.height / 30,
-                child: TextField(
-                  decoration: InputDecoration(
-                      border: InputBorder.none,
-                      icon: Icon(
-                        Icons.edit_square,
-                        color: Colors.grey[300],
+                    Expanded(child: SizedBox()),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width / 3.0,
+                      height: MediaQuery.of(context).size.height / 30,
+                      child: TextField(
+                        decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            icon: Icon(
+                              Icons.edit,
+                              color: Colors.black,
+                            ),
+                            hintText: '評価方法1'),
+                        controller: _evaluationMethod1,
                       ),
-                      hintText: '評価方法3'),
-                  controller: _evaluationMethod3,
-                ),
-              ),
-              Row(
-                children: <Widget>[
-                  IconButton(
-                    icon: const Icon(Icons.expand_more, color: Colors.black),
-                    onPressed: () {
-                      perValue3 = perValue3 > 5 ? perValue3 - 5 : 0;
-                      setState(() {});
-                    },
-                  ),
-                  Text(
-                    perValue3.toString() + '%',
-                    style: const TextStyle(
-                      fontSize: 20,
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.expand_less, color: Colors.black),
-                    onPressed: () {
-                      perValue3 = perValue3 < _maxValue3(perValue2, perValue1)
-                          ? perValue3 + 5
-                          : _maxValue3(perValue2, perValue1);
-                      setState(() {});
-                    },
-                  ),
-                ],
-              ),
-            ],
+                    Row(
+                      children: <Widget>[
+                        IconButton(
+                          icon: const Icon(Icons.expand_more,
+                              color: Colors.black),
+                          onPressed: () {
+                            perValue1 = perValue1 > 5 ? perValue1 - 5 : 0;
+                            setState(() {});
+                          },
+                        ),
+                        Text(
+                          perValue1.toString() + '%',
+                          style: const TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.expand_less,
+                              color: Colors.black),
+                          onPressed: () {
+                            perValue1 =
+                                perValue1 < _maxValue1(perValue2, perValue3)
+                                    ? perValue1 + 5
+                                    : _maxValue1(perValue2, perValue3);
+                            setState(() {});
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width / 3.0,
+                      height: MediaQuery.of(context).size.height / 30,
+                      child: TextField(
+                        decoration: InputDecoration(
+                            border: InputBorder.none,
+                            icon: Icon(
+                              Icons.edit_square,
+                              color: Colors.grey[300],
+                            ),
+                            hintText: '評価方法2'),
+                        controller: _evaluationMethod2,
+                      ),
+                    ),
+                    Row(
+                      children: <Widget>[
+                        IconButton(
+                          icon: const Icon(Icons.expand_more,
+                              color: Colors.black),
+                          onPressed: () {
+                            perValue2 = perValue2 > 5 ? perValue2 - 5 : 0;
+                            setState(() {});
+                          },
+                        ),
+                        Text(
+                          perValue2.toString() + '%',
+                          style: const TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.expand_less,
+                              color: Colors.black),
+                          onPressed: () {
+                            perValue2 =
+                                perValue2 < _maxValue2(perValue1, perValue3)
+                                    ? perValue2 + 5
+                                    : _maxValue2(perValue1, perValue3);
+                            setState(() {});
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width / 3.0,
+                      height: MediaQuery.of(context).size.height / 30,
+                      child: TextField(
+                        decoration: InputDecoration(
+                            border: InputBorder.none,
+                            icon: Icon(
+                              Icons.edit_square,
+                              color: Colors.grey[300],
+                            ),
+                            hintText: '評価方法3'),
+                        controller: _evaluationMethod3,
+                      ),
+                    ),
+                    Row(
+                      children: <Widget>[
+                        IconButton(
+                          icon: const Icon(Icons.expand_more,
+                              color: Colors.black),
+                          onPressed: () {
+                            perValue3 = perValue3 > 5 ? perValue3 - 5 : 0;
+                            setState(() {});
+                          },
+                        ),
+                        Text(
+                          perValue3.toString() + '%',
+                          style: const TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.expand_less,
+                              color: Colors.black),
+                          onPressed: () {
+                            perValue3 =
+                                perValue3 < _maxValue3(perValue2, perValue1)
+                                    ? perValue3 + 5
+                                    : _maxValue3(perValue2, perValue1);
+                            setState(() {});
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -578,7 +593,7 @@ class ListWidget extends StatelessWidget {
         // 4. Firestore から取得したデータを表示
         return //口コミのリスト一覧
             Container(
-          width: MediaQuery.of(context).size.width / 1.4,
+          width: MediaQuery.of(context).size.width / 1.1,
           height: MediaQuery.of(context).size.height / 2.5,
           decoration: const BoxDecoration(
             //角を丸くする
