@@ -78,7 +78,9 @@ class _Subject_settingsState extends State<Subject_settings> {
               child: Align(
                 alignment: Alignment.center,
                 child: Container(
-                  width: MediaQuery.of(context).size.width / 1.4,
+                  width: MediaQuery.of(context).size.width > 500
+                      ? MediaQuery.of(context).size.width / 1.4
+                      : MediaQuery.of(context).size.width / 1.2,
                   decoration: BoxDecoration(
                     color: Colors.grey[350],
                     border: Border.all(
@@ -94,14 +96,20 @@ class _Subject_settingsState extends State<Subject_settings> {
                       children: [
                         Row(
                           children: <Widget>[
-                            const Text(
+                            Text(
                               '最大授業数',
                               style: TextStyle(
-                                fontSize: 20,
+                                fontSize:
+                                    MediaQuery.of(context).size.width > 500
+                                        ? 20
+                                        : 18,
                               ),
                             ),
                             Expanded(child: SizedBox()),
                             Container(
+                              width: MediaQuery.of(context).size.width > 500
+                                  ? 40
+                                  : 36,
                               decoration: BoxDecoration(
                                 color: classNum == 5
                                     ? Color.fromARGB(255, 250, 250, 250)
@@ -126,10 +134,17 @@ class _Subject_settingsState extends State<Subject_settings> {
                                           SetOptions(merge: true));
                                   setState(() {});
                                 },
+                                iconSize:
+                                    MediaQuery.of(context).size.width > 500
+                                        ? 24
+                                        : 20,
                               ),
                             ),
                             SizedBox(width: 8.0),
                             Container(
+                              width: MediaQuery.of(context).size.width > 500
+                                  ? 40
+                                  : 36,
                               decoration: BoxDecoration(
                                 color: classNum == 6
                                     ? Color.fromARGB(255, 250, 250, 250)
@@ -154,10 +169,17 @@ class _Subject_settingsState extends State<Subject_settings> {
                                           SetOptions(merge: true));
                                   setState(() {});
                                 },
+                                iconSize:
+                                    MediaQuery.of(context).size.width > 500
+                                        ? 24
+                                        : 20,
                               ),
                             ),
                             SizedBox(width: 8.0),
                             Container(
+                              width: MediaQuery.of(context).size.width > 500
+                                  ? 40
+                                  : 36,
                               decoration: BoxDecoration(
                                 color: classNum == 7
                                     ? Color.fromARGB(255, 250, 250, 250)
@@ -182,6 +204,10 @@ class _Subject_settingsState extends State<Subject_settings> {
                                           SetOptions(merge: true));
                                   setState(() {});
                                 },
+                                iconSize:
+                                    MediaQuery.of(context).size.width > 500
+                                        ? 24
+                                        : 20,
                               ),
                             ),
                           ],
@@ -194,10 +220,13 @@ class _Subject_settingsState extends State<Subject_settings> {
                         ),
                         Row(
                           children: <Widget>[
-                            const Text(
+                            Text(
                               '表示する曜日',
                               style: TextStyle(
-                                fontSize: 20,
+                                fontSize:
+                                    MediaQuery.of(context).size.width > 500
+                                        ? 20
+                                        : 18,
                               ),
                             ),
                             Expanded(child: SizedBox()),
@@ -261,10 +290,13 @@ class _Subject_settingsState extends State<Subject_settings> {
                         ),
                         Row(
                           children: <Widget>[
-                            const Text(
+                            Text(
                               '授業時間',
                               style: TextStyle(
-                                fontSize: 20,
+                                fontSize:
+                                    MediaQuery.of(context).size.width > 500
+                                        ? 20
+                                        : 18,
                               ),
                             ),
                           ],
