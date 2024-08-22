@@ -99,7 +99,7 @@ class SubjectDetailsUpdating extends StatelessWidget {
                 GestureDetector(
                     onTap: () {
                       GoRouter.of(context)
-                          .go('/classTimetable/subject_eval', extra: subject);
+                          .go('/classTimetable/subject_details_updating/subject_eval', extra: {'subject':subject});
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -204,7 +204,7 @@ class SubjectDetailsUpdating extends StatelessWidget {
                       print(
                           'Navigating to subject_eval with subject: $subject');
                       GoRouter.of(context)
-                          .go('/classTimetable/task_answer', extra: subject);
+                          .go('/classTimetable/subject_details_updating/task_answer', extra: {'subject':subject});
                     },
                     child: Container(
                       decoration: BoxDecoration(
