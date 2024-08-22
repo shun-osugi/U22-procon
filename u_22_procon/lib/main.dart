@@ -18,8 +18,8 @@ import 'firebase_options.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:u_22_procon/task_answer.dart' //webとモバイルでファイルを分ける
-  if (dart.library.io) 'package:u_22_procon/task_answer_mob.dart'
-  if (dart.library.html) 'package:u_22_procon/task_answer_web.dart';
+    if (dart.library.io) 'package:u_22_procon/task_answer_mob.dart'
+    if (dart.library.html) 'package:u_22_procon/task_answer_web.dart';
 
 // グローバルな GoRouter インスタンス
 GoRouter? globalRouter;
@@ -44,7 +44,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
   final router = GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: '/classTimetable',
+    initialLocation: '/log_in',
     debugLogDiagnostics: true,
     routes: <RouteBase>[
       GoRoute(
@@ -95,7 +95,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                       print('OK');
                     else
                       ('NO');
-                    
+
                     final Map<String, dynamic>? data =
                         state.extra as Map<String, dynamic>?;
 
@@ -132,15 +132,21 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   routes: <RouteBase>[
                     GoRoute(
                         path: 'subject_eval',
-                        pageBuilder: (BuildContext context, GoRouterState state) {
-                          final Map<String, dynamic> data = state.extra as Map<String, dynamic>;
-                          return buildTransitionPage(child: SubjectEval(data['subject']));
+                        pageBuilder:
+                            (BuildContext context, GoRouterState state) {
+                          final Map<String, dynamic> data =
+                              state.extra as Map<String, dynamic>;
+                          return buildTransitionPage(
+                              child: SubjectEval(data['subject']));
                         }),
                     GoRoute(
                         path: 'task_answer',
-                        pageBuilder: (BuildContext context, GoRouterState state) {
-                          final Map<String, dynamic> data = state.extra as Map<String, dynamic>;
-                          return buildTransitionPage(child: TaskAnswer(data['subject']));
+                        pageBuilder:
+                            (BuildContext context, GoRouterState state) {
+                          final Map<String, dynamic> data =
+                              state.extra as Map<String, dynamic>;
+                          return buildTransitionPage(
+                              child: TaskAnswer(data['subject']));
                         }),
                   ]),
             ],
