@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:u_22_procon/sign_in.dart';
 import 'package:u_22_procon/log_in.dart';
 import 'package:u_22_procon/subject_details_updating.dart';
-import 'package:u_22_procon/task_answer.dart';
 import 'package:u_22_procon/todo.dart';
 import 'package:u_22_procon/class_timetable.dart';
 import 'package:u_22_procon/subject_details.dart';
@@ -17,6 +16,10 @@ import 'package:u_22_procon/tech_term.dart';
 import 'firebase_options.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
+
+import 'package:u_22_procon/task_answer.dart' //webとモバイルでファイルを分ける
+  if (dart.library.io) 'package:u_22_procon/task_answer_mob.dart'
+  if (dart.library.html) 'package:u_22_procon/task_answer_web.dart';
 
 // グローバルな GoRouter インスタンス
 GoRouter? globalRouter;
@@ -86,27 +89,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                             day: data['day'], period: data['period']));
                   }),
               GoRoute(
-                  path: 'subject_eval',
-                  pageBuilder: (BuildContext context, GoRouterState state) {
-                    final String data = state.extra as String;
-                    return buildTransitionPage(child: SubjectEval(data));
-                  }),
-              GoRoute(
-                  path: 'task_answer',
-                  pageBuilder: (BuildContext context, GoRouterState state) {
-                    final String data = state.extra as String;
-                    return buildTransitionPage(child: TaskAnswer(data));
-                  }),
-              GoRoute(
                   path: 'subject_details_updating',
                   pageBuilder: (BuildContext context, GoRouterState state) {
-                    final Map<String, dynamic>? data =
-                        state.extra as Map<String, dynamic>?;
-
                     if (state.extra is Map<String, dynamic>)
                       print('OK');
                     else
                       ('NO');
+                    
+                    final Map<String, dynamic>? data =
+                        state.extra as Map<String, dynamic>?;
 
                     // デフォルト値を設定
                     final subject = data?['subject'] ?? '';
@@ -138,7 +129,20 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                               SubjectDetailsUpdating(recievedData: sendData));
                     }
                   },
-                  routes: <RouteBase>[]),
+                  routes: <RouteBase>[
+                    GoRoute(
+                        path: 'subject_eval',
+                        pageBuilder: (BuildContext context, GoRouterState state) {
+                          final Map<String, dynamic> data = state.extra as Map<String, dynamic>;
+                          return buildTransitionPage(child: SubjectEval(data['subject']));
+                        }),
+                    GoRoute(
+                        path: 'task_answer',
+                        pageBuilder: (BuildContext context, GoRouterState state) {
+                          final Map<String, dynamic> data = state.extra as Map<String, dynamic>;
+                          return buildTransitionPage(child: TaskAnswer(data['subject']));
+                        }),
+                  ]),
             ],
           ),
           GoRoute(
