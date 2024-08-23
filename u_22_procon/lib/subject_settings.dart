@@ -403,6 +403,44 @@ class _Subject_settingsState extends State<Subject_settings> {
                                   }
                                 },
                                 child: Text('Log Out')),
+                            ElevatedButton(
+                                onPressed: () async {
+                                  try {
+                                    final user =
+                                        FirebaseAuth.instance.currentUser;
+                                    await user?.delete();
+                                    print('$documentIdを削除しました。');
+
+                                    await FirebaseFirestore.instance
+                                        .collection('students')
+                                        .doc(documentId)
+                                        .delete();
+
+                                    // Firestore コレクションの参照を取得
+                                    final querySnapshot =
+                                        await FirebaseFirestore.instance
+                                            .collection('users')
+                                            .where('userid',
+                                                isEqualTo: documentId)
+                                            .get();
+
+                                    if (querySnapshot.docs.isEmpty) {
+                                      // 3. データが存在しない場合、メッセージを表示
+                                      print('ユーザーがありません');
+                                    } else {
+                                      var userdoc = querySnapshot.docs.first.id;
+
+                                      await FirebaseFirestore.instance
+                                          .collection('users')
+                                          .doc(userdoc)
+                                          .delete();
+                                    }
+                                    GoRouter.of(context).go('/log_in');
+                                  } catch (e) {
+                                    print(e);
+                                  }
+                                },
+                                child: Text('アカウント削除')),
                           ],
                         )
                       ],
