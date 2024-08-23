@@ -140,24 +140,26 @@ class SubjectEval extends StatelessWidget {
                   ]),
             ),
 
-            //口コミのリスト一覧
-            Container(
-              width: screenwidth / 1.2,
-              height: screenheight / 2.8,
+          //各widget
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              // SizedBox(width: screenwidth/6),
 
-              decoration: const BoxDecoration(
-                //角を丸くする
-                color: Color.fromARGB(255, 255, 255, 255),
-                border: Border(
-                  top: BorderSide(color: Colors.grey, width: 1),
-                  right: BorderSide(color: Colors.grey, width: 2),
-                  bottom: BorderSide(color: Colors.grey, width: 2),
-                  left: BorderSide(color: Colors.grey, width: 2),
-                ),
-                borderRadius: BorderRadius.only(
-                  //下だけ
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10),
+              //テキスト
+              Container(
+                width:  screenwidth/3,
+                height: screenheight/15,
+                alignment: Alignment.center,
+                child: const Text(
+                  'みんなの口コミ',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                  textAlign: TextAlign.center,
+
                 ),
               ),
 
@@ -297,30 +299,11 @@ class SubjectEval extends StatelessWidget {
                     size: screenheight / 30,
                   ),
                 ),
-              for (var i = value; i < 5; i++)
-                SizedBox(
-                  width: screenwidth / 20,
-                  height: screenheight / 25,
-                  child: Stack(
-                    children: [
-                      Align(
-                        alignment: Alignment.center,
-                        child: Icon(
-                          Icons.star,
-                          color: Colors.black,
-                          size: screenheight / 30,
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.center,
-                        child: Icon(
-                          Icons.star,
-                          color: Colors.white,
-                          size: screenheight / 50,
-                        ),
-                      ),
-                    ],
-                  ),
+
+                for(var i=value;i<5;i++) SizedBox(
+                  width: screenwidth/20,
+                  height: screenheight/25,
+
                 ),
             ],
           ),
@@ -333,57 +316,63 @@ class SubjectEval extends StatelessWidget {
   //評価星ボタン
   StatefulBuilder evalstarbutton() {
     return StatefulBuilder(//状態を管理
-        builder: (BuildContext context, StateSetter setState) {
-      return SimpleDialog(
-        titleTextStyle: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1,
-        ),
-        titlePadding: const EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 10.0),
-        title: const Text('科目を評価する', textAlign: TextAlign.center),
-        contentPadding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 15.0),
-        children: [
-          for (var i = 0; i < 4; i++)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Container(
-                  width: screenwidth / 6,
-                  height: screenheight / 20,
-                  alignment: Alignment.centerLeft, //左寄せ
-                  child: Text(
-                    etext[i],
-                    style: const TextStyle(
-                      fontSize: 12,
-                      letterSpacing: 1,
+
+      builder: (BuildContext context, StateSetter setState) {
+        return SimpleDialog(
+          titleTextStyle: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1,
+            color: Colors.black
+          ),
+          titlePadding: const EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 10.0),
+          title: const Text('科目を評価する', textAlign: TextAlign.center),
+          contentPadding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 15.0),
+          children: [
+            for(var i=0;i<4;i++) Container(
+              color: Colors.grey[100],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Container(
+                    width:  screenwidth/6,
+                    height: screenheight/20,
+                    alignment: Alignment.centerLeft,//左寄せ
+                    child: Text(
+                      etext[i],
+                      style: const TextStyle(
+                        fontSize: 12,
+                        letterSpacing: 1,
+                      ),
+                      textAlign: TextAlign.left,
+
                     ),
-                    textAlign: TextAlign.left,
                   ),
-                ),
-                for (var j = 0; j < 5; j++)
-                  SizedBox(
-                    width: screenwidth / 20,
-                    height: screenheight / 20,
+
+                  for(var j=0;j<5;j++) SizedBox(
+                    width: screenwidth/20,
+                    height: screenheight/20,
                     child: GestureDetector(
                       onTap: () async {
-                        usereval[i] = j + 1;
-                        setState(() {});
+                        usereval[i]=j+1;
+                        setState((){});
                       },
                       child: j < usereval[i]
-                          ? Icon(
-                              Icons.star,
-                              color: Colors.black,
-                              size: screenheight / 30,
-                            )
-                          : Icon(
-                              Icons.star,
-                              color: Colors.white,
-                              size: screenheight / 30,
-                            ),
+                      ? Icon(
+                        Icons.star,
+                        color: Colors.black,
+                        size: screenheight / 30,
+                      )
+                      : Icon(
+                        Icons.star,
+                        color: Colors.white,
+                        size: screenheight / 30,
+                      ),
                     ),
                   ),
-              ],
+                ],
+              ),
+
             ),
           ElevatedButton(
             onPressed: () async {
@@ -548,17 +537,60 @@ class SubjectEval extends StatelessWidget {
             }
 
             return ListView.builder(
-                itemCount: reviews.length,
-                //itemCount分表示
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () async {
-                      //内容の詳細をダイアログで表示
-                      await showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return SimpleDialog(
-                            titleTextStyle: const TextStyle(
+
+              itemCount: reviews.length,
+              //itemCount分表示
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () async {
+                    //内容の詳細をダイアログで表示
+                    await showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return SimpleDialog(
+                          titleTextStyle: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                            color: Colors.black
+                          ),
+                          titlePadding: const EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 10.0),
+                          title: Text(reviews[index].title),
+                          contentPadding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 15.0),
+                          children: [
+                            Text(
+                              reviews[index].content,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  //元から表示されるリスト
+                  child: Container(
+                    width:  screenwidth/1.2,
+                    height: screenheight/15,
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey, width: 2),
+                      ),
+                    ),
+                    
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        //口コミタイトル
+                        Container(
+                          width: screenwidth/2.2,
+                          alignment: Alignment.centerLeft,//左寄せ
+                          child: Text(
+                            (reviews[index].title.length >= 14 ? reviews[index].title.substring(0,10)+'...': reviews[index].title),
+                            style: const TextStyle(
+
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1,

@@ -7,9 +7,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
-//flutter pub add file_picker:^8.0.6
-//flutter pub add firebase_storage:^12.1.0
-//flutter run -d chrome --web-renderer html
 
 class task {//口コミ
   String title; //タイトル
@@ -42,7 +39,6 @@ class TaskAnswer extends StatelessWidget {
   @override
   Widget build(BuildContext context)
   {
-    print("web");
     screenwidth = MediaQuery.of(context).size.width;
     screenheight = MediaQuery.of(context).size.height;
 
@@ -90,11 +86,11 @@ class TaskAnswer extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              SizedBox(width: screenwidth/6),
+              // SizedBox(width: screenwidth/6),
 
               //テキスト
               Container(
-                width:  screenwidth/4,
+                width:  screenwidth/3,
                 height: screenheight/15,
                 alignment: Alignment.center,//左寄せ
                 child: const Text(
@@ -287,14 +283,15 @@ class TaskAnswer extends StatelessWidget {
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1,
+                            color: Colors.black
                           ),
                           titlePadding: const EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 10.0),
                           title: Text(tasks[index].title),
                           contentPadding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 15.0),
                           children: [
                             Container(
-                              height: 80,
-                              width: 80,
+                              height: screenheight/1.5,
+                              width: screenwidth/1.5,
                               child: tasks[index].image != ''
                               ? FittedBox(
                                 fit: BoxFit.contain,
