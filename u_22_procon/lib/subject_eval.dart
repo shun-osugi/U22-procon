@@ -114,11 +114,11 @@ class SubjectEval extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              SizedBox(width: screenwidth/6),
+              // SizedBox(width: screenwidth/6),
 
               //テキスト
               Container(
-                width:  screenwidth/4,
+                width:  screenwidth/3,
                 height: screenheight/15,
                 alignment: Alignment.center,
                 child: const Text(
@@ -299,24 +299,6 @@ class SubjectEval extends StatelessWidget {
                 for(var i=value;i<5;i++) SizedBox(
                   width: screenwidth/20,
                   height: screenheight/25,
-                  child:Stack(children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: Icon(
-                        Icons.star,
-                        color: Colors.black,
-                        size: screenheight / 30,
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.center,
-                      child: Icon(
-                        Icons.star,
-                        color: Colors.white,
-                        size: screenheight / 50,
-                      ),
-                    ),
-                  ],),
                 ),
               ],
             ),
@@ -336,49 +318,53 @@ class SubjectEval extends StatelessWidget {
             fontSize: 15,
             fontWeight: FontWeight.bold,
             letterSpacing: 1,
+            color: Colors.black
           ),
           titlePadding: const EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 10.0),
           title: const Text('科目を評価する', textAlign: TextAlign.center),
           contentPadding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 15.0),
           children: [
-            for(var i=0;i<4;i++) Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Container(
-                  width:  screenwidth/6,
-                  height: screenheight/20,
-                  alignment: Alignment.centerLeft,//左寄せ
-                  child: Text(
-                    etext[i],
-                    style: const TextStyle(
-                      fontSize: 12,
-                      letterSpacing: 1,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-                for(var j=0;j<5;j++) SizedBox(
-                  width: screenwidth/20,
-                  height: screenheight/20,
-                  child: GestureDetector(
-                    onTap: () async {
-                      usereval[i]=j+1;
-                      setState((){});
-                    },
-                    child: j < usereval[i]
-                    ? Icon(
-                      Icons.star,
-                      color: Colors.black,
-                      size: screenheight / 30,
-                    )
-                    : Icon(
-                      Icons.star,
-                      color: Colors.white,
-                      size: screenheight / 30,
+            for(var i=0;i<4;i++) Container(
+              color: Colors.grey[100],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Container(
+                    width:  screenwidth/6,
+                    height: screenheight/20,
+                    alignment: Alignment.centerLeft,//左寄せ
+                    child: Text(
+                      etext[i],
+                      style: const TextStyle(
+                        fontSize: 12,
+                        letterSpacing: 1,
+                      ),
+                      textAlign: TextAlign.left,
                     ),
                   ),
-                ),
-              ],
+                  for(var j=0;j<5;j++) SizedBox(
+                    width: screenwidth/20,
+                    height: screenheight/20,
+                    child: GestureDetector(
+                      onTap: () async {
+                        usereval[i]=j+1;
+                        setState((){});
+                      },
+                      child: j < usereval[i]
+                      ? Icon(
+                        Icons.star,
+                        color: Colors.black,
+                        size: screenheight / 30,
+                      )
+                      : Icon(
+                        Icons.star,
+                        color: Colors.white,
+                        size: screenheight / 30,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -551,6 +537,7 @@ class SubjectEval extends StatelessWidget {
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1,
+                            color: Colors.black
                           ),
                           titlePadding: const EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 10.0),
                           title: Text(reviews[index].title),
