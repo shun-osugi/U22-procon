@@ -48,6 +48,7 @@ dependencies:
   flutter_local_notifications: ^17.2.2
 
   timezone: any
+  flutter_launcher_icons: ^0.13.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -102,3 +103,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+flutter_icons:
+  ios: true
+  image_path: "assets/images/launcher/cocoa_icon.png"
+  remove_alpha_ios: true
+  android: true
+  adaptive_icon_background: "assets/images/launcher/icon_background.png"
+  adaptive_icon_foreground: "assets/images/launcher/icon_foreground.png"
