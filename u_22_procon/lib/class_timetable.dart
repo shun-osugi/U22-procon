@@ -22,10 +22,7 @@ class _ClassTimetableState extends State<ClassTimetable> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (ModalRoute.of(context)?.isCurrent == true) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => ClassTimetable()),
-        );
+        GoRouter.of(context).replace('/classTimetable');
       }
     });
   }

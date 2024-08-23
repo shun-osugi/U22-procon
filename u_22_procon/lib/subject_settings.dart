@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
-import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:intl/intl.dart';
+// import 'firebase_options.dart';
+// import 'package:firebase_core/firebase_core.dart';
 
 class Subject_settings extends StatefulWidget {
   const Subject_settings({super.key});
@@ -383,6 +383,28 @@ class _Subject_settingsState extends State<Subject_settings> {
                             ],
                           );
                         }),
+                        const Divider(
+                          height: 20,
+                          thickness: 3,
+                          endIndent: 0,
+                          color: Color.fromARGB(255, 128, 128, 128),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            ElevatedButton(
+                                onPressed: () async {
+                                  try {
+                                    await FirebaseAuth.instance.signOut();
+                                    print('ログアウトしました。');
+                                    GoRouter.of(context).go('/log_in');
+                                  } catch (e) {
+                                    print(e);
+                                  }
+                                },
+                                child: Text('Log Out')),
+                          ],
+                        )
                       ],
                     ),
                   ),
