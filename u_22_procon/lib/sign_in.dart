@@ -25,9 +25,13 @@ class _LogIn extends State<SignIn> {
     return Scaffold(
       body: Center(
         child: Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.fromLTRB(8, 32, 8, 32),
           child: Column(
             children: [
+              //スペースを空ける
+              const SizedBox(
+                height: 8,
+              ),
               //Emailアドレスを入力するテキストラベル
               TextField(
                 decoration: const InputDecoration(labelText: 'Email'),
