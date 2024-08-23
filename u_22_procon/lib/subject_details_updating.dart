@@ -153,7 +153,6 @@ class SubjectDetailsUpdating extends StatelessWidget {
                                 .collection('reviews')
                                 .where('追加日')
                                 .orderBy('追加日', descending: true)
-                                .limit(1)
                                 .get(),
                             builder: (context,
                                 AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -184,21 +183,23 @@ class SubjectDetailsUpdating extends StatelessWidget {
                                 return const Text('更新なし');
                               }
 
+                              // リストの最初の要素を取得
+                              DocumentSnapshot firstDoc = docs.first;
+
                               // データが存在する場合、UI に表示する
+                              var data =
+                                  firstDoc.data() as Map<String, dynamic>;
+                              var dateTimestamp = data['追加日'] ?? 'No review';
                               return Column(
-                                children: docs.map<Widget>((doc) {
-                                  var data = doc.data() as Map<String, dynamic>;
-                                  var dateTimestamp =
-                                      data['追加日'] ?? 'No review';
-                                  if (dateTimestamp is Timestamp) {
-                                    DateTime date = dateTimestamp.toDate();
-                                    return Text(
-                                      '最終更新\n$date',
+                                children: [
+                                  if (dateTimestamp is Timestamp)
+                                    Text(
+                                      '最終更新\n${dateTimestamp.toDate()}',
                                       textAlign: TextAlign.center,
-                                    );
-                                  }
-                                  return const Text('');
-                                }).toList(),
+                                    ),
+                                  if (!(dateTimestamp is Timestamp))
+                                    const Text(''),
+                                ],
                               );
                             },
                           ),
@@ -253,7 +254,6 @@ class SubjectDetailsUpdating extends StatelessWidget {
                                 .collection('tasks')
                                 .where('追加日')
                                 .orderBy('追加日', descending: true)
-                                .limit(1)
                                 .get(),
                             builder: (context,
                                 AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -284,21 +284,24 @@ class SubjectDetailsUpdating extends StatelessWidget {
                                 return const Text('更新なし');
                               }
 
+                              // リストの最初の要素を取得
+                              DocumentSnapshot firstDoc = docs.first;
+
                               // データが存在する場合、UI に表示する
+                              var data =
+                                  firstDoc.data() as Map<String, dynamic>;
+                              var dateTimestamp = data['追加日'] ?? 'No review';
+
                               return Column(
-                                children: docs.map<Widget>((doc) {
-                                  var data = doc.data() as Map<String, dynamic>;
-                                  var dateTimestamp =
-                                      data['追加日'] ?? 'No review';
-                                  if (dateTimestamp is Timestamp) {
-                                    DateTime date = dateTimestamp.toDate();
-                                    return Text(
-                                      '最終更新\n$date',
+                                children: [
+                                  if (dateTimestamp is Timestamp)
+                                    Text(
+                                      '最終更新\n${dateTimestamp.toDate()}',
                                       textAlign: TextAlign.center,
-                                    );
-                                  }
-                                  return const Text('');
-                                }).toList(),
+                                    ),
+                                  if (!(dateTimestamp is Timestamp))
+                                    const Text(''),
+                                ],
                               );
                             },
                           ),
