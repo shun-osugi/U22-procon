@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="u_22_procon"
+        android:label="COCOA"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
