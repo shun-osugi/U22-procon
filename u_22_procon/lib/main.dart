@@ -227,6 +227,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(goRouterProvider);
     return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
       title: 'u22_procon',
       theme: ThemeData(
         primarySwatch: Colors.blue,

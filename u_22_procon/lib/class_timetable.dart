@@ -75,6 +75,7 @@ class _ClassTimetableState extends State<ClassTimetable> {
         double basicHeight = 70.0;
 
         return MaterialApp(
+          debugShowCheckedModeBanner: false,
           home: Scaffold(
             appBar: AppBar(
               title: const Text('時間割'),
