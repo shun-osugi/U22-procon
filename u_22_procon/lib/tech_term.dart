@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_core/firebase_core.dart';
-// import 'firebase_options.dart';
 
 class TechTermPage extends StatefulWidget {
   TechTermPage(this.subjectKey, {super.key});
@@ -420,19 +420,6 @@ class _TechTermPageState extends State<TechTermPage> {
                             TextInputType.multiline, // 複数行のテキスト入力をサポート
                       ),
                       SizedBox(height: 20),
-                      Checkbox(
-                        value: _isChecked,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            _isChecked = value ?? false;
-                            if (_isChecked == true) {
-                              registrationNumber += 1;
-                            } else {
-                              registrationNumber -= 1;
-                            }
-                          });
-                        },
-                      ),
                       ElevatedButton(
                         onPressed: () async {
                           String term = _termName.text;
@@ -502,7 +489,6 @@ class _TechTermPageState extends State<TechTermPage> {
                               _dropdownValue = _dropdownValue;
                               _termName.clear();
                               _description.clear();
-                              _isChecked = true;
                               registrationNumber = 1;
                             });
 
